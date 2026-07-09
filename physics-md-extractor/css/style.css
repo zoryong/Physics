@@ -136,6 +136,13 @@ input[type=file]{display:none;}
   padding:9px 11px;border:1px solid #C7CEDA;border-radius:9px;font-size:13.5px;font-family:inherit;background:#fff;
 }
 .opt-select select:focus{outline:2px solid var(--teal);outline-offset:1px;border-color:var(--teal);}
+.opt-select input[type=text],.opt-select input[type=password]{
+  padding:9px 11px;border:1px solid #C7CEDA;border-radius:9px;font-size:13.5px;font-family:inherit;background:#fff;width:100%;box-sizing:border-box;
+}
+.opt-select input[type=text]:focus,.opt-select input[type=password]:focus{outline:2px solid var(--teal);outline-offset:1px;border-color:var(--teal);}
+.ai-fields{display:grid;gap:0;margin:4px 0 6px;padding:12px;border:1px dashed #C7CEDA;border-radius:10px;background:var(--bg-soft,#F7F9FC);}
+.ai-fields .opt-select{margin-bottom:10px;}
+.ai-fields .opt-select:last-child{margin-bottom:0;}
 
 /* ---------- buttons ---------- */
 .btn{

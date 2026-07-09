@@ -11,12 +11,13 @@
  */
 import { ensurePdfjs } from './lib-loader.js';
 import { extractPageText, isTextReliable, orderLines, detectTwoColumn } from './pdf-text.js';
-import { renderPage, extractFigures } from './render.js';
+import { renderPage, extractFigures, cropRegion } from './render.js';
 import { preprocessForOCR } from './preprocess.js';
 import { OcrEngine } from './ocr.js';
 import { splitQuestions } from './question-splitter.js';
 import { parseQuestion } from './structure-parser.js';
 import { assembleMarkdown, figureName } from './markdown.js';
+import { recognizeLatex } from './ai-math.js';
 import { saveCombined, saveFullZip, saveEachZip, buildCombinedMarkdown } from './download.js';
 
 /* ------------------------------ DOM ------------------------------ */
@@ -25,6 +26,9 @@ const dom = {
   dropzone: $('dropzone'), fileInput: $('fileInput'), fileInfo: $('fileInfo'),
   ocrMode: $('ocrMode'), renderScale: $('renderScale'),
   optLatex: $('optLatex'), optFigures: $('optFigures'), optTwoCol: $('optTwoCol'),
+  optAI: $('optAI'), aiFields: $('aiFields'), aiProvider: $('aiProvider'),
+  aiBase: $('aiBase'), aiModel: $('aiModel'), aiKey: $('aiKey'),
+  aiAppId: $('aiAppId'), aiAppKey: $('aiAppKey'),
   convertBtn: $('convertBtn'),
   status: $('status'), statusText: $('statusText'),
   progressTrack: $('progressTrack'), progressFill: $('progressFill'),
@@ -113,6 +117,11 @@ async function convert() {
   const useLatex = dom.optLatex.checked;
   const useFigures = dom.optFigures.checked;
   const useTwoCol = dom.optTwoCol.checked;
+  const aiCfg = readAiConfig();              // null 이면 오프라인(수식=이미지)
+  if (dom.optAI.checked && !aiCfg) log('AI 수식 인식이 켜져 있으나 키가 비어 있어 이미지로 대체합니다.', 'warn');
+
+  // 수식 자리표시자(⟦EQ:키⟧) → {pageIndex, box} 등록부
+  const formulaMap = new Map();
 
   const ocr = new OcrEngine((m) => {
     if (m.type === 'warn') log(m.message, 'warn');
@@ -138,7 +147,7 @@ async function convert() {
       const { canvas, width, height } = await renderPage(page, scale);
 
       // 2) 텍스트 추출 + 품질 판정 (2단 인식 옵션 반영)
-      const { lines: textLines, metrics } = await extractPageText(page, scale, useTwoCol);
+      const { lines: textLines, metrics, formulas } = await extractPageText(page, scale, useTwoCol);
       const reliable = isTextReliable(metrics);
 
       let useOcr = false;
@@ -157,6 +166,16 @@ async function convert() {
       } else {
         pageLines = textLines;
         log(`p.${p}: 텍스트 추출 (글자 ${metrics.chars}자, 라인 ${metrics.lineCount}개)`);
+        // 페이지별 수식 자리표시자를 전역 고유 키로 바꾸고 위치를 등록한다.
+        if (formulas && formulas.length) {
+          const pi = p - 1;
+          for (const ln of pageLines) {
+            if (ln.text.indexOf('\u27E6EQ:L') === -1) continue;
+            ln.text = ln.text.replace(/\u27E6EQ:L(\d+)\u27E7/g, (_, i) => `\u27E6EQ:p${pi}e${i}\u27E7`);
+          }
+          formulas.forEach((f, i) => formulaMap.set(`p${pi}e${i}`, { pageIndex: pi, box: f }));
+          log(`p.${p}: 인라인 수식 ${formulas.length}개 감지`);
+        }
       }
 
       const twoCol = useTwoCol && detectTwoColumn(pageLines, width);
@@ -193,7 +212,7 @@ async function convert() {
         for (const reg of regions) {
           const pg = pages[reg.pageIndex];
           const figs = extractFigures(pg.canvas, pg.lines, reg);
-          for (const f of figs) figures.push(f);
+          for (const f of figs) { f.pageIndex = reg.pageIndex; figures.push(f); }
         }
       }
       const figNames = figures.map((_, idx) => figureName(q.number, idx));
@@ -201,7 +220,10 @@ async function convert() {
 
       // 5-2) 구조 분석 + 조립
       const parsed = parseQuestion(q);
-      const markdown = assembleMarkdown(parsed, figNames, useLatex);
+      let markdown = assembleMarkdown(parsed, figNames, useLatex);
+
+      // 5-3) 인라인 수식 처리: 자리표시자 → LaTeX(AI) 또는 이미지 크롭
+      markdown = await resolveFormulas(markdown, q.number, pages, formulaMap, figures, aiCfg);
 
       questions.push({
         number: q.number,
@@ -265,6 +287,73 @@ function questionRegions(q, pages) {
     regions.push({ pageIndex: pi, x0, y0: top - 6, x1, y1: bottom + 6 });
   }
   return regions;
+}
+
+/**
+ * 마크다운 안의 수식 자리표시자(⟦EQ:키⟧)를 등장 순서대로 해소한다.
+ *  - AI 설정이 있으면 잘라낸 수식 이미지를 LaTeX 로 변환해 $...$ 로 치환
+ *  - 실패하거나 오프라인이면 이미지로 잘라 ![[questionNN_eqK.png]] 로 삽입
+ * @returns {Promise<string>} 치환된 마크다운
+ */
+async function resolveFormulas(markdown, number, pages, formulaMap, figures, aiCfg) {
+  const keys = [];
+  markdown.replace(/\u27E6EQ:([A-Za-z0-9_]+)\u27E7/g, (_, k) => { keys.push(k); return _; });
+  if (!keys.length) return markdown;
+
+  // 이미 그림으로 잘린 영역(다이어그램) 안의 수식은 인라인에서 제외한다.
+  const figBoxes = figures.filter((f) => f.box).map((f) => ({ ...f.box, pageIndex: f.pageIndex }));
+  const insideFigure = (b, pageIndex) => {
+    const cx = (b.x0 + b.x1) / 2, cy = (b.y0 + b.y1) / 2;
+    return figBoxes.some((r) => r.pageIndex === pageIndex &&
+      cx >= r.x0 && cx <= r.x1 && cy >= r.y0 && cy <= r.y1);
+  };
+
+  const pad = String(number).padStart(2, '0');
+  let eqIdx = 0;
+  for (const key of keys) {
+    const token = `\u27E6EQ:${key}\u27E7`;
+    const info = formulaMap.get(key);
+    if (!info) { markdown = markdown.replace(token, ''); continue; }
+    const pg = pages[info.pageIndex];
+    if (!pg) { markdown = markdown.replace(token, ''); continue; }
+    if (insideFigure(info.box, info.pageIndex)) { markdown = markdown.replace(token, ''); continue; }
+
+    eqIdx++;
+    const crop = cropRegion(pg.canvas, info.box, 4);
+    const name = `question${pad}_eq${eqIdx}.png`;
+
+    let replacement = '';
+    if (aiCfg) {
+      const latex = await recognizeLatex(crop.dataURL, aiCfg, log);
+      if (latex) replacement = `$${latex}$`;
+    }
+    if (!replacement) {
+      // 오프라인/실패 → 이미지 삽입(그림 목록에 추가해 ZIP·썸네일에 포함)
+      crop.name = name;
+      figures.push(crop);
+      replacement = `![[${name}]]`;
+    }
+    markdown = markdown.replace(token, replacement);
+    await tick();
+  }
+  return markdown;
+}
+
+/** AI 수식 인식 설정을 읽는다. 비활성/키 미입력이면 null. */
+function readAiConfig() {
+  if (!dom.optAI || !dom.optAI.checked) return null;
+  const provider = dom.aiProvider.value;
+  if (provider === 'mathpix') {
+    const appId = dom.aiAppId.value.trim();
+    const appKey = dom.aiAppKey.value.trim();
+    if (!appId || !appKey) return null;
+    return { provider, appId, appKey };
+  }
+  const base = dom.aiBase.value.trim().replace(/\/+$/, '');
+  const model = dom.aiModel.value.trim();
+  const key = dom.aiKey.value.trim();
+  if (!base || !key) return null;
+  return { provider: 'openai', base, model, key };
 }
 
 /* --------------------------- 결과 UI ----------------------------- */
@@ -420,6 +509,25 @@ function bindEvents() {
 
   // 사용 방법 토글
   dom.guideToggle.addEventListener('click', () => dom.guidePanel.classList.toggle('open'));
+
+  // AI 수식 인식 옵션 토글
+  if (dom.optAI) {
+    dom.optAI.addEventListener('change', () => {
+      dom.aiFields.style.display = dom.optAI.checked ? 'grid' : 'none';
+    });
+  }
+  if (dom.aiProvider) {
+    dom.aiProvider.addEventListener('change', updateAiProviderFields);
+    updateAiProviderFields();
+  }
+}
+
+/** 선택한 AI 제공자에 맞는 입력 필드만 표시 */
+function updateAiProviderFields() {
+  const prov = dom.aiProvider.value;
+  for (const el of dom.aiFields.querySelectorAll('[data-prov]')) {
+    el.style.display = el.dataset.prov === prov ? '' : 'none';
+  }
 }
 
 bindEvents();

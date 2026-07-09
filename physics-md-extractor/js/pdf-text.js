@@ -14,35 +14,91 @@
 
 const HANGUL_RE = /[\uAC00-\uD7A3\u3130-\u318F]/;
 
+// 시험지 수식은 전용 수식 폰트(HyhwpEQ 등)의 "사설 사용 영역(PUA)" 글리프로
+// 저장되어 유니코드 텍스트로는 읽히지 않는다. 이런 글리프는 수식 조각으로 보고
+// 위치(bbox)만 뽑아 이미지로 잘라 쓴다.  U+E000–U+F8FF: PUA, U+FFFD: 대체문자.
+const PUA_RE = /[\uE000-\uF8FF\uFFFD]/;
+// 라인 텍스트에 삽입되는 수식 자리표시자(⟦EQ:키⟧). 이후 단계에서 그대로 운반되다가
+// main 에서 이미지 링크(![[...]]) 또는 LaTeX($...$)로 치환된다.
+export const EQ_PLACEHOLDER_RE = /\u27E6EQ:([A-Za-z0-9_]+)\u27E7/g;
+
 /**
  * 한 페이지의 텍스트를 추출해 라인 배열과 품질 지표를 반환한다.
  * @param {object} page   PDF.js page proxy
  * @param {number} scale  렌더링에 사용한 배율(캔버스 좌표계와 일치시키기 위함)
- * @returns {Promise<{lines:Array, metrics:object}>}
+ * @returns {Promise<{lines:Array, metrics:object, formulas:Array}>}
  */
 export async function extractPageText(page, scale, twoColumn = true) {
   const viewport = page.getViewport({ scale });
   const content = await page.getTextContent();
   const Util = window.pdfjsLib.Util;
 
-  /** @type {Array<{str:string,x:number,y:number,w:number,h:number,top:number,bottom:number}>} */
+  /** @type {Array<{str:string,x:number,y:number,w:number,h:number,top:number,bottom:number,formula:boolean}>} */
   const items = [];
 
   for (const it of content.items) {
-    const str = it.str;
-    if (!str) continue;
+    const str = it.str || '';
+    const formula = PUA_RE.test(str);
+    if (!formula && !str.trim()) continue;   // 순수 공백/빈 텍스트는 버림
     // 텍스트 변환행렬을 뷰포트(디바이스) 좌표로 합성
     const tm = Util.transform(viewport.transform, it.transform);
     const x = tm[4];
     const y = tm[5]; // baseline y (아래로 증가)
     const h = Math.hypot(tm[2], tm[3]) || (it.height * scale) || 10;
     const w = (it.width || 0) * scale;
-    items.push({ str, x, y, w, h, top: y - h, bottom: y });
+    items.push({ str, x, y, w, h, top: y - h, bottom: y, formula });
   }
 
-  const lines = reconstructLines(items, viewport.width, twoColumn);
+  // 수식 글리프들을 인접성으로 묶어 하나의 수식 덩어리(그룹)로 만들고,
+  // 각 그룹을 자리표시자 문자열을 가진 가짜 아이템으로 대체한다. 그러면
+  // 라인 재구성 시 수식이 원래 위치(x 순서)에 자연스럽게 끼워진다.
+  const formulaGroups = clusterFormulas(items.filter((it) => it.formula));
+  const textItems = items.filter((it) => !it.formula);
+  const pseudoItems = formulaGroups.map((g, idx) => ({
+    str: `\u27E6EQ:L${idx}\u27E7`,
+    x: g.x0, y: g.y1, w: Math.max(1, g.x1 - g.x0), h: Math.max(1, g.y1 - g.y0),
+    top: g.y0, bottom: g.y1, formula: true,
+  }));
+
+  const lines = reconstructLines(textItems.concat(pseudoItems), viewport.width, twoColumn);
   const metrics = computeQuality(lines);
-  return { lines, metrics, viewportWidth: viewport.width, viewportHeight: viewport.height };
+  const formulas = formulaGroups.map((g) => ({ x0: g.x0, y0: g.y0, x1: g.x1, y1: g.y1 }));
+  return { lines, metrics, formulas, viewportWidth: viewport.width, viewportHeight: viewport.height };
+}
+
+/**
+ * 수식 글리프(PUA) 아이템들을 인접성으로 묶어 수식 덩어리로 만든다.
+ * 분수의 분자/분모처럼 y가 다르더라도 x가 겹치면 하나로 합쳐지고,
+ * 사이에 일반 텍스트가 끼어 x간격이 크게 벌어지면 서로 다른 수식으로 분리된다.
+ * @returns {Array<{x0,y0,x1,y1}>}
+ */
+function clusterFormulas(fitems) {
+  if (!fitems.length) return [];
+  const items = fitems.map((it) => ({
+    x0: it.x, y0: it.top, x1: it.x + Math.max(it.w, 1), y1: it.bottom, h: it.h || (it.bottom - it.top) || 10,
+  }));
+  items.sort((a, b) => a.x0 - b.x0 || a.y0 - b.y0);
+
+  const groups = [];
+  for (const it of items) {
+    let g = null;
+    for (let k = groups.length - 1; k >= 0; k--) {
+      const G = groups[k];
+      const hRef = Math.max(it.h, G.y1 - G.y0, 8);
+      const gapX = it.x0 - G.x1;                                  // 수평 간격(겹치면 음수)
+      const vOverlap = Math.min(it.y1, G.y1) - Math.max(it.y0, G.y0);
+      // 세로: 같은 줄(겹침) 또는 분수 위/아래(작은 간격)만 병합.
+      //   허용치를 크게 잡으면 아랫줄 수식까지 하나로 묶여 줄이 합쳐진다.
+      if (gapX <= hRef * 0.9 && vOverlap > -hRef * 0.5) { g = G; break; }
+    }
+    if (!g) {
+      groups.push({ x0: it.x0, y0: it.y0, x1: it.x1, y1: it.y1 });
+    } else {
+      g.x0 = Math.min(g.x0, it.x0); g.y0 = Math.min(g.y0, it.y0);
+      g.x1 = Math.max(g.x1, it.x1); g.y1 = Math.max(g.y1, it.y1);
+    }
+  }
+  return groups;
 }
 
 /**
@@ -133,7 +189,7 @@ function groupItemsIntoLines(items) {
     }
     text = text.replace(/\s+/g, ' ').trim();
     if (!text) continue;
-    lines.push({ text, xLeft, xRight, top: r.top, bottom: r.bottom, height: r.height });
+    lines.push({ text, xLeft, xRight, top: r.top, bottom: r.bottom, height: r.height, words: r.items });
   }
 
   lines.sort((a, b) => a.top - b.top || a.xLeft - b.xLeft);

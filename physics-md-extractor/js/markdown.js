@@ -43,6 +43,15 @@ function protectMath(text, store) {
     return key;
   });
 }
+
+/** 수식 자리표시자(⟦EQ:키⟧)를 보호해 변환 규칙이 건드리지 못하게 함 */
+function protectPlaceholders(text, store) {
+  return text.replace(/\u27E6EQ:[A-Za-z0-9_]+\u27E7/g, (m) => {
+    const key = `\uE000${store.length}\uE001`;
+    store.push(m);
+    return key;
+  });
+}
 function restoreMath(text, store) {
   return text.replace(/\uE000(\d+)\uE001/g, (_, i) => store[+i]);
 }
@@ -62,6 +71,7 @@ export function convertText(text, enable = true) {
   t = t.replace(/[₀₁₂₃₄₅₆₇₈₉]/g, (c) => SUB[c] || c);
 
   const store = [];
+  t = protectPlaceholders(t, store);   // 수식 자리표시자 먼저 보호
   t = protectMath(t, store);
 
   // 1) 숫자+단위 → $2\,\mathrm{kg}$
