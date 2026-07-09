@@ -20,7 +20,7 @@ const HANGUL_RE = /[\uAC00-\uD7A3\u3130-\u318F]/;
  * @param {number} scale  렌더링에 사용한 배율(캔버스 좌표계와 일치시키기 위함)
  * @returns {Promise<{lines:Array, metrics:object}>}
  */
-export async function extractPageText(page, scale) {
+export async function extractPageText(page, scale, twoColumn = true) {
   const viewport = page.getViewport({ scale });
   const content = await page.getTextContent();
   const Util = window.pdfjsLib.Util;
@@ -40,9 +40,50 @@ export async function extractPageText(page, scale) {
     items.push({ str, x, y, w, h, top: y - h, bottom: y });
   }
 
-  const lines = groupItemsIntoLines(items);
+  const lines = reconstructLines(items, viewport.width, twoColumn);
   const metrics = computeQuality(lines);
   return { lines, metrics, viewportWidth: viewport.width, viewportHeight: viewport.height };
+}
+
+/**
+ * 단어 단위 아이템들을 라인으로 재구성한다.
+ *
+ * ⚠️ 중요: 2단 편집에서는 좌측 단과 우측 단의 글자가 "같은 baseline(y)"을
+ * 공유하는 경우가 많다. y좌표만으로 묶으면 좌·우 두 단이 한 줄로 합쳐져
+ * 우측 단의 문항 번호(4. 5. 9. 10. …)가 줄 중간에 파묻혀 인식되지 않는다.
+ * 따라서 먼저 아이템을 단(column)으로 분리한 뒤 단별로 라인을 묶는다.
+ */
+function reconstructLines(items, pageWidth, twoColumn) {
+  const cols = twoColumn ? detectColumns(items, pageWidth) : [[0, pageWidth]];
+  let lines = [];
+  for (const [cx0, cx1] of cols) {
+    const colItems = items.filter((it) => {
+      const c = it.x + it.w / 2;
+      return c >= cx0 && c < cx1;
+    });
+    lines = lines.concat(groupItemsIntoLines(colItems));
+  }
+  return lines;
+}
+
+/**
+ * 아이템 분포로 단(column) 경계를 추정한다. (1단 또는 2단만 지원)
+ * 가운데(midline)를 가로지르는 단어가 거의 없으면(=가운데 여백/거터 존재)
+ * 2단으로 판단하고 [0,mid],[mid,width] 로 나눈다.
+ */
+function detectColumns(items, pageWidth) {
+  if (items.length < 10) return [[0, pageWidth]];
+  const mid = pageWidth / 2;
+  let straddle = 0, left = 0, right = 0;
+  for (const it of items) {
+    const xL = it.x, xR = it.x + it.w;
+    if (xL <= mid && xR >= mid) straddle++;        // 미드라인을 관통하는 단어
+    if ((xL + xR) / 2 < mid) left++; else right++;
+  }
+  const twoCol = straddle < items.length * 0.03
+    && left > items.length * 0.15
+    && right > items.length * 0.15;
+  return twoCol ? [[0, mid], [mid, pageWidth]] : [[0, pageWidth]];
 }
 
 /** 텍스트 아이템들을 라인으로 묶는다(수직 근접 + 수평 정렬 + 공백 보정). */

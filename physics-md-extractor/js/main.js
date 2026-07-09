@@ -137,8 +137,8 @@ async function convert() {
       // 1) 렌더링(그림 크롭·OCR 공용)
       const { canvas, width, height } = await renderPage(page, scale);
 
-      // 2) 텍스트 추출 + 품질 판정
-      const { lines: textLines, metrics } = await extractPageText(page, scale);
+      // 2) 텍스트 추출 + 품질 판정 (2단 인식 옵션 반영)
+      const { lines: textLines, metrics } = await extractPageText(page, scale, useTwoCol);
       const reliable = isTextReliable(metrics);
 
       let useOcr = false;
