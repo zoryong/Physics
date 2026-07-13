@@ -45,6 +45,9 @@ header p{margin:0;color:#C7D4E8;font-size:13.5px;}
 .field input:focus{outline:2px solid var(--teal);outline-offset:1px;border-color:var(--teal);}
 .err-msg{color:var(--rose);font-size:12.5px;margin-bottom:10px;min-height:1em;}
 .google-signin-btn-wrap{display:flex;justify-content:center;padding:8px 0 4px;}
+.checking-box{display:flex;flex-direction:column;align-items:center;gap:16px;padding:24px 0;color:var(--ink-soft);font-size:13.5px;}
+.spinner{width:32px;height:32px;border:3px solid var(--line);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
 .gate-err{
   margin-top:14px;padding:12px 14px;background:var(--rose-soft);border:1px solid #E6B7C0;
   border-radius:9px;color:#7A2334;font-size:13px;line-height:1.6;text-align:center;font-weight:600;
@@ -140,6 +143,14 @@ header p{margin:0;color:#C7D4E8;font-size:13.5px;}
     <p class="sub" id="gateSub">이 퀴즈는 학교 Google 계정으로만 접근할 수 있습니다.</p>
     <div id="googleSignInBtn" class="google-signin-btn-wrap"></div>
     <div class="err-msg gate-err" id="gateError" style="display:none;"></div>
+  </div>
+
+  <!-- 로그인 직후, 이전 제출 여부를 확인하는 동안 잠깐 보여지는 화면(빈 화면 방지) -->
+  <div class="panel" id="screenChecking" style="display:none;">
+    <div class="checking-box">
+      <div class="spinner"></div>
+      <p>이전 제출 기록을 확인하는 중입니다…</p>
+    </div>
   </div>
 
   <!-- 시작 화면: 학번/이름 입력 -->
@@ -342,13 +353,29 @@ header p{margin:0;color:#C7D4E8;font-size:13.5px;}
       // 쓰는 퀴즈에서는 학번·이름을 입력받기도 전에, 이 구글 계정(이메일) 기준으로
       // 먼저 확인한다 — 이미 제출한 계정이면 학번·이름 입력 화면 자체를 건너뛰고
       // 바로 이전 결과를 보여준다.
+      //
+      // ⚠️ 이 확인은 네트워크 왕복(구글시트 쪽 Apps Script 호출)이 필요해서 몇 초
+      // 걸릴 수 있다. 그동안 아무 화면도 안 보이면 마치 멈춘 것처럼 보이므로,
+      // "확인하는 중" 화면을 반드시 보여준다. 그리고 혹시라도 이전 결과를 화면에
+      // 재구성하는 도중 예상 못 한 데이터 문제로 오류가 나더라도, 학생이 빈
+      // 화면에 갇히지 않도록 안전하게 시작 화면으로 넘어가게 한다.
+      var elChecking = document.getElementById('screenChecking');
+      elChecking.style.display = 'block';
+
       checkPriorSubmission('', window.__stuEmail).then(function(prior){
-        if (prior && prior.found) {
-          window.__stuId = prior.studentId || '';
-          window.__stuName = prior.studentName || '';
-          applyShuffle(window.__stuId, window.__stuName);
-          showPriorResult(prior);
-        } else {
+        elChecking.style.display = 'none';
+        try {
+          if (prior && prior.found) {
+            window.__stuId = prior.studentId || '';
+            window.__stuName = prior.studentName || '';
+            applyShuffle(window.__stuId, window.__stuName);
+            showPriorResult(prior);
+          } else {
+            elStart.style.display = 'block';
+          }
+        } catch (renderErr) {
+          console.warn('[퀴즈] 이전 제출 결과를 불러오는 중 문제가 발생해 새로 시작합니다:', renderErr);
+          document.getElementById('screenResult').style.display = 'none';
           elStart.style.display = 'block';
         }
       });
@@ -546,19 +573,28 @@ header p{margin:0;color:#C7D4E8;font-size:13.5px;}
     checkPriorSubmission(id, window.__stuEmail).then(function(prior){
       startBtn.disabled = false;
       startBtn.textContent = origStartLabel;
-      if (prior && prior.found) {
-        // 이전 제출 결과를 보여줄 때도, 그때 그 학생이 실제로 봤던 문항·선지 순서를
-        // 그대로 재현해야 "내 답/정답" 번호가 그 학생 화면 기준으로 맞게 나온다.
-        // 셔플은 학번+이름으로 결정되는 시드 기반이라, 같은 학번+이름이면 항상 같은
-        // 순서가 재현된다(따로 저장해둘 필요가 없음).
+      try {
+        if (prior && prior.found) {
+          // 이전 제출 결과를 보여줄 때도, 그때 그 학생이 실제로 봤던 문항·선지 순서를
+          // 그대로 재현해야 "내 답/정답" 번호가 그 학생 화면 기준으로 맞게 나온다.
+          // 셔플은 학번+이름으로 결정되는 시드 기반이라, 같은 학번+이름이면 항상 같은
+          // 순서가 재현된다(따로 저장해둘 필요가 없음).
+          applyShuffle(id, name);
+          showPriorResult(prior);
+          return;
+        }
         applyShuffle(id, name);
-        showPriorResult(prior);
-        return;
+        elStart.style.display = 'none';
+        elQuiz.style.display = 'block';
+        renderQuiz();
+      } catch (renderErr) {
+        console.warn('[퀴즈] 이전 제출 확인 중 문제가 발생해 새로 시작합니다:', renderErr);
+        document.getElementById('screenResult').style.display = 'none';
+        applyShuffle(id, name);
+        elStart.style.display = 'none';
+        elQuiz.style.display = 'block';
+        renderQuiz();
       }
-      applyShuffle(id, name);
-      elStart.style.display = 'none';
-      elQuiz.style.display = 'block';
-      renderQuiz();
     });
   });
 
