@@ -24,7 +24,8 @@ header{
   background:linear-gradient(155deg,var(--navy-deep) 0%,var(--navy) 62%,#2B4C7E 100%);
   color:#fff;padding:44px 24px 52px;text-align:center;
 }
-header .eyebrow{font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:#9FB3D6;font-weight:700;margin-bottom:10px;}
+header .eyebrow{font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:#9FB3D6;font-weight:700;margin-bottom:10px;text-decoration:none;display:inline-block;transition:color .15s;}
+header .eyebrow:hover{color:#fff;text-decoration:underline;}
 header h1{margin:0 0 10px;font-size:clamp(22px,5vw,30px);font-weight:900;letter-spacing:-.01em;}
 header p{margin:0;color:#C7D4E8;font-size:14.5px;}
 
@@ -59,7 +60,7 @@ footer.copyright a:hover{color:var(--teal);}
 <body>
 
 <header>
-  <div class="eyebrow">An's Physics</div>
+  <a class="eyebrow" href="https://physics.physicsgon.workers.dev/">An's Physics</a>
   <h1>연습과제 02 · 2차원 물체 운동 분석</h1>
   <p>역학과 에너지</p>
 </header>
