@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>역학과 에너지 연습과제</title>
+<meta name="description" content="역학과 에너지 연습과제 01~03 모음 - 슬기로운 학교생활">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;900&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --ink:#1B2430; --ink-soft:#57616F; --line:#E2E6EB; --paper:#F6F7F9; --card:#FFFFFF;
+  --navy:#213863; --navy-deep:#152540; --teal:#0F8A82; --teal-soft:#E3F4F1;
+  --radius:14px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--paper);color:var(--ink);font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,sans-serif;line-height:1.5;}
+
+header{
+  background:linear-gradient(155deg,var(--navy-deep) 0%,var(--navy) 62%,#2B4C7E 100%);
+  color:#fff;padding:44px 24px 52px;text-align:center;
+}
+header .eyebrow{font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:#9FB3D6;font-weight:700;margin-bottom:10px;}
+header h1{margin:0 0 10px;font-size:clamp(22px,5vw,30px);font-weight:900;letter-spacing:-.01em;}
+header p{margin:0;color:#C7D4E8;font-size:14.5px;}
+
+.wrap{max-width:720px;margin:-28px auto 0;padding:0 20px 60px;}
+
+.card-list{display:flex;flex-direction:column;gap:16px;}
+.q-card{
+  display:flex;align-items:center;gap:18px;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:22px 24px;text-decoration:none;color:inherit;
+  box-shadow:0 1px 3px rgba(21,37,64,.06);transition:transform .12s, box-shadow .12s, border-color .12s;
+}
+.q-card:hover{transform:translateY(-2px);border-color:var(--teal);box-shadow:0 8px 20px rgba(21,37,64,.1);}
+.q-card .qc-num{
+  flex:0 0 auto;width:52px;height:52px;border-radius:50%;
+  background:var(--teal-soft);color:var(--teal);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-weight:800;font-size:18px;
+}
+.q-card .qc-body{flex:1;min-width:0;}
+.q-card .qc-title{font-size:16px;font-weight:800;margin-bottom:3px;}
+.q-card .qc-desc{font-size:13px;color:var(--ink-soft);}
+.q-card .qc-arrow{flex:0 0 auto;font-size:20px;color:var(--ink-soft);}
+
+footer.copyright{margin-top:36px;font-size:11.5px;color:#9AA2B1;text-align:center;}
+footer.copyright a{color:#9AA2B1;text-decoration:underline;text-underline-offset:2px;}
+footer.copyright a:hover{color:var(--teal);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">슬기로운 학교생활</div>
+  <h1>역학과 에너지 연습과제</h1>
+  <p>아래에서 풀 연습과제를 선택하세요.</p>
+</header>
+
+<div class="wrap">
+  <div class="card-list">
+    <a class="q-card" href="quiz-01.html">
+      <div class="qc-num">01</div>
+      <div class="qc-body">
+        <div class="qc-title">연습과제 01</div>
+        <div class="qc-desc">역학과 에너지 - 첫 번째 연습과제</div>
+      </div>
+      <div class="qc-arrow">→</div>
+    </a>
+    <a class="q-card" href="quiz-02.html">
+      <div class="qc-num">02</div>
+      <div class="qc-body">
+        <div class="qc-title">연습과제 02</div>
+        <div class="qc-desc">역학과 에너지 - 두 번째 연습과제</div>
+      </div>
+      <div class="qc-arrow">→</div>
+    </a>
+    <a class="q-card" href="quiz-03.html">
+      <div class="qc-num">03</div>
+      <div class="qc-body">
+        <div class="qc-title">연습과제 03</div>
+        <div class="qc-desc">역학과 에너지 - 세 번째 연습과제</div>
+      </div>
+      <div class="qc-arrow">→</div>
+    </a>
+  </div>
+
+  <footer class="copyright">Copyright © 2026 <a href="mailto:physicsgon@gmail.com">physicsgon@gmail.com</a> . All rights reserved.</footer>
+</div>
+
+</body>
+</html>
