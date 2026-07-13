@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>안정곤의 물리학 교실</title>
-<meta name="description" content="안정곤의 물리학 교실 - An's Physics">
+<title>역학과 에너지 연습과제</title>
+<meta name="description" content="역학과 에너지 연습과제 01~03 모음 - An's Physics">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,9 +34,8 @@ header p{margin:0;color:#C7D4E8;font-size:14.5px;}
 .q-card{
   display:flex;align-items:center;gap:18px;
   background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
-  padding:22px 24px;text-decoration:none;color:inherit;cursor:pointer;
+  padding:22px 24px;text-decoration:none;color:inherit;
   box-shadow:0 1px 3px rgba(21,37,64,.06);transition:transform .12s, box-shadow .12s, border-color .12s;
-  width:100%;text-align:left;font:inherit;
 }
 .q-card:hover{transform:translateY(-2px);border-color:var(--teal);box-shadow:0 8px 20px rgba(21,37,64,.1);}
 .q-card .qc-num{
@@ -50,13 +49,6 @@ header p{margin:0;color:#C7D4E8;font-size:14.5px;}
 .q-card .qc-desc{font-size:13px;color:var(--ink-soft);}
 .q-card .qc-arrow{flex:0 0 auto;font-size:20px;color:var(--ink-soft);}
 
-.notice{
-  margin-top:16px;padding:14px 18px;border-radius:var(--radius);
-  background:var(--teal-soft);border:1px solid #CDEAE6;color:var(--teal);
-  font-size:14px;font-weight:700;text-align:center;display:none;
-}
-.notice.show{display:block;}
-
 footer.copyright{margin-top:36px;font-size:11.5px;color:#9AA2B1;text-align:center;}
 footer.copyright a{color:#9AA2B1;text-decoration:underline;text-underline-offset:2px;}
 footer.copyright a:hover{color:var(--teal);}
@@ -66,47 +58,40 @@ footer.copyright a:hover{color:var(--teal);}
 
 <header>
   <div class="eyebrow">An's Physics</div>
-  <h1>안정곤의 물리학 교실</h1>
-  <p>아래에서 접근할 페이지를 선택하세요.</p>
+  <h1>역학과 에너지 연습과제</h1>
+  <p>아래에서 풀 연습과제를 선택하세요.</p>
 </header>
 
 <div class="wrap">
   <div class="card-list">
-    <a class="q-card" href="2026Mech/">
+    <a class="q-card" href="quiz-01.html">
       <div class="qc-num">01</div>
       <div class="qc-body">
-        <div class="qc-title">2026-2 역학과 에너지 연습과제 제출</div>
-        <div class="qc-desc">연습과제 01 ~ 03</div>
+        <div class="qc-title">연습과제 01</div>
+        <div class="qc-desc">벡터</div>
       </div>
-      <div class="qc-arrow">&rarr;</div>
+      <div class="qc-arrow">→</div>
     </a>
-    <button type="button" class="q-card" id="simCard" aria-describedby="simNotice">
+    <a class="q-card" href="quiz-02.html">
       <div class="qc-num">02</div>
       <div class="qc-body">
-        <div class="qc-title">물리학 시뮬레이터</div>
-        <div class="qc-desc">준비 중</div>
+        <div class="qc-title">연습과제 02</div>
+        <div class="qc-desc">2차원 물체 운동 분석</div>
       </div>
-      <div class="qc-arrow">&rarr;</div>
-    </button>
+      <div class="qc-arrow">→</div>
+    </a>
+    <a class="q-card" href="quiz-03.html">
+      <div class="qc-num">03</div>
+      <div class="qc-body">
+        <div class="qc-title">연습과제 03</div>
+        <div class="qc-desc">포물선 운동</div>
+      </div>
+      <div class="qc-arrow">→</div>
+    </a>
   </div>
 
-  <div class="notice" id="simNotice" role="status">서비스 준비중입니다.</div>
-
-  <footer class="copyright">Copyright &copy; 2026 <a href="mailto:physicsgon@gmail.com">physicsgon@gmail.com</a> . All rights reserved.</footer>
+  <footer class="copyright">Copyright © 2026 <a href="mailto:physicsgon@gmail.com">physicsgon@gmail.com</a> . All rights reserved.</footer>
 </div>
-
-<script>
-  (function(){
-    var card = document.getElementById('simCard');
-    var notice = document.getElementById('simNotice');
-    if(card && notice){
-      card.addEventListener('click', function(){
-        notice.classList.add('show');
-        notice.scrollIntoView({behavior:'smooth', block:'nearest'});
-      });
-    }
-  })();
-</script>
 
 </body>
 </html>
