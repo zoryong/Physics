@@ -269,7 +269,7 @@ header p{margin:0;color:#C7D4E8;font-size:13.5px;}
   });
 
   function applyShuffle(studentId, studentName){
-    var seed = hashSeed(studentId.trim() + '||' + studentName.trim());
+    var seed = hashSeed(String(studentId).trim() + '||' + String(studentName).trim());
     var rng = mulberry32(seed);
     // 먼저 원래 문항 순서(origIndex 기준)로 각 문항의 선지 순서를 정한다.
     questions.forEach(function(q){
