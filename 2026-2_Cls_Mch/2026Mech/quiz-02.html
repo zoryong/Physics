@@ -612,7 +612,7 @@ header p{margin:0;color:#C7D4E8;font-size:13.5px;}
       var cbName = '__quizCheckCb_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
       var script = document.createElement('script');
       var done = false;
-      var timeoutId = setTimeout(function(){ finish({ found: false }); }, 6000);
+      var timeoutId = setTimeout(function(){ finish({ found: false }); }, 20000);
       function finish(data){
         if (done) return;
         done = true;
