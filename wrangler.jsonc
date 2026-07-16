@@ -6,7 +6,7 @@
     "enabled": true
   },
   "assets": {
-    "directory": "2026-2_Cls_Mch"
+    "directory": "."
   },
   "compatibility_flags": [
     "nodejs_compat"
