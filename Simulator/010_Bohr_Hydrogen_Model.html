@@ -272,36 +272,40 @@
 <script>
   SimI18n.register({
     en: {
-      'ui.series': '스펙트럼 계열',
-      'ui.showSeries': '스펙트럼 계열 색 표시',
-      'ui.showArrow': '전이 화살표 표시',
-      'ui.panelHtml': '보어의 수소<br>원자 모형's Hydrogen<br>Atom Model',
-      'ui.title': 'Bohr\'s Hydrogen Atom Model',
-      'ui.lead': 'Calculate and visualize the photon wavelength and spectral line emitted as an electron transitions between orbits in Bohr\'s model.',
-      'ui.panel': 'Bohr\'s Hydrogen Atom Model',
-      'ui.orbit': '전자 궤도 (n)',
-      'ui.hint': '궤도 번호를 클릭하면 전자가 그 궤도로 바로 전이합니다.',
-      'ui.display': '표시 옵션',
-      'ui.reset': '초기화',
-      'ui.lyman': '라이먼 계열 (n→1, 자외선)',
-      'ui.balmer': '발머 계열 (n→2, 가시광선)',
-      'ui.paschen': '파셴 계열 (n→3, 적외선)',
-      'ui.others': '기타 (n→4 이상)',
-      'ui.state': '현재 상태',
+      'ui.title': "Bohr's Hydrogen Atom Model",
+      'ui.lead': "Calculate and visualize the photon wavelength and spectral line emitted as an electron transitions between orbits in Bohr's model.",
+      'ui.panel': "Bohr's Hydrogen Atom Model",
+      'ui.panelHtml': "Bohr's Hydrogen<br>Atom Model",
+      'ui.orbit': 'Electron Orbit (n)',
+      'ui.hint': 'Click an orbit number to instantly transition the electron to that orbit.',
+      'ui.display': 'Display Options',
+      'ui.showArrow': 'Show transition arrow',
+      'ui.showSeries': 'Show spectral series colors',
+      'ui.reset': 'Reset',
+      'ui.series': 'Spectral Series',
+      'ui.lyman': 'Lyman series (n→1, UV)',
+      'ui.balmer': 'Balmer series (n→2, Visible)',
+      'ui.paschen': 'Paschen series (n→3, IR)',
+      'ui.others': 'Others (n→4 or higher)',
+      'ui.state': 'Current State',
       'common.eyebrow': 'Physics Simulator'
     },
     ko: {
       'ui.title': '보어의 수소 원자 모형',
       'ui.lead': '보어 모형에서 전자가 궤도 사이를 전이할 때 방출되는 광자의 파장과 스펙트럼선을 계산하고 시각화합니다.',
       'ui.panel': '보어의 수소 원자 모형',
+      'ui.panelHtml': '보어의 수소<br>원자 모형',
       'ui.orbit': '전자 궤도 (n)',
-      'ui.hint': '궤도 번호를 클릭하세요…',
+      'ui.hint': '궤도 번호를 클릭하면 전자가 그 궤도로 바로 전이합니다.',
       'ui.display': '표시 옵션',
+      'ui.showArrow': '전이 화살표 표시',
+      'ui.showSeries': '스펙트럼 계열 색 표시',
       'ui.reset': '초기화',
-      'ui.lyman': '라이먼',
-      'ui.balmer': '발머',
-      'ui.paschen': '파셴',
-      'ui.others': '기타',
+      'ui.series': '스펙트럼 계열',
+      'ui.lyman': '라이먼 계열 (n→1, 자외선)',
+      'ui.balmer': '발머 계열 (n→2, 가시광선)',
+      'ui.paschen': '파셴 계열 (n→3, 적외선)',
+      'ui.others': '기타 (n→4 이상)',
       'ui.state': '현재 상태',
       'common.eyebrow': '물리학 시뮬레이터'
     }
@@ -1090,6 +1094,7 @@ document.getElementById('showSeriesColor').addEventListener('change', draw);
 refreshOrbitButtons();
 resetSim();
 startFlashing();
+window.simRedraw = draw;
 </script>
 </body>
 </html>
