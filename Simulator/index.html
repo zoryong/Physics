@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>An's Physics Simulator</title>
+<meta name="description" content="A collection of interactive physics simulators that run right in your browser - An's Physics Simulator">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B2430;
+    --ink-soft:#57616F;
+    --line:#E2E6EB;
+    --paper:#F6F7F9;
+    --card:#FFFFFF;
+    --navy:#213863;
+    --navy-deep:#152540;
+    --teal:#0F8A82;
+    --teal-soft:#E3F4F1;
+    --amber:#C8791C;
+    --amber-soft:#FBF0DF;
+    --rose:#B8465A;
+    --rose-soft:#FBEAEC;
+    --violet:#6E56A6;
+    --violet-soft:#EEEAF7;
+    --indigo:#4C51BF;
+    --indigo-soft:#E9E9FA;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,sans-serif;
+    line-height:1.5;
+    padding-bottom:60px;
+  }
+
+  /* ---------- header ---------- */
+  header{
+    background:linear-gradient(155deg,var(--navy-deep) 0%,var(--navy) 58%,#2B4C7E 100%);
+    color:#fff;
+    padding:64px 28px 72px;
+    position:relative;
+    overflow:hidden;
+  }
+  header::after{
+    content:'';
+    position:absolute;
+    right:-80px;top:-80px;
+    width:320px;height:320px;
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(255,255,255,.06) 0%, rgba(255,255,255,0) 70%);
+  }
+  .header-inner{max-width:1080px;margin:0 auto;position:relative;}
+  header .eyebrow-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;}
+  header .eyebrow{
+    display:inline-flex;align-items:center;gap:7px;
+    font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:#9FB3D6;font-weight:700;
+    padding:6px 13px;border:1px solid rgba(159,179,214,.35);border-radius:999px;
+  }
+  header h1{
+    margin:0 0 14px;
+    font-size:clamp(30px,5vw,44px);
+    font-weight:900;
+    letter-spacing:-.02em;
+  }
+  header p{
+    margin:0;color:#C7D4E8;font-size:15.5px;
+    line-height:1.7;
+  }
+  .header-meta{
+    margin-top:28px;padding-top:20px;
+    border-top:1px solid rgba(159,179,214,.25);
+  }
+  .header-meta .hm-note{
+    margin:0;font-size:13.5px;color:#C7D4E8;line-height:1.75;
+  }
+  .header-meta .hm-note b{color:#fff;}
+  .email-mask{
+    color:#fff;text-decoration:underline;text-underline-offset:2px;font-weight:700;
+    transition:color .15s ease;
+  }
+  .email-mask:hover, .email-mask:focus{color:var(--teal);}
+
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px;}
+
+  /* ---------- category tabs (horizontal) ---------- */
+  .category-tabs{
+    display:flex;flex-wrap:wrap;gap:4px;
+    margin-top:44px;
+    border-bottom:2px solid var(--line);
+  }
+  .category-tab{
+    display:flex;align-items:center;gap:8px;
+    padding:14px 18px;
+    border:none;background:none;cursor:pointer;
+    font-family:'Noto Sans KR',sans-serif;font-size:14.5px;font-weight:700;color:var(--ink-soft);
+    border-bottom:3px solid transparent;
+    margin-bottom:-2px;
+    white-space:nowrap;
+    transition:color .15s ease, border-color .15s ease;
+  }
+  .category-tab .cat-icon{font-size:17px;}
+  .category-tab .cat-count{
+    font-size:11px;font-weight:600;color:var(--ink-soft);
+    font-family:'JetBrains Mono',monospace;opacity:.65;
+  }
+  .category-tab:hover{color:var(--ink);}
+  .category-tab.active{color:var(--tab-accent, var(--teal));border-bottom-color:var(--tab-accent, var(--teal));}
+  .category-tab.active .cat-count{color:var(--tab-accent, var(--teal));opacity:1;}
+
+  .category-tab[data-cat="mechanics"]{--tab-accent:var(--amber);}
+  .category-tab[data-cat="electrodynamics"]{--tab-accent:var(--violet);}
+  .category-tab[data-cat="thermal"]{--tab-accent:var(--rose);}
+  .category-tab[data-cat="wave"]{--tab-accent:var(--teal);}
+  .category-tab[data-cat="modern"]{--tab-accent:var(--indigo);}
+
+  /* ---------- content panels ---------- */
+  .tool-panel{display:none;margin-top:28px;}
+  .tool-panel.active{display:block;}
+
+  .tool-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:16px;
+  }
+  @media(max-width:720px){.tool-grid{grid-template-columns:1fr;}}
+
+  .tool-card{
+    display:flex;flex-direction:column;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:22px 22px 20px;
+    text-decoration:none;
+    color:inherit;
+    transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    position:relative;
+    overflow:hidden;
+  }
+  .tool-card::before{
+    content:'';
+    position:absolute;left:0;top:0;bottom:0;width:3px;
+    background:var(--card-accent, var(--teal));
+    opacity:0;transition:opacity .15s ease;
+  }
+  .tool-card:hover{
+    transform:translateY(-3px);
+    box-shadow:0 10px 28px rgba(21,37,64,.10);
+    border-color:var(--card-accent, var(--teal));
+  }
+  .tool-card:hover::before{opacity:1;}
+
+  .tc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .tc-icon{
+    width:42px;height:42px;border-radius:11px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:20px;
+    background:var(--card-accent-soft, var(--teal-soft));
+  }
+  .tc-tag{
+    font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;
+    color:var(--card-accent, var(--teal));background:var(--card-accent-soft, var(--teal-soft));
+  }
+  .tc-title{font-size:16.5px;font-weight:800;margin:0 0 8px;color:var(--ink);letter-spacing:-.01em;}
+  .tc-desc{font-size:13px;color:var(--ink-soft);line-height:1.6;margin:0;flex:1;}
+  .tc-cta{
+    display:inline-flex;align-items:center;gap:5px;
+    margin-top:16px;font-size:13px;font-weight:700;color:var(--card-accent, var(--teal));
+  }
+  .tool-card:hover .tc-cta{gap:8px;}
+  .tc-cta .arrow{transition:transform .15s ease;}
+  .tool-card:hover .tc-cta .arrow{transform:translateX(2px);}
+
+  .tool-card.accent-teal{--card-accent:var(--teal);--card-accent-soft:var(--teal-soft);}
+  .tool-card.accent-violet{--card-accent:var(--violet);--card-accent-soft:var(--violet-soft);}
+  .tool-card.accent-amber{--card-accent:var(--amber);--card-accent-soft:var(--amber-soft);}
+  .tool-card.accent-rose{--card-accent:var(--rose);--card-accent-soft:var(--rose-soft);}
+  .tool-card.accent-indigo{--card-accent:var(--indigo);--card-accent-soft:var(--indigo-soft);}
+
+  /* ---------- coming-soon placeholder ---------- */
+  .tool-card.is-soon{
+    border-style:dashed;
+    color:var(--ink-soft);
+    cursor:default;
+  }
+  .tool-card.is-soon:hover{transform:none;box-shadow:none;border-color:var(--line);}
+  .tool-card.is-soon:hover::before{opacity:0;}
+  .tool-card.is-soon .tc-icon{opacity:.5;}
+  .tool-card.is-soon .tc-title{color:var(--ink-soft);}
+
+  /* ---------- footer ---------- */
+  footer.copyright{margin-top:52px;font-size:11.5px;color:#9AA2B1;text-align:center;}
+  footer.copyright .copyright-link{color:#9AA2B1;text-decoration:underline;text-underline-offset:2px;}
+  footer.copyright .copyright-link:hover{color:var(--teal);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="eyebrow-row">
+      <div class="eyebrow">⚛️ PHYSICS SIMULATOR</div>
+    </div>
+    <h1>Physics Simulator</h1>
+    <p>A collection of interactive simulators built to support the teaching and learning of physics. Adjust the sliders to change the conditions and see how each phenomenon responds, making abstract concepts easier to grasp and explore in the classroom or at home.</p>
+    <div class="header-meta">
+      <p class="hm-note">Currently <b>10 simulators</b> are live. If you find a bug or have an idea for improvement, please <a href="mailto:physicsgon@gmail.com" class="email-mask">email me</a> and I'll take a look.</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="category-tabs" id="categoryTabs">
+    <button class="category-tab" data-cat="mechanics" type="button">
+      <span class="cat-icon">⚙️</span> Mechanics <span class="cat-count">Coming soon</span>
+    </button>
+    <button class="category-tab" data-cat="electrodynamics" type="button">
+      <span class="cat-icon">⚡</span> Electrodynamics <span class="cat-count">Coming soon</span>
+    </button>
+    <button class="category-tab" data-cat="thermal" type="button">
+      <span class="cat-icon">🌡️</span> Thermal <span class="cat-count">Coming soon</span>
+    </button>
+    <button class="category-tab active" data-cat="wave" type="button">
+      <span class="cat-icon">🌊</span> Wave <span class="cat-count">7</span>
+    </button>
+    <button class="category-tab" data-cat="modern" type="button">
+      <span class="cat-icon">⚛️</span> Modern <span class="cat-count">3</span>
+    </button>
+  </div>
+
+  <!-- ============ Mechanics ============ -->
+  <div class="tool-panel" id="panel-mechanics" data-cat="mechanics">
+    <div class="tool-grid">
+      <div class="tool-card is-soon">
+        <div class="tc-top">
+          <span class="tc-icon">🪀</span>
+        </div>
+        <h3 class="tc-title">Mechanics simulators coming soon</h3>
+        <p class="tc-desc">Simulators covering momentum, energy, oscillation, and rotational motion will be added here soon.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ Electrodynamics ============ -->
+  <div class="tool-panel" id="panel-electrodynamics" data-cat="electrodynamics">
+    <div class="tool-grid">
+      <div class="tool-card is-soon">
+        <div class="tc-top">
+          <span class="tc-icon">🔌</span>
+        </div>
+        <h3 class="tc-title">Electrodynamics simulators coming soon</h3>
+        <p class="tc-desc">Simulators covering electric fields, magnetic fields, and circuits will be added here soon.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ Thermal ============ -->
+  <div class="tool-panel" id="panel-thermal" data-cat="thermal">
+    <div class="tool-grid">
+      <div class="tool-card is-soon">
+        <div class="tc-top">
+          <span class="tc-icon">🔥</span>
+        </div>
+        <h3 class="tc-title">Thermal simulators coming soon</h3>
+        <p class="tc-desc">Simulators covering gas molecule motion and the laws of thermodynamics will be added here soon.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ Wave ============ -->
+  <div class="tool-panel active" id="panel-wave" data-cat="wave">
+    <div class="tool-grid">
+      <a class="tool-card accent-teal" href="001_Convex_Lens_Ray_Tracing.html">
+        <div class="tc-top">
+          <span class="tc-icon">🔍</span>
+          <span class="tc-tag">Wave</span>
+        </div>
+        <h3 class="tc-title">Convex Lens Ray Tracing</h3>
+        <p class="tc-desc">Adjust the focal length, object distance, and object height, and watch three principal rays locate the real or virtual image.</p>
+        <span class="tc-cta">Open <span class="arrow">→</span></span>
+      </a>
+
+      <a class="tool-card accent-teal" href="002_Wave_Diffraction.html">
+        <div class="tc-top">
+          <span class="tc-icon">〰️</span>
+          <span class="tc-tag">Wave</span>
+        </div>
+        <h3 class="tc-title">Wave Diffraction</h3>
+        <p class="tc-desc">Adjust the wavelength and slit width to see how a wave spreads after passing through a single slit, and compare the spread with the diffraction condition d sin θ = mλ.</p>
+        <span class="tc-cta">Open <span class="arrow">→</span></span>
+      </a>
+
+      <a class="tool-card accent-teal" href="003_Pulse_Superposition.html">
+        <div class="tc-top">
+          <span class="tc-icon">💫</span>
+          <span class="tc-tag">Wave</span>
+        </div>
+        <h3 class="tc-title">Pulse Superposition</h3>
+        <p class="tc-desc">Watch two pulses traveling toward each other overlap, and see constructive and destructive interference happen in real time.</p>
+        <span class="tc-cta">Open <span class="arrow">→</span></span>
+      </a>
+
+      <a class="tool-card accent-teal" href="004_Wave_Superposition.html">
+        <div class="tc-top">
+          <span class="tc-icon">➕</span>
+          <span class="tc-tag">Wave</span>
+        </div>
+        <h3 class="tc-title">Wave Superposition</h3>
+        <p class="tc-desc">Add two sine waves with independent amplitude and phase, and see how the phase difference shapes the resultant wave.</p>
+        <span class="tc-cta">Open <span class="arrow">→</span></span>
+      </a>
+
+      <a class="tool-card accent-teal" href="005_Wave_Superposition_Standing_Wave.html">
+        <div class="tc-top">
+          <span class="tc-icon">🎻</span>
+          <span class="tc-tag">Wave</span>
+        </div>
+        <h3 class="tc-title">Standing Wave</h3>
+        <p class="tc-desc">See the standing wave, nodes, and antinodes that form when two waves of equal wavelength and amplitude travel in opposite directions.</p>
+        <span class="tc-cta">Open <span class="arrow">→</span></span>
+      </a>
+
+      <a class="tool-card accent-teal" href="006_Two_Source_Interference.html">
+        <div class="tc-top">
+          <span class="tc-icon">💠</span>
+          <span class="tc-tag">Wave</span>
+        </div>
+        <h3 class="tc-title">Two-Source Interference</h3>
+        <p class="tc-desc">Click anywhere on the overlapping wavefronts from two point sources to find where interference is constructive or destructive.</p>
+        <span class="tc-cta">Open <span class="arrow">→</span></span>
+      </a>
+
+      <a class="tool-card accent-teal" href="008_Anti_Reflection_Coating.html">
+        <div class="tc-top">
+          <span class="tc-icon">🕶️</span>
+          <span class="tc-tag">Wave</span>
+        </div>
+        <h3 class="tc-title">Anti-Reflection Coating</h3>
+        <p class="tc-desc">Adjust the coating thickness and light wavelength to see how reflections off the top and bottom of a thin film cancel through destructive interference.</p>
+        <span class="tc-cta">Open <span class="arrow">→</span></span>
+      </a>
+    </div>
+  </div>
+
+  <!-- ============ Modern ============ -->
+  <div class="tool-panel" id="panel-modern" data-cat="modern">
+    <div class="tool-grid">
+      <a class="tool-card accent-indigo" href="007_Michelson_Morley.html">
+        <div class="tc-top">
+          <span class="tc-icon">🔬</span>
+          <span class="tc-tag">Modern</span>
+        </div>
+        <h3 class="tc-title">Michelson-Morley Experiment</h3>
+        <p class="tc-desc">Recreate the 1887 Michelson-Morley interferometer experiment and see how aether wind speed, arm length, and rotation angle affect the fringe pattern.</p>
+        <span class="tc-cta">Open <span class="arrow">→</span></span>
+      </a>
+
+      <a class="tool-card accent-indigo" href="009_Photoelectric_Effect.html">
+        <div class="tc-top">
+          <span class="tc-icon">⚡</span>
+          <span class="tc-tag">Modern</span>
+        </div>
+        <h3 class="tc-title">Photoelectric Effect</h3>
+        <p class="tc-desc">Adjust the light's wavelength, intensity, and applied voltage to explore the conditions for electron emission and the stopping voltage.</p>
+        <span class="tc-cta">Open <span class="arrow">→</span></span>
+      </a>
+
+      <a class="tool-card accent-indigo" href="010_Bohr_Hydrogen_Model.html">
+        <div class="tc-top">
+          <span class="tc-icon">⚛️</span>
+          <span class="tc-tag">Modern</span>
+        </div>
+        <h3 class="tc-title">Bohr's Hydrogen Atom Model</h3>
+        <p class="tc-desc">Calculate and visualize the photon wavelength and spectral line emitted as an electron transitions between orbits in Bohr's model.</p>
+        <span class="tc-cta">Open <span class="arrow">→</span></span>
+      </a>
+    </div>
+  </div>
+
+  <footer class="copyright">Copyright &copy; 2026 <a href="mailto:physicsgon@gmail.com" class="copyright-link">physicsgon@gmail.com</a> . All rights reserved.</footer>
+</div>
+
+<script>
+  const tabs = document.querySelectorAll('.category-tab');
+  const panels = document.querySelectorAll('.tool-panel');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const cat = tab.dataset.cat;
+      tabs.forEach(t => t.classList.toggle('active', t === tab));
+      panels.forEach(p => p.classList.toggle('active', p.dataset.cat === cat));
+    });
+  });
+</script>
+
+</body>
+</html>
