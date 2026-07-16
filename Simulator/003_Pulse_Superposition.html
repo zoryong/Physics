@@ -11,7 +11,7 @@
         header.page-head{
             background:linear-gradient(155deg,#152540 0%,#213863 58%,#2B4C7E 100%);
             color:#fff;
-            padding:34px 26px 38px;
+            padding:64px 28px 72px;
         }
         header.page-head .eyebrow{
             font-size:12.5px;letter-spacing:.08em;color:#9FB3D6;
@@ -21,7 +21,8 @@
         header.page-head h1{
             font-size:clamp(20px,3.6vw,28px);font-weight:800;margin:0 0 8px;letter-spacing:-.01em;color:#fff;
         }
-        header.page-head p{color:#C7D4E8;font-size:13.5px;margin:0;max-width:660px;line-height:1.6;}
+        header.page-head .header-inner{max-width:1080px;margin:0 auto;position:relative;}
+        header.page-head p{margin:0;color:#C7D4E8;font-size:15.5px;line-height:1.7;}
         .stage{
             display:flex; justify-content:center; align-items:flex-start;
             padding:20px;
@@ -101,9 +102,11 @@
 </head>
 <body>
 <header class="page-head">
-  <a class="eyebrow" href="https://physics.physicsgon.workers.dev">An's Physics</a>
-  <h1>Wave Superposition (Pulses)</h1>
-  <p>Two Gaussian pulses travel toward each other and overlap. Adjust each pulse's amplitude and width to see constructive and destructive interference in action, following the principle of superposition y = y₁ + y₂.</p>
+  <div class="header-inner">
+    <a class="eyebrow" href="https://physics.physicsgon.workers.dev">An's Physics</a>
+    <h1>Wave Superposition (Pulses)</h1>
+    <p>Two Gaussian pulses travel toward each other and overlap. Adjust each pulse's amplitude and width to see constructive and destructive interference in action, following the principle of superposition y = y₁ + y₂.</p>
+  </div>
 </header>
 
 <div class="stage">
