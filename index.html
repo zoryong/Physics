@@ -24,7 +24,14 @@ header{
   background:linear-gradient(155deg,var(--navy-deep) 0%,var(--navy) 62%,#2B4C7E 100%);
   color:#fff;padding:44px 24px 52px;text-align:center;
 }
-header .eyebrow{font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:#9FB3D6;font-weight:700;margin-bottom:10px;}
+header .eyebrow{
+  display:inline-flex;align-items:center;gap:7px;
+  font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:#9FB3D6;font-weight:700;margin-bottom:14px;
+  padding:6px 13px;border:1px solid rgba(159,179,214,.35);border-radius:999px;
+  text-decoration:none;transition:color .15s ease, border-color .15s ease;
+}
+header .eyebrow:hover{color:#fff;border-color:rgba(255,255,255,.45);}
 header h1{margin:0 0 10px;font-size:clamp(22px,5vw,30px);font-weight:900;letter-spacing:-.01em;}
 header p{margin:0;color:#C7D4E8;font-size:14.5px;}
 
@@ -57,7 +64,7 @@ footer.copyright a:hover{color:var(--teal);}
 <body>
 
 <header>
-  <div class="eyebrow">An's Physics</div>
+  <div class="eyebrow">⚛️ AN'S PHYSICS</div>
   <h1>An's Physics Lecture</h1>
   <p>아래에서 접근할 페이지를 선택하세요.</p>
 </header>
