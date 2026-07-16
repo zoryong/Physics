@@ -13,12 +13,13 @@
 
   var style = document.createElement('style');
   style.textContent = [
-    '.lang-switch{display:inline-flex;align-items:center;gap:0;border:1px solid rgba(159,179,214,.45);border-radius:999px;overflow:hidden;background:rgba(21,37,64,.25);}',
-    '.lang-switch .lang-btn{appearance:none;border:0;background:transparent;color:#9FB3D6;font:700 12px/1 "Noto Sans KR",-apple-system,BlinkMacSystemFont,sans-serif;letter-spacing:.04em;padding:7px 12px;cursor:pointer;transition:background .15s ease,color .15s ease;}',
+    '.lang-mount{position:relative;z-index:2;flex:0 0 auto;}',
+    '.lang-switch{display:inline-flex;align-items:center;gap:0;border:1px solid rgba(159,179,214,.45);border-radius:999px;overflow:hidden;background:rgba(21,37,64,.25);position:relative;z-index:2;-webkit-user-select:none;user-select:none;}',
+    '.lang-switch .lang-btn{-webkit-appearance:none;appearance:none;border:0;background:transparent;color:#9FB3D6;font:700 12px/1 "Noto Sans KR",-apple-system,BlinkMacSystemFont,sans-serif;letter-spacing:.04em;padding:10px 14px;min-height:36px;cursor:pointer;transition:background .15s ease,color .15s ease;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}',
     '.lang-switch .lang-btn:hover{color:#fff;}',
     '.lang-switch .lang-btn.active{background:rgba(255,255,255,.14);color:#fff;}',
-    'header .eyebrow-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;}',
-    'header.page-head .header-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;}',
+    'header .eyebrow-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;position:relative;z-index:2;}',
+    'header.page-head .header-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;position:relative;z-index:2;}',
     'header.page-head .header-top .eyebrow{margin-bottom:0;}'
   ].join('');
   document.head.appendChild(style);
@@ -96,7 +97,11 @@
         btn.setAttribute('data-lang', pair[0]);
         btn.setAttribute('aria-pressed', SimI18n.lang === pair[0] ? 'true' : 'false');
         btn.textContent = pair[1];
-        btn.addEventListener('click', function () { SimI18n.setLang(pair[0]); });
+        btn.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          SimI18n.setLang(pair[0]);
+        });
         wrap.appendChild(btn);
       });
       return wrap;

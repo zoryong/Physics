@@ -55,9 +55,11 @@
     width:320px;height:320px;
     border-radius:50%;
     background:radial-gradient(circle, rgba(255,255,255,.06) 0%, rgba(255,255,255,0) 70%);
+    pointer-events:none;
   }
-  .header-inner{max-width:1080px;margin:0 auto;position:relative;}
+  .header-inner{max-width:1080px;margin:0 auto;position:relative;z-index:1;}
   header .eyebrow-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;}
+  header .lang-mount{position:relative;z-index:2;flex:0 0 auto;}
   header .eyebrow{
     display:inline-flex;align-items:center;gap:7px;
     font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;
