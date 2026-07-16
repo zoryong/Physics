@@ -135,9 +135,12 @@
 <body>
 <header class="page-head">
   <div class="header-inner">
-    <a class="eyebrow" href="https://physics.physicsgon.workers.dev/Simulator/">Physics Simulator</a>
-    <h1>Wave Superposition</h1>
-    <p>Two continuous sine waves with independent amplitude and phase combine into a resultant wave. Adjust the phase difference to explore constructive, destructive, and partial interference.</p>
+    <div class="header-top">
+      <a class="eyebrow" href="https://physics.physicsgon.workers.dev/Simulator/" data-i18n="common.eyebrow">Physics Simulator</a>
+      <div class="lang-mount"></div>
+    </div>
+    <h1 data-i18n="ui.title">Wave Superposition</h1>
+    <p data-i18n="ui.lead">Add two sine waves with independent amplitude and phase, and see how the phase difference shapes the resultant wave.</p>
   </div>
 </header>
 
@@ -145,20 +148,20 @@
 <div class="container">
     <!-- Controls Panel -->
     <div class="controls">
-        <h2>Wave Superposition Simulation</h2>
+        <h2 data-i18n="ui.panel">Wave Superposition Simulation</h2>
 
         <!-- Wave 1 -->
         <div class="wave-section">
             <div class="wave-section-title">
                 <span class="dot" style="background:#e05a2b;"></span>
-                Wave 1
+                <span data-i18n="ui.w1">Wave 1</span>
             </div>
             <div class="control-group">
-                <label>Amplitude A₁ <span id="a1-val">1.0</span></label>
+                <label><span data-i18n="ui.a1">Amplitude A₁</span> <span id="a1-val">1.0</span></label>
                 <input type="range" id="a1" min="0" max="2" step="0.1" value="1.0">
             </div>
             <div class="control-group">
-                <label>Phase φ₁ <span id="p1-val">0°</span></label>
+                <label><span data-i18n="ui.p1">Phase φ₁</span> <span id="p1-val">0°</span></label>
                 <input type="range" id="p1" min="0" max="360" step="5" value="0">
             </div>
         </div>
@@ -167,14 +170,14 @@
         <div class="wave-section">
             <div class="wave-section-title">
                 <span class="dot" style="background:#2b6fe0;"></span>
-                Wave 2
+                <span data-i18n="ui.w2">Wave 2</span>
             </div>
             <div class="control-group">
-                <label>Amplitude A₂ <span id="a2-val">1.0</span></label>
+                <label><span data-i18n="ui.a2">Amplitude A₂</span> <span id="a2-val">1.0</span></label>
                 <input type="range" id="a2" min="0" max="2" step="0.1" value="1.0">
             </div>
             <div class="control-group">
-                <label>Phase φ₂ <span id="p2-val">180°</span></label>
+                <label><span data-i18n="ui.p2">Phase φ₂</span> <span id="p2-val">180°</span></label>
                 <input type="range" id="p2" min="0" max="360" step="5" value="180">
             </div>
         </div>
@@ -184,7 +187,7 @@
 
         <!-- Explanation -->
         <div class="info-box" style="font-size:12.5px; color:#555;">
-            <strong>💡 Superposition Principle</strong><br>
+            <strong>💡 <span data-i18n="ui.tip">Superposition Principle</span></strong><br>
             When two waves occupy the same space simultaneously, the displacement of the resultant wave equals the sum of the individual displacements.<br><br>
             • <strong>Constructive</strong>: Δφ = 0° → max amplitude<br>
             • <strong>Destructive</strong>: Δφ = 180° → min amplitude
@@ -200,6 +203,52 @@
 
 <footer class="copyright">Copyright © 2026 <a href="mailto:physicsgon@gmail.com" class="copyright-link">physicsgon@gmail.com</a> . All rights reserved.</footer>
 
+<script src="i18n.js"></script>
+<script>
+  SimI18n.register({
+    en: {
+      'ui.resultAmp': '합성 진폭 ≈',
+      'ui.title': 'Wave Superposition',
+      'ui.lead': 'Add two sine waves with independent amplitude and phase, and see how the phase difference shapes the resultant wave.',
+      'ui.panel': '파동의 중첩 시뮬레이션',
+      'ui.w1': 'Wave 1',
+      'ui.w2': 'Wave 2',
+      'ui.a1': 'Amplitude A₁',
+      'ui.a2': 'Amplitude A₂',
+      'ui.p1': 'Phase φ₁',
+      'ui.p2': 'Phase φ₂',
+      'ui.tip': 'Superposition Principle',
+      'ui.state': 'Current State',
+      'ui.con': '보강',
+      'ui.des': '상쇄',
+      'ui.partial': '부분',
+      'ui.resultant': '합성파',
+      'common.eyebrow': 'Physics Simulator'
+    },
+    ko: {
+      'ui.title': '파동의 중첩',
+      'ui.lead': '진폭과 위상을 각각 조절한 두 사인파를 더해, 위상 차가 합성파 모양에 어떤 영향을 주는지 살펴봅니다.',
+      'ui.panel': '파동의 중첩',
+      'ui.w1': '파동 1',
+      'ui.w2': '파동 2',
+      'ui.a1': '진폭 A₁',
+      'ui.a2': '진폭 A₂',
+      'ui.p1': '위상 φ₁',
+      'ui.p2': '위상 φ₂',
+      'ui.tip': '중첩의 원리',
+      'ui.state': '현재 상태',
+      'ui.con': '보강',
+      'ui.des': '상쇄',
+      'ui.partial': '부분',
+      'ui.resultant': '합성파',
+      'common.eyebrow': '물리학 시뮬레이터'
+    }
+  });
+  SimI18n.boot({ mount: '.lang-mount' });
+  window.addEventListener('sim-langchange', function () {
+    if (typeof window.simRedraw === 'function') window.simRedraw();
+  });
+</script>
 <script>
 const canvas = document.getElementById('simCanvas');
 const W = canvas.width, H = canvas.height;   // logical (CSS-pixel) size
@@ -428,13 +477,13 @@ function drawSuperposition() {
     let resultColor, resultLabel;
     if (phaseDiff <= 30 || phaseDiff >= 330) {
         resultColor = '#2ca060';
-        resultLabel = 'Constructive';
+        resultLabel = SimI18n.t('ui.con');
     } else if (phaseDiff >= 150 && phaseDiff <= 210) {
         resultColor = '#cc3333';
-        resultLabel = 'Destructive';
+        resultLabel = SimI18n.t('ui.des');
     } else {
         resultColor = '#7755cc';
-        resultLabel = 'Partial';
+        resultLabel = SimI18n.t('ui.partial');
     }
 
     // Background
@@ -489,7 +538,7 @@ function drawSuperposition() {
     ctx.font         = 'bold 12px sans-serif';
     ctx.textAlign    = 'center';
     ctx.textBaseline = 'alphabetic';
-    ctx.fillText('Resultant', lx + labelW / 2, ly + 17);
+    ctx.fillText(SimI18n.t('ui.resultant'), lx + labelW / 2, ly + 17);
 
     return { resultLabel, phaseDiff };
 }
@@ -525,7 +574,7 @@ function updateInfoBox(resultLabel, phaseDiff) {
     document.getElementById('result-info').innerHTML =
         `<strong>📊 Current State</strong><br>
         Phase difference Δφ = <b>${pd}°</b><br>
-        Resultant amplitude ≈ <span style="color:${stateColor};font-weight:700;">${Amax.toFixed(2)}</span><br>
+        ${SimI18n.t('ui.resultAmp')} <span style="color:${stateColor};font-weight:700;">${Amax.toFixed(2)}</span><br>
         Interference: <span style="color:${stateColor};font-weight:700;">${stateEmoji} ${resultLabel}</span>`;
 }
 

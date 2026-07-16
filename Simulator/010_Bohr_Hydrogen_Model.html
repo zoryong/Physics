@@ -202,9 +202,12 @@
 
 <header class="page-head">
   <div class="header-inner">
-    <a class="eyebrow" href="https://physics.physicsgon.workers.dev/Simulator/">Physics Simulator</a>
-    <h1>Bohr's Hydrogen Atom Model</h1>
-    <p>Click an orbit to trigger an electron transition and see the emitted photon's wavelength, energy level diagram, and spectral line, following Bohr's model of the hydrogen atom.</p>
+    <div class="header-top">
+      <a class="eyebrow" href="https://physics.physicsgon.workers.dev/Simulator/" data-i18n="common.eyebrow">Physics Simulator</a>
+      <div class="lang-mount"></div>
+    </div>
+    <h1 data-i18n="ui.title">Bohr's Hydrogen Atom Model</h1>
+    <p data-i18n="ui.lead">Calculate and visualize the photon wavelength and spectral line emitted as an electron transitions between orbits in Bohr's model.</p>
   </div>
 </header>
 
@@ -212,33 +215,33 @@
 <div class="container">
     <!-- Controls Panel -->
     <div class="controls">
-        <h2>Bohr's Hydrogen<br>Atom Model</h2>
+        <h2 data-i18n="ui.panelHtml" data-i18n-html>Bohr's Hydrogen<br>Atom Model</h2>
 
         <!-- Orbit selection -->
         <div class="wave-section">
             <div class="wave-section-title">
                 <span class="dot" style="background:#0078d4;"></span>
-                Electron Orbit (n)
+                <span data-i18n="ui.orbit">Electron Orbit (n)</span>
             </div>
             <div class="orbit-grid" id="orbitGrid"></div>
             <div style="font-size:12px; color:#777; line-height:1.5;">
-                Click an orbit number to instantly transition the electron to that orbit.
+                <span data-i18n="ui.hint">Click an orbit number to instantly transition the electron to that orbit.</span>
             </div>
         </div>
 
         <!-- Display options -->
         <div class="toggle-group">
-            <div class="toggle-group-title">Display Options</div>
+            <div class="toggle-group-title" data-i18n="ui.display">Display Options</div>
             <label class="toggle-item">
-                <input type="checkbox" id="showHistory" checked> Show transition arrow
+                <input type="checkbox" id="showHistory" checked> <span data-i18n="ui.showArrow">Show transition arrow</span>
             </label>
             <label class="toggle-item">
-                <input type="checkbox" id="showSeriesColor" checked> Show spectral series colors
+                <input type="checkbox" id="showSeriesColor" checked> <span data-i18n="ui.showSeries">Show spectral series colors</span>
             </label>
         </div>
 
         <div class="btn-group">
-            <button class="btn" id="btnReset" onclick="resetSim()">↺ Reset</button>
+            <button class="btn" id="btnReset" onclick="resetSim()">↺ <span data-i18n="ui.reset">Reset</span></button>
         </div>
 
         <!-- Transition info -->
@@ -246,12 +249,12 @@
 
         <!-- Series legend -->
         <div class="info-box">
-            <strong>🌈 Spectral Series</strong>
+            <strong>🌈 <span data-i18n="ui.series">Spectral Series</span></strong>
             <div style="margin-top:8px; display:flex; flex-direction:column; gap:6px;">
-                <div class="legend-row"><span class="legend-swatch" style="background:#000000;"></span> Lyman series (n→1, UV)</div>
-                <div class="legend-row"><span class="legend-swatch" style="background:#2ca060;"></span> Balmer series (n→2, Visible)</div>
-                <div class="legend-row"><span class="legend-swatch" style="background:#888888;"></span> Paschen series (n→3, IR)</div>
-                <div class="legend-row"><span class="legend-swatch" style="background:#999;"></span> Others (n→4 or higher)</div>
+                <div class="legend-row"><span class="legend-swatch" style="background:#000000;"></span> <span data-i18n="ui.lyman">Lyman series (n→1, UV)</span></div>
+                <div class="legend-row"><span class="legend-swatch" style="background:#2ca060;"></span> <span data-i18n="ui.balmer">Balmer series (n→2, Visible)</span></div>
+                <div class="legend-row"><span class="legend-swatch" style="background:#888888;"></span> <span data-i18n="ui.paschen">Paschen series (n→3, IR)</span></div>
+                <div class="legend-row"><span class="legend-swatch" style="background:#999;"></span> <span data-i18n="ui.others">Others (n→4 or higher)</span></div>
             </div>
         </div>
     </div>
@@ -265,6 +268,49 @@
 
 <footer class="copyright">Copyright © 2026 <a href="mailto:physicsgon@gmail.com" class="copyright-link">physicsgon@gmail.com</a> . All rights reserved.</footer>
 
+<script src="i18n.js"></script>
+<script>
+  SimI18n.register({
+    en: {
+      'ui.series': '스펙트럼 계열',
+      'ui.showSeries': '스펙트럼 계열 색 표시',
+      'ui.showArrow': '전이 화살표 표시',
+      'ui.panelHtml': '보어의 수소<br>원자 모형's Hydrogen<br>Atom Model',
+      'ui.title': 'Bohr\'s Hydrogen Atom Model',
+      'ui.lead': 'Calculate and visualize the photon wavelength and spectral line emitted as an electron transitions between orbits in Bohr\'s model.',
+      'ui.panel': 'Bohr\'s Hydrogen Atom Model',
+      'ui.orbit': '전자 궤도 (n)',
+      'ui.hint': '궤도 번호를 클릭하면 전자가 그 궤도로 바로 전이합니다.',
+      'ui.display': '표시 옵션',
+      'ui.reset': '초기화',
+      'ui.lyman': '라이먼 계열 (n→1, 자외선)',
+      'ui.balmer': '발머 계열 (n→2, 가시광선)',
+      'ui.paschen': '파셴 계열 (n→3, 적외선)',
+      'ui.others': '기타 (n→4 이상)',
+      'ui.state': '현재 상태',
+      'common.eyebrow': 'Physics Simulator'
+    },
+    ko: {
+      'ui.title': '보어의 수소 원자 모형',
+      'ui.lead': '보어 모형에서 전자가 궤도 사이를 전이할 때 방출되는 광자의 파장과 스펙트럼선을 계산하고 시각화합니다.',
+      'ui.panel': '보어의 수소 원자 모형',
+      'ui.orbit': '전자 궤도 (n)',
+      'ui.hint': '궤도 번호를 클릭하세요…',
+      'ui.display': '표시 옵션',
+      'ui.reset': '초기화',
+      'ui.lyman': '라이먼',
+      'ui.balmer': '발머',
+      'ui.paschen': '파셴',
+      'ui.others': '기타',
+      'ui.state': '현재 상태',
+      'common.eyebrow': '물리학 시뮬레이터'
+    }
+  });
+  SimI18n.boot({ mount: '.lang-mount' });
+  window.addEventListener('sim-langchange', function () {
+    if (typeof window.simRedraw === 'function') window.simRedraw();
+  });
+</script>
 <script>
 /* ============================================================
    Canvas setup

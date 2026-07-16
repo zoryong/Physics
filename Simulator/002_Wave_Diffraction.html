@@ -97,50 +97,53 @@
 <body>
 <header class="page-head">
   <div class="header-inner">
-    <a class="eyebrow" href="https://physics.physicsgon.workers.dev/Simulator/">Physics Simulator</a>
-    <h1>Wave Diffraction</h1>
-    <p>A single-slit diffraction simulator. Adjust the wavelength and slit width to see how the diffracted wave spreads out, and compare the spread angle with the theoretical d sin θ = mλ condition.</p>
+    <div class="header-top">
+      <a class="eyebrow" href="https://physics.physicsgon.workers.dev/Simulator/" data-i18n="common.eyebrow">Physics Simulator</a>
+      <div class="lang-mount"></div>
+    </div>
+    <h1 data-i18n="ui.title">Wave Diffraction</h1>
+    <p data-i18n="ui.lead">A single-slit diffraction simulator. Adjust the wavelength and slit width to see how the diffracted wave spreads out, and compare the spread angle with the theoretical d sin θ = mλ condition.</p>
   </div>
 </header>
 
 <div class="stage">
 <div class="container">
     <div class="controls">
-        <h2>Wave Diffraction</h2>
+        <h2 data-i18n="ui.panel">Wave Diffraction</h2>
         <div class="control-group">
-            <label>Wavelength (λ) <span id="lam-val">50</span> px</label>
+            <label><span data-i18n="ui.lam">Wavelength (λ)</span> <span id="lam-val">50</span> px</label>
             <input type="range" id="lam-slider" min="20" max="100" step="5" value="50">
         </div>
         <div class="control-group">
-            <label>Slit Width (d) <span id="slit-val">80</span> px</label>
+            <label><span data-i18n="ui.slit">Slit Width (d)</span> <span id="slit-val">80</span> px</label>
             <input type="range" id="slit-slider" min="20" max="220" step="10" value="80">
         </div>
         <div class="control-group">
-            <label>Wave Speed <span id="spd-val">3</span></label>
+            <label><span data-i18n="ui.spd">Wave Speed</span> <span id="spd-val">3</span></label>
             <input type="range" id="spd-slider" min="1" max="6" step="1" value="3">
         </div>
         <div class="info-box">
             <div class="info-row">
-                <span class="info-label">Wavelength (λ)</span>
+                <span class="info-label" data-i18n="ui.info.lam">Wavelength (λ)</span>
                 <span class="info-value" id="info-lam">—</span>
             </div>
             <div class="info-row">
-                <span class="info-label">Slit Width (d)</span>
+                <span class="info-label" data-i18n="ui.info.slit">Slit Width (d)</span>
                 <span class="info-value" id="info-slit">—</span>
             </div>
             <div class="info-row">
-                <span class="info-label">Ratio (λ/d)</span>
+                <span class="info-label" data-i18n="ui.info.ratio">Ratio (λ/d)</span>
                 <span class="info-value" id="info-ratio">—</span>
             </div>
             <div class="info-row">
-                <span class="info-label">Diffraction</span>
+                <span class="info-label" data-i18n="ui.info.diff">Diffraction</span>
                 <span class="info-value" id="info-diff">—</span>
             </div>
         </div>
         <div class="formula-box">
-            <div class="formula-title">Diffraction Condition</div>
+            <div class="formula-title" data-i18n="ui.formula">Diffraction Condition</div>
             <div class="formula-main">d sin θ = mλ</div>
-            <div class="calc-row"><span class="calc-label">1st minimum (m = 1)</span></div>
+            <div class="calc-row"><span class="calc-label" data-i18n="ui.m1">1st minimum (m = 1)</span></div>
             <div class="calc-row">
                 <span class="calc-label">sin θ = λ / d</span>
                 <span class="calc-expr" id="calc-sintheta">—</span>
@@ -150,7 +153,7 @@
                 <span class="calc-expr" id="calc-theta">—</span>
             </div>
             <div class="calc-result">
-                <span class="result-label">Spread angle</span>
+                <span class="result-label" data-i18n="ui.spread">Spread angle</span>
                 <span class="result-value" id="calc-spread">—</span>
             </div>
         </div>
@@ -164,6 +167,52 @@
 
 <footer class="copyright">Copyright © 2026 <a href="mailto:physicsgon@gmail.com" class="copyright-link">physicsgon@gmail.com</a> . All rights reserved.</footer>
 
+<script src="i18n.js"></script>
+<script>
+  SimI18n.register({
+    en: {
+      'ui.diff.mod': '보통 ★★',
+      'ui.title': 'Wave Diffraction',
+      'ui.lead': 'A single-slit diffraction simulator. Adjust the wavelength and slit width to see how the diffracted wave spreads out, and compare the spread angle with the theoretical d sin θ = mλ condition.',
+      'ui.panel': 'Wave Diffraction',
+      'ui.lam': 'Wavelength (λ)',
+      'ui.slit': 'Slit Width (d)',
+      'ui.spd': 'Wave Speed',
+      'ui.info.lam': 'Wavelength (λ)',
+      'ui.info.slit': 'Slit Width (d)',
+      'ui.info.ratio': 'Ratio (λ/d)',
+      'ui.info.diff': 'Diffraction',
+      'ui.formula': 'Diffraction Condition',
+      'ui.m1': '1st minimum (m = 1)',
+      'ui.spread': 'Spread angle',
+      'ui.diff.strong': '강함 ★★★',
+      'ui.diff.weak': '약함 ★',
+      'common.eyebrow': 'Physics Simulator'
+    },
+    ko: {
+      'ui.title': '파동의 회절',
+      'ui.lead': '단일 슬릿 회절 시뮬레이터입니다. 파장과 슬릿 폭을 조절해 회절파가 퍼지는 모습을 보고, 이론식 d sin θ = mλ과 퍼짐각을 비교해 보세요.',
+      'ui.panel': '파동의 회절',
+      'ui.lam': '파장 (λ)',
+      'ui.slit': '슬릿 폭 (d)',
+      'ui.spd': '파동 속력',
+      'ui.info.lam': '파장 (λ)',
+      'ui.info.slit': '슬릿 폭 (d)',
+      'ui.info.ratio': '비 (λ/d)',
+      'ui.info.diff': '회절',
+      'ui.formula': '회절 조건',
+      'ui.m1': '첫 번째 최소 (m = 1)',
+      'ui.spread': '퍼짐각',
+      'ui.diff.strong': '강함 ★★★',
+      'ui.diff.weak': '약함 ★',
+      'common.eyebrow': '물리학 시뮬레이터'
+    }
+  });
+  SimI18n.boot({ mount: '.lang-mount' });
+  window.addEventListener('sim-langchange', function () {
+    if (typeof window.simRedraw === 'function') window.simRedraw();
+  });
+</script>
 <script>
 const canvas = document.getElementById('waveCanvas');
 const W = canvas.width, H = canvas.height;    // logical (CSS-pixel) size, e.g. 840 x 500
@@ -198,7 +247,7 @@ function updateInfo(lam, slit) {
     const ratio = lam / slit;
     document.getElementById('info-ratio').innerText = ratio.toFixed(3);
     document.getElementById('info-diff').innerText  =
-        ratio >= 1.0 ? 'Strong ★★★' : ratio >= 0.4 ? 'Moderate ★★' : 'Weak ★';
+        ratio >= 1.0 ? SimI18n.t('ui.diff.strong') : ratio >= 0.4 ? SimI18n.t('ui.diff.mod') : SimI18n.t('ui.diff.weak');
     const sinT  = Math.min(ratio, 1.0);
     const theta = Math.asin(sinT) * 180 / Math.PI;
     document.getElementById('calc-sintheta').innerText = lam + ' / ' + slit + ' = ' + ratio.toFixed(3);

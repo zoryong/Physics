@@ -174,24 +174,27 @@
 
 <header class="page-head">
   <div class="header-inner">
-    <a class="eyebrow" href="https://physics.physicsgon.workers.dev/Simulator/">Physics Simulator</a>
-    <h1>Standing Wave</h1>
-    <p>Two waves of equal wavelength and amplitude travel in opposite directions and combine into a standing wave. Toggle nodes, antinodes, and the envelope to explore the resulting pattern.</p>
+    <div class="header-top">
+      <a class="eyebrow" href="https://physics.physicsgon.workers.dev/Simulator/" data-i18n="common.eyebrow">Physics Simulator</a>
+      <div class="lang-mount"></div>
+    </div>
+    <h1 data-i18n="ui.title">Standing Wave</h1>
+    <p data-i18n="ui.lead">See the standing wave, nodes, and antinodes that form when two waves of equal wavelength and amplitude travel in opposite directions.</p>
   </div>
 </header>
 
 <div class="stage">
 <div class="container">
     <div class="controls">
-        <h2>Standing Wave</h2>
+        <h2 data-i18n="ui.panel">Standing Wave</h2>
 
         <div class="wave-section">
             <div class="wave-section-title">
                 <span class="dot" style="background:#555;"></span>
-                Wave Speed
+                <span data-i18n="ui.spd">Wave Speed</span>
             </div>
             <div class="control-group">
-                <label>Speed v <span id="v-val">2.0 m/s</span></label>
+                <label><span data-i18n="ui.speedV">Speed v</span> <span id="v-val">2.0 m/s</span></label>
                 <input type="range" id="speed" min="0" max="4.0" step="0.1" value="2.0">
             </div>
         </div>
@@ -199,14 +202,14 @@
         <div class="wave-section">
             <div class="wave-section-title">
                 <span class="dot" style="background:#e05a2b;"></span>
-                Wave 1 &nbsp;(→ right)
+                <span data-i18n="ui.w1">Wave 1 (→ right)</span>
             </div>
             <div class="control-group">
-                <label>Wavelength λ₁ <span id="lam1-val">2.0 m</span></label>
+                <label><span data-i18n="ui.lam1">Wavelength λ₁</span> <span id="lam1-val">2.0 m</span></label>
                 <input type="range" id="lam1" min="0.5" max="4.0" step="0.1" value="2.0">
             </div>
             <div class="control-group">
-                <label>Amplitude A₁ <span id="a1-val">1.0</span></label>
+                <label><span data-i18n="ui.a1">Amplitude A₁</span> <span id="a1-val">1.0</span></label>
                 <input type="range" id="a1" min="0" max="2" step="0.1" value="1.0">
             </div>
         </div>
@@ -214,41 +217,41 @@
         <div class="wave-section">
             <div class="wave-section-title">
                 <span class="dot" style="background:#2b6fe0;"></span>
-                Wave 2 &nbsp;(← left)
+                <span data-i18n="ui.w2">Wave 2 (← left)</span>
             </div>
             <div class="control-group">
-                <label>Wavelength λ₂ <span id="lam2-val">2.0 m</span></label>
+                <label><span data-i18n="ui.lam2">Wavelength λ₂</span> <span id="lam2-val">2.0 m</span></label>
                 <input type="range" id="lam2" min="0.5" max="4.0" step="0.1" value="2.0">
             </div>
             <div class="control-group">
-                <label>Amplitude A₂ <span id="a2-val">1.0</span></label>
+                <label><span data-i18n="ui.a2">Amplitude A₂</span> <span id="a2-val">1.0</span></label>
                 <input type="range" id="a2" min="0" max="2" step="0.1" value="1.0">
             </div>
         </div>
 
         <div class="toggle-group">
-            <div class="toggle-group-title">Display Options</div>
+            <div class="toggle-group-title" data-i18n="ui.display">Display Options</div>
             <label class="toggle-item">
-                <input type="checkbox" id="showWave1" checked> Show Wave 1 (→)
+                <input type="checkbox" id="showWave1" checked> <span data-i18n="ui.show1">Show Wave 1 (→)</span>
             </label>
             <label class="toggle-item">
-                <input type="checkbox" id="showWave2" checked> Show Wave 2 (←)
+                <input type="checkbox" id="showWave2" checked> <span data-i18n="ui.show2">Show Wave 2 (←)</span>
             </label>
             <label class="toggle-item">
-                <input type="checkbox" id="showResultant" checked> Show Resultant
+                <input type="checkbox" id="showResultant" checked> <span data-i18n="ui.showR">Show Resultant</span>
             </label>
             <label class="toggle-item">
-                <input type="checkbox" id="showEnvelope" checked> Show Envelope
+                <input type="checkbox" id="showEnvelope" checked> <span data-i18n="ui.showE">Show Envelope</span>
             </label>
             <label class="toggle-item">
-                <input type="checkbox" id="showNodes"> Show Nodes / Antinodes
+                <input type="checkbox" id="showNodes"> <span data-i18n="ui.showN">Show Nodes / Antinodes</span>
             </label>
         </div>
 
         <div class="btn-group">
-            <button class="btn active" id="btnPlay"  onclick="setPlay()">▶ Play</button>
-            <button class="btn"        id="btnPause" onclick="setPause()">⏸ Pause</button>
-            <button class="btn"        id="btnStep"  onclick="doStep()">⏭ Step</button>
+            <button class="btn active" id="btnPlay"  onclick="setPlay()">▶ <span data-i18n="ui.play">Play</span></button>
+            <button class="btn"        id="btnPause" onclick="setPause()">⏸ <span data-i18n="ui.pause">Pause</span></button>
+            <button class="btn"        id="btnStep"  onclick="doStep()">⏭ <span data-i18n="ui.step">Step</span></button>
         </div>
 
     </div>
@@ -261,6 +264,59 @@
 
 <footer class="copyright">Copyright © 2026 <a href="mailto:physicsgon@gmail.com" class="copyright-link">physicsgon@gmail.com</a> . All rights reserved.</footer>
 
+<script src="i18n.js"></script>
+<script>
+  SimI18n.register({
+    en: {
+      'ui.display': '표시 옵션',
+      'ui.a2': '진폭 A₂',
+      'ui.a1': '진폭 A₁',
+      'ui.lam2': '파장 λ₂',
+      'ui.lam1': '파장 λ₁',
+      'ui.speedV': '속력 v',
+      'ui.title': 'Standing Wave',
+      'ui.lead': 'See the standing wave, nodes, and antinodes that form when two waves of equal wavelength and amplitude travel in opposite directions.',
+      'ui.panel': 'Standing Wave',
+      'ui.spd': 'Wave Speed',
+      'ui.w1': '파동 1 (→ 오른쪽)',
+      'ui.w2': '파동 2 (← 왼쪽)',
+      'ui.lam': 'Wavelength λ',
+      'ui.amp': 'Amplitude',
+      'ui.show1': '파동 1 표시 (→)',
+      'ui.show2': '파동 2 표시 (←)',
+      'ui.showR': '합성파 표시',
+      'ui.showE': '포락선 표시',
+      'ui.showN': '마디/배 표시',
+      'ui.play': 'Play',
+      'ui.pause': 'Pause',
+      'ui.step': '한 프레임',
+      'common.eyebrow': 'Physics Simulator'
+    },
+    ko: {
+      'ui.title': '정상파',
+      'ui.lead': '파장과 진폭이 같고 진행 방향이 반대인 두 파동이 만나 만드는 정상파와 마디·배의 위치를 관찰합니다.',
+      'ui.panel': '정상파',
+      'ui.spd': '파동 속력',
+      'ui.w1': '파동 1 (→)',
+      'ui.w2': '파동 2 (←)',
+      'ui.lam': '파장 λ',
+      'ui.amp': '진폭',
+      'ui.show1': '파동 1 표시',
+      'ui.show2': '파동 2 표시',
+      'ui.showR': '합성파',
+      'ui.showE': '포락선',
+      'ui.showN': '마디/배',
+      'ui.play': '재생',
+      'ui.pause': '일시정지',
+      'ui.step': '한 프레임',
+      'common.eyebrow': '물리학 시뮬레이터'
+    }
+  });
+  SimI18n.boot({ mount: '.lang-mount' });
+  window.addEventListener('sim-langchange', function () {
+    if (typeof window.simRedraw === 'function') window.simRedraw();
+  });
+</script>
 <script>
 /* ============================================================
    Canvas & layout setup

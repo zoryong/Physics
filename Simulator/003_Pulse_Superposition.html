@@ -106,55 +106,58 @@
 <body>
 <header class="page-head">
   <div class="header-inner">
-    <a class="eyebrow" href="https://physics.physicsgon.workers.dev/Simulator/">Physics Simulator</a>
-    <h1>Wave Superposition (Pulses)</h1>
-    <p>Two Gaussian pulses travel toward each other and overlap. Adjust each pulse's amplitude and width to see constructive and destructive interference in action, following the principle of superposition y = y₁ + y₂.</p>
+    <div class="header-top">
+      <a class="eyebrow" href="https://physics.physicsgon.workers.dev/Simulator/" data-i18n="common.eyebrow">Physics Simulator</a>
+      <div class="lang-mount"></div>
+    </div>
+    <h1 data-i18n="ui.title">Pulse Superposition</h1>
+    <p data-i18n="ui.lead">Watch two pulses traveling toward each other overlap, and see constructive and destructive interference happen in real time.</p>
   </div>
 </header>
 
 <div class="stage">
 <div class="container">
     <div class="controls">
-        <h2>Wave Superposition (Interference)</h2>
+        <h2 data-i18n="ui.panel">Wave Superposition (Interference)</h2>
         <div class="control-group">
-            <label>Amplitude A (y₁) <span id="y1-val">100</span> px</label>
+            <label><span data-i18n="ui.ampA">Amplitude A (y₁)</span> <span id="y1-val">100</span> px</label>
             <input type="range" id="y1-slider" min="-150" max="150" step="10" value="100">
         </div>
         <div class="control-group">
-            <label>Amplitude B (y₂) <span id="y2-val">60</span> px</label>
+            <label><span data-i18n="ui.ampB">Amplitude B (y₂)</span> <span id="y2-val">60</span> px</label>
             <input type="range" id="y2-slider" min="-150" max="150" step="10" value="60">
         </div>
         <div class="control-group">
-            <label>Pulse Width (w) <span id="w-val">50</span> px</label>
+            <label><span data-i18n="ui.width">Pulse Width (w)</span> <span id="w-val">50</span> px</label>
             <input type="range" id="w-slider" min="20" max="100" step="5" value="50">
         </div>
         <div class="control-group">
-            <label>Wave Speed <span id="v-val">4</span></label>
+            <label><span data-i18n="ui.spd">Wave Speed</span> <span id="v-val">4</span></label>
             <input type="range" id="v-slider" min="1" max="8" step="1" value="4">
         </div>
         
-        <button id="playPauseBtn" class="btn-toggle">Pause</button>
+        <button id="playPauseBtn" class="btn-toggle" data-i18n="ui.pause">Pause</button>
 
         <div class="info-box">
             <div class="info-row">
-                <span class="info-label">Wave A (y₁)</span>
+                <span class="info-label" data-i18n="ui.info.a">Wave A (y₁)</span>
                 <span class="info-value" id="info-y1">—</span>
             </div>
             <div class="info-row">
-                <span class="info-label">Wave B (y₂)</span>
+                <span class="info-label" data-i18n="ui.info.b">Wave B (y₂)</span>
                 <span class="info-value" id="info-y2">—</span>
             </div>
             <div class="info-row">
-                <span class="info-label">Max Overlap (y)</span>
+                <span class="info-label" data-i18n="ui.info.max">Max Overlap (y)</span>
                 <span class="info-value" id="info-ymax">—</span>
             </div>
             <div class="info-row">
-                <span class="info-label">Interference</span>
+                <span class="info-label" data-i18n="ui.info.type">Interference</span>
                 <span class="info-value" id="info-type">—</span>
             </div>
         </div>
         <div class="formula-box">
-            <div class="formula-title">Principle of Superposition</div>
+            <div class="formula-title" data-i18n="ui.formula">Principle of Superposition</div>
             <div class="formula-main">y = y₁ + y₂</div>
             <div class="calc-row">
                 <span class="calc-label">When pulses completely overlap:</span>
@@ -178,6 +181,57 @@
 
 <footer class="copyright">Copyright © 2026 <a href="mailto:physicsgon@gmail.com" class="copyright-link">physicsgon@gmail.com</a> . All rights reserved.</footer>
 
+<script src="i18n.js"></script>
+<script>
+  SimI18n.register({
+    en: {
+      'ui.title': 'Pulse Superposition',
+      'ui.lead': 'Watch two pulses traveling toward each other overlap, and see constructive and destructive interference happen in real time.',
+      'ui.panel': 'Wave Superposition (Interference)',
+      'ui.ampA': '진폭 A (y₁)',
+      'ui.ampB': '진폭 B (y₂)',
+      'ui.width': '펄스 폭 (w)',
+      'ui.spd': 'Wave Speed',
+      'ui.pause': 'Pause',
+      'ui.play': 'Play',
+      'ui.info.a': '파동 A (y₁)',
+      'ui.info.b': '파동 B (y₂)',
+      'ui.info.max': '최대 중첩 (y)',
+      'ui.info.type': 'Interference',
+      'ui.formula': 'Principle of Superposition',
+      'ui.result': 'Resultant Amplitude',
+      'ui.type.con': SimI18n.t("ui.type.con"),
+      'ui.type.des': SimI18n.t("ui.type.des"),
+      'ui.type.none': 'None',
+      'common.eyebrow': 'Physics Simulator'
+    },
+    ko: {
+      'ui.title': '펄스 중첩',
+      'ui.lead': '서로 다가오는 두 펄스가 겹치며 생기는 보강·상쇄 간섭을 실시간으로 관찰합니다.',
+      'ui.panel': '파동의 중첩 (간섭)',
+      'ui.ampA': '진폭 A (y₁)',
+      'ui.ampB': '진폭 B (y₂)',
+      'ui.width': '펄스 폭 (w)',
+      'ui.spd': '파동 속력',
+      'ui.pause': '일시정지',
+      'ui.play': '재생',
+      'ui.info.a': '파동 A (y₁)',
+      'ui.info.b': '파동 B (y₂)',
+      'ui.info.max': '최대 중첩 (y)',
+      'ui.info.type': '간섭',
+      'ui.formula': '중첩의 원리',
+      'ui.result': '합성 진폭',
+      'ui.type.con': '보강 간섭',
+      'ui.type.des': '상쇄 간섭',
+      'ui.type.none': '없음',
+      'common.eyebrow': '물리학 시뮬레이터'
+    }
+  });
+  SimI18n.boot({ mount: '.lang-mount' });
+  window.addEventListener('sim-langchange', function () {
+    if (typeof window.simRedraw === 'function') window.simRedraw();
+  });
+</script>
 <script>
 const canvas = document.getElementById('waveCanvas');
 const W = canvas.width, H = canvas.height;   // logical (CSS-pixel) size
@@ -196,10 +250,10 @@ let isPaused = false;
 document.getElementById('playPauseBtn').addEventListener('click', function() {
     isPaused = !isPaused;
     if (isPaused) {
-        this.innerText = "Play";
+        this.innerText = SimI18n.t("ui.play");
         this.classList.add('paused');
     } else {
-        this.innerText = "Pause";
+        this.innerText = SimI18n.t("ui.pause");
         this.classList.remove('paused');
     }
 });
@@ -238,8 +292,8 @@ function updateInfo(y1, y2) {
     
     let type = "None";
     if (y1 !== 0 && y2 !== 0) {
-        if ((y1 > 0 && y2 > 0) || (y1 < 0 && y2 < 0)) type = "Constructive";
-        else type = "Destructive";
+        if ((y1 > 0 && y2 > 0) || (y1 < 0 && y2 < 0)) type = SimI18n.t("ui.type.con");
+        else type = SimI18n.t("ui.type.des");
     }
     document.getElementById('info-type').innerText = type;
     

@@ -209,11 +209,12 @@
   <div class="header-inner">
     <div class="eyebrow-row">
       <a class="eyebrow" href="https://physics.physicsgon.workers.dev">⚛️ AN'S PHYSICS</a>
+      <div class="lang-mount"></div>
     </div>
-    <h1>Physics Simulator</h1>
-    <p>A collection of interactive simulators built to support the teaching and learning of physics. Adjust the sliders to change the conditions and see how each phenomenon responds, making abstract concepts easier to grasp and explore in the classroom or at home.</p>
+    <h1 data-i18n="index.title">Physics Simulator</h1>
+    <p data-i18n="index.lead">A collection of interactive simulators built to support the teaching and learning of physics. Adjust the sliders to change the conditions and see how each phenomenon responds, making abstract concepts easier to grasp and explore in the classroom or at home.</p>
     <div class="header-meta">
-      <p class="hm-note">Currently <b>10 simulators</b> are live. If you find a bug or have an idea for improvement, please <a href="mailto:physicsgon@gmail.com" class="email-mask">email me</a> and I'll take a look.</p>
+      <p class="hm-note" data-i18n="index.meta" data-i18n-html>Currently <b>10 simulators</b> are live. If you find a bug or have an idea for improvement, please <a href="mailto:physicsgon@gmail.com" class="email-mask">email me</a> and I'll take a look.</p>
     </div>
   </div>
 </header>
@@ -222,19 +223,19 @@
 
   <div class="category-tabs" id="categoryTabs">
     <button class="category-tab" data-cat="mechanics" type="button">
-      <span class="cat-icon">⚙️</span> Mechanics <span class="cat-count">Coming soon</span>
+      <span class="cat-icon">⚙️</span> <span data-i18n="cat.mechanics">Mechanics</span> <span class="cat-count" data-i18n="common.comingSoon">Coming soon</span>
     </button>
     <button class="category-tab" data-cat="electrodynamics" type="button">
-      <span class="cat-icon">⚡</span> Electrodynamics <span class="cat-count">Coming soon</span>
+      <span class="cat-icon">⚡</span> <span data-i18n="cat.electrodynamics">Electrodynamics</span> <span class="cat-count" data-i18n="common.comingSoon">Coming soon</span>
     </button>
     <button class="category-tab" data-cat="thermal" type="button">
-      <span class="cat-icon">🌡️</span> Thermal <span class="cat-count">Coming soon</span>
+      <span class="cat-icon">🌡️</span> <span data-i18n="cat.thermal">Thermal</span> <span class="cat-count" data-i18n="common.comingSoon">Coming soon</span>
     </button>
     <button class="category-tab active" data-cat="wave" type="button">
-      <span class="cat-icon">🌊</span> Wave <span class="cat-count">7</span>
+      <span class="cat-icon">🌊</span> <span data-i18n="cat.wave">Wave</span> <span class="cat-count">7</span>
     </button>
     <button class="category-tab" data-cat="modern" type="button">
-      <span class="cat-icon">⚛️</span> Modern <span class="cat-count">3</span>
+      <span class="cat-icon">⚛️</span> <span data-i18n="cat.modern">Modern</span> <span class="cat-count">3</span>
     </button>
   </div>
 
@@ -245,8 +246,8 @@
         <div class="tc-top">
           <span class="tc-icon">🪀</span>
         </div>
-        <h3 class="tc-title">Mechanics simulators coming soon</h3>
-        <p class="tc-desc">Simulators covering momentum, energy, oscillation, and rotational motion will be added here soon.</p>
+        <h3 class="tc-title" data-i18n="soon.mech.title">Mechanics simulators coming soon</h3>
+        <p class="tc-desc" data-i18n="soon.mech.desc">Simulators covering momentum, energy, oscillation, and rotational motion will be added here soon.</p>
       </div>
     </div>
   </div>
@@ -258,8 +259,8 @@
         <div class="tc-top">
           <span class="tc-icon">🔌</span>
         </div>
-        <h3 class="tc-title">Electrodynamics simulators coming soon</h3>
-        <p class="tc-desc">Simulators covering electric fields, magnetic fields, and circuits will be added here soon.</p>
+        <h3 class="tc-title" data-i18n="soon.em.title">Electrodynamics simulators coming soon</h3>
+        <p class="tc-desc" data-i18n="soon.em.desc">Simulators covering electric fields, magnetic fields, and circuits will be added here soon.</p>
       </div>
     </div>
   </div>
@@ -271,8 +272,8 @@
         <div class="tc-top">
           <span class="tc-icon">🔥</span>
         </div>
-        <h3 class="tc-title">Thermal simulators coming soon</h3>
-        <p class="tc-desc">Simulators covering gas molecule motion and the laws of thermodynamics will be added here soon.</p>
+        <h3 class="tc-title" data-i18n="soon.th.title">Thermal simulators coming soon</h3>
+        <p class="tc-desc" data-i18n="soon.th.desc">Simulators covering gas molecule motion and the laws of thermodynamics will be added here soon.</p>
       </div>
     </div>
   </div>
@@ -283,71 +284,71 @@
       <a class="tool-card accent-teal" href="001_Convex_Lens_Ray_Tracing.html">
         <div class="tc-top">
           <span class="tc-icon">🔍</span>
-          <span class="tc-tag">Wave</span>
+          <span class="tc-tag" data-i18n="cat.wave">Wave</span>
         </div>
-        <h3 class="tc-title">Convex Lens Ray Tracing</h3>
-        <p class="tc-desc">Adjust the focal length, object distance, and object height, and watch three principal rays locate the real or virtual image.</p>
-        <span class="tc-cta">Open <span class="arrow">→</span></span>
+        <h3 class="tc-title" data-i18n="card.001.title">Convex Lens Ray Tracing</h3>
+        <p class="tc-desc" data-i18n="card.001.desc">Adjust the focal length, object distance, and object height, and watch three principal rays locate the real or virtual image.</p>
+        <span class="tc-cta"><span data-i18n="common.open">Open</span> <span class="arrow">→</span></span>
       </a>
 
       <a class="tool-card accent-teal" href="002_Wave_Diffraction.html">
         <div class="tc-top">
           <span class="tc-icon">〰️</span>
-          <span class="tc-tag">Wave</span>
+          <span class="tc-tag" data-i18n="cat.wave">Wave</span>
         </div>
-        <h3 class="tc-title">Wave Diffraction</h3>
-        <p class="tc-desc">Adjust the wavelength and slit width to see how a wave spreads after passing through a single slit, and compare the spread with the diffraction condition d sin θ = mλ.</p>
-        <span class="tc-cta">Open <span class="arrow">→</span></span>
+        <h3 class="tc-title" data-i18n="card.002.title">Wave Diffraction</h3>
+        <p class="tc-desc" data-i18n="card.002.desc">Adjust the wavelength and slit width to see how a wave spreads after passing through a single slit, and compare the spread with the diffraction condition d sin θ = mλ.</p>
+        <span class="tc-cta"><span data-i18n="common.open">Open</span> <span class="arrow">→</span></span>
       </a>
 
       <a class="tool-card accent-teal" href="003_Pulse_Superposition.html">
         <div class="tc-top">
           <span class="tc-icon">💫</span>
-          <span class="tc-tag">Wave</span>
+          <span class="tc-tag" data-i18n="cat.wave">Wave</span>
         </div>
-        <h3 class="tc-title">Pulse Superposition</h3>
-        <p class="tc-desc">Watch two pulses traveling toward each other overlap, and see constructive and destructive interference happen in real time.</p>
-        <span class="tc-cta">Open <span class="arrow">→</span></span>
+        <h3 class="tc-title" data-i18n="card.003.title">Pulse Superposition</h3>
+        <p class="tc-desc" data-i18n="card.003.desc">Watch two pulses traveling toward each other overlap, and see constructive and destructive interference happen in real time.</p>
+        <span class="tc-cta"><span data-i18n="common.open">Open</span> <span class="arrow">→</span></span>
       </a>
 
       <a class="tool-card accent-teal" href="004_Wave_Superposition.html">
         <div class="tc-top">
           <span class="tc-icon">➕</span>
-          <span class="tc-tag">Wave</span>
+          <span class="tc-tag" data-i18n="cat.wave">Wave</span>
         </div>
-        <h3 class="tc-title">Wave Superposition</h3>
-        <p class="tc-desc">Add two sine waves with independent amplitude and phase, and see how the phase difference shapes the resultant wave.</p>
-        <span class="tc-cta">Open <span class="arrow">→</span></span>
+        <h3 class="tc-title" data-i18n="card.004.title">Wave Superposition</h3>
+        <p class="tc-desc" data-i18n="card.004.desc">Add two sine waves with independent amplitude and phase, and see how the phase difference shapes the resultant wave.</p>
+        <span class="tc-cta"><span data-i18n="common.open">Open</span> <span class="arrow">→</span></span>
       </a>
 
       <a class="tool-card accent-teal" href="005_Wave_Superposition_Standing_Wave.html">
         <div class="tc-top">
           <span class="tc-icon">🎻</span>
-          <span class="tc-tag">Wave</span>
+          <span class="tc-tag" data-i18n="cat.wave">Wave</span>
         </div>
-        <h3 class="tc-title">Standing Wave</h3>
-        <p class="tc-desc">See the standing wave, nodes, and antinodes that form when two waves of equal wavelength and amplitude travel in opposite directions.</p>
-        <span class="tc-cta">Open <span class="arrow">→</span></span>
+        <h3 class="tc-title" data-i18n="card.005.title">Standing Wave</h3>
+        <p class="tc-desc" data-i18n="card.005.desc">See the standing wave, nodes, and antinodes that form when two waves of equal wavelength and amplitude travel in opposite directions.</p>
+        <span class="tc-cta"><span data-i18n="common.open">Open</span> <span class="arrow">→</span></span>
       </a>
 
       <a class="tool-card accent-teal" href="006_Two_Source_Interference.html">
         <div class="tc-top">
           <span class="tc-icon">💠</span>
-          <span class="tc-tag">Wave</span>
+          <span class="tc-tag" data-i18n="cat.wave">Wave</span>
         </div>
-        <h3 class="tc-title">Two-Source Interference</h3>
-        <p class="tc-desc">Click anywhere on the overlapping wavefronts from two point sources to find where interference is constructive or destructive.</p>
-        <span class="tc-cta">Open <span class="arrow">→</span></span>
+        <h3 class="tc-title" data-i18n="card.006.title">Two-Source Interference</h3>
+        <p class="tc-desc" data-i18n="card.006.desc">Click anywhere on the overlapping wavefronts from two point sources to find where interference is constructive or destructive.</p>
+        <span class="tc-cta"><span data-i18n="common.open">Open</span> <span class="arrow">→</span></span>
       </a>
 
       <a class="tool-card accent-teal" href="008_Anti_Reflection_Coating.html">
         <div class="tc-top">
           <span class="tc-icon">🕶️</span>
-          <span class="tc-tag">Wave</span>
+          <span class="tc-tag" data-i18n="cat.wave">Wave</span>
         </div>
-        <h3 class="tc-title">Anti-Reflection Coating</h3>
-        <p class="tc-desc">Adjust the coating thickness and light wavelength to see how reflections off the top and bottom of a thin film cancel through destructive interference.</p>
-        <span class="tc-cta">Open <span class="arrow">→</span></span>
+        <h3 class="tc-title" data-i18n="card.008.title">Anti-Reflection Coating</h3>
+        <p class="tc-desc" data-i18n="card.008.desc">Adjust the coating thickness and light wavelength to see how reflections off the top and bottom of a thin film cancel through destructive interference.</p>
+        <span class="tc-cta"><span data-i18n="common.open">Open</span> <span class="arrow">→</span></span>
       </a>
     </div>
   </div>
@@ -358,31 +359,31 @@
       <a class="tool-card accent-indigo" href="007_Michelson_Morley.html">
         <div class="tc-top">
           <span class="tc-icon">🔬</span>
-          <span class="tc-tag">Modern</span>
+          <span class="tc-tag" data-i18n="cat.modern">Modern</span>
         </div>
-        <h3 class="tc-title">Michelson-Morley Experiment</h3>
-        <p class="tc-desc">Recreate the 1887 Michelson-Morley interferometer experiment and see how aether wind speed, arm length, and rotation angle affect the fringe pattern.</p>
-        <span class="tc-cta">Open <span class="arrow">→</span></span>
+        <h3 class="tc-title" data-i18n="card.007.title">Michelson-Morley Experiment</h3>
+        <p class="tc-desc" data-i18n="card.007.desc">Recreate the 1887 Michelson-Morley interferometer experiment and see how aether wind speed, arm length, and rotation angle affect the fringe pattern.</p>
+        <span class="tc-cta"><span data-i18n="common.open">Open</span> <span class="arrow">→</span></span>
       </a>
 
       <a class="tool-card accent-indigo" href="009_Photoelectric_Effect.html">
         <div class="tc-top">
           <span class="tc-icon">⚡</span>
-          <span class="tc-tag">Modern</span>
+          <span class="tc-tag" data-i18n="cat.modern">Modern</span>
         </div>
-        <h3 class="tc-title">Photoelectric Effect</h3>
-        <p class="tc-desc">Adjust the light's wavelength, intensity, and applied voltage to explore the conditions for electron emission and the stopping voltage.</p>
-        <span class="tc-cta">Open <span class="arrow">→</span></span>
+        <h3 class="tc-title" data-i18n="card.009.title">Photoelectric Effect</h3>
+        <p class="tc-desc" data-i18n="card.009.desc">Adjust the light's wavelength, intensity, and applied voltage to explore the conditions for electron emission and the stopping voltage.</p>
+        <span class="tc-cta"><span data-i18n="common.open">Open</span> <span class="arrow">→</span></span>
       </a>
 
       <a class="tool-card accent-indigo" href="010_Bohr_Hydrogen_Model.html">
         <div class="tc-top">
           <span class="tc-icon">⚛️</span>
-          <span class="tc-tag">Modern</span>
+          <span class="tc-tag" data-i18n="cat.modern">Modern</span>
         </div>
-        <h3 class="tc-title">Bohr's Hydrogen Atom Model</h3>
-        <p class="tc-desc">Calculate and visualize the photon wavelength and spectral line emitted as an electron transitions between orbits in Bohr's model.</p>
-        <span class="tc-cta">Open <span class="arrow">→</span></span>
+        <h3 class="tc-title" data-i18n="card.010.title">Bohr's Hydrogen Atom Model</h3>
+        <p class="tc-desc" data-i18n="card.010.desc">Calculate and visualize the photon wavelength and spectral line emitted as an electron transitions between orbits in Bohr's model.</p>
+        <span class="tc-cta"><span data-i18n="common.open">Open</span> <span class="arrow">→</span></span>
       </a>
     </div>
   </div>
@@ -390,7 +391,84 @@
   <footer class="copyright">Copyright &copy; 2026 <a href="mailto:physicsgon@gmail.com" class="copyright-link">physicsgon@gmail.com</a> . All rights reserved.</footer>
 </div>
 
+<script src="i18n.js"></script>
 <script>
+  SimI18n.register({
+    en: {
+      'index.title': 'Physics Simulator',
+      'index.lead': 'A collection of interactive simulators built to support the teaching and learning of physics. Adjust the sliders to change the conditions and see how each phenomenon responds, making abstract concepts easier to grasp and explore in the classroom or at home.',
+      'index.meta': 'Currently <b>10 simulators</b> are live. If you find a bug or have an idea for improvement, please <a href="mailto:physicsgon@gmail.com" class="email-mask">email me</a> and I\'ll take a look.',
+      'cat.mechanics': 'Mechanics',
+      'cat.electrodynamics': 'Electrodynamics',
+      'cat.thermal': 'Thermal',
+      'cat.wave': 'Wave',
+      'cat.modern': 'Modern',
+      'soon.mech.title': 'Mechanics simulators coming soon',
+      'soon.mech.desc': 'Simulators covering momentum, energy, oscillation, and rotational motion will be added here soon.',
+      'soon.em.title': 'Electrodynamics simulators coming soon',
+      'soon.em.desc': 'Simulators covering electric fields, magnetic fields, and circuits will be added here soon.',
+      'soon.th.title': 'Thermal simulators coming soon',
+      'soon.th.desc': 'Simulators covering gas molecule motion and the laws of thermodynamics will be added here soon.',
+      'card.001.title': 'Convex Lens Ray Tracing',
+      'card.001.desc': 'Adjust the focal length, object distance, and object height, and watch three principal rays locate the real or virtual image.',
+      'card.002.title': 'Wave Diffraction',
+      'card.002.desc': 'Adjust the wavelength and slit width to see how a wave spreads after passing through a single slit, and compare the spread with the diffraction condition d sin θ = mλ.',
+      'card.003.title': 'Pulse Superposition',
+      'card.003.desc': 'Watch two pulses traveling toward each other overlap, and see constructive and destructive interference happen in real time.',
+      'card.004.title': 'Wave Superposition',
+      'card.004.desc': 'Add two sine waves with independent amplitude and phase, and see how the phase difference shapes the resultant wave.',
+      'card.005.title': 'Standing Wave',
+      'card.005.desc': 'See the standing wave, nodes, and antinodes that form when two waves of equal wavelength and amplitude travel in opposite directions.',
+      'card.006.title': 'Two-Source Interference',
+      'card.006.desc': 'Click anywhere on the overlapping wavefronts from two point sources to find where interference is constructive or destructive.',
+      'card.008.title': 'Anti-Reflection Coating',
+      'card.008.desc': 'Adjust the coating thickness and light wavelength to see how reflections off the top and bottom of a thin film cancel through destructive interference.',
+      'card.007.title': 'Michelson-Morley Experiment',
+      'card.007.desc': 'Recreate the 1887 Michelson-Morley interferometer experiment and see how aether wind speed, arm length, and rotation angle affect the fringe pattern.',
+      'card.009.title': 'Photoelectric Effect',
+      'card.009.desc': 'Adjust the light\'s wavelength, intensity, and applied voltage to explore the conditions for electron emission and the stopping voltage.',
+      'card.010.title': 'Bohr\'s Hydrogen Atom Model',
+      'card.010.desc': 'Calculate and visualize the photon wavelength and spectral line emitted as an electron transitions between orbits in Bohr\'s model.'
+    },
+    ko: {
+      'index.title': '물리학 시뮬레이터',
+      'index.lead': '물리 개념의 교수·학습을 돕기 위해 만든 인터랙티브 시뮬레이터 모음입니다. 슬라이더로 조건을 바꾸며 각 현상이 어떻게 달라지는지 살펴보고, 교실과 가정에서 추상적인 개념을 더 쉽게 이해할 수 있습니다.',
+      'index.meta': '현재 <b>시뮬레이터 10개</b>가 공개되어 있습니다. 오류를 발견하거나 개선 아이디어가 있으면 <a href="mailto:physicsgon@gmail.com" class="email-mask">이메일</a>로 알려 주세요.',
+      'cat.mechanics': '역학',
+      'cat.electrodynamics': '전자기학',
+      'cat.thermal': '열역학',
+      'cat.wave': '파동',
+      'cat.modern': '현대물리',
+      'soon.mech.title': '역학 시뮬레이터 준비 중',
+      'soon.mech.desc': '운동량, 에너지, 진동, 회전 운동을 다루는 시뮬레이터가 곧 추가됩니다.',
+      'soon.em.title': '전자기학 시뮬레이터 준비 중',
+      'soon.em.desc': '전기장, 자기장, 회로를 다루는 시뮬레이터가 곧 추가됩니다.',
+      'soon.th.title': '열역학 시뮬레이터 준비 중',
+      'soon.th.desc': '기체 분자 운동과 열역학 법칙을 다루는 시뮬레이터가 곧 추가됩니다.',
+      'card.001.title': '볼록 렌즈 광선 추적',
+      'card.001.desc': '초점거리, 물체거리, 물체 높이를 조절하며 세 가지 주요 광선이 실상·허상의 위치를 어떻게 결정하는지 살펴봅니다.',
+      'card.002.title': '파동의 회절',
+      'card.002.desc': '파장과 슬릿 폭을 바꿔 단일 슬릿을 지나며 퍼지는 파동을 관찰하고, 회절 조건 d sin θ = mλ과 비교해 봅니다.',
+      'card.003.title': '펄스 중첩',
+      'card.003.desc': '서로 다가오는 두 펄스가 겹치며 생기는 보강·상쇄 간섭을 실시간으로 확인합니다.',
+      'card.004.title': '파동의 중첩',
+      'card.004.desc': '진폭과 위상을 독립적으로 조절한 두 사인파를 더해, 위상 차가 합성파에 미치는 영향을 살펴봅니다.',
+      'card.005.title': '정상파',
+      'card.005.desc': '파장과 진폭이 같고 진행 방향이 반대인 두 파동이 만나 만드는 정상파와 마디·배의 위치를 관찰합니다.',
+      'card.006.title': '두 점파원의 간섭',
+      'card.006.desc': '두 점파원에서 퍼져 나온 파면이 겹치는 지점을 클릭해 보강·상쇄 간섭이 일어나는 위치를 찾아봅니다.',
+      'card.008.title': '무반사 코팅',
+      'card.008.desc': '코팅 두께와 빛의 파장을 조절하며, 박막 위·아랫면에서 반사된 빛이 상쇄 간섭으로 약해지는 과정을 살펴봅니다.',
+      'card.007.title': '마이컬슨-몰리 실험',
+      'card.007.desc': '1887년 마이컬슨-몰리 간섭계 실험을 재현하고, 에테르 바람 속도·팔 길이·회전각이 간섭무늬에 미치는 영향을 확인합니다.',
+      'card.009.title': '광전 효과',
+      'card.009.desc': '빛의 파장, 세기, 인가 전압을 바꿔 전자 방출 조건과 정지 전압을 탐구합니다.',
+      'card.010.title': '보어의 수소 원자 모형',
+      'card.010.desc': '보어 모형에서 전자가 궤도 사이를 전이할 때 방출되는 광자의 파장과 스펙트럼선을 계산하고 시각화합니다.'
+    }
+  });
+  SimI18n.boot({ mount: '.lang-mount' });
+
   const tabs = document.querySelectorAll('.category-tab');
   const panels = document.querySelectorAll('.tool-panel');
   tabs.forEach(tab => {
