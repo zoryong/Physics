@@ -100,32 +100,34 @@
 <body>
 <header class="page-head">
   <div class="header-inner">
-    <a class="eyebrow" href="https://physics.physicsgon.workers.dev/Simulator/">Physics Simulator</a>
-    <h1>Two-Source Interference</h1>
-    <p>Wavefronts spreading from two point sources overlap to create regions of constructive and destructive interference. Click anywhere on the diagram to measure the path-length difference at that point.</p>
+    <div class="header-top">
+      <a class="eyebrow" href="https://physics.physicsgon.workers.dev/Simulator/" data-i18n="common.eyebrow">Physics Simulator</a>
+      <div class="lang-mount"></div>
+    </div>
+    <h1 data-i18n="ui.title">Two-Source Interference</h1>
+    <p data-i18n="ui.lead">Click anywhere on the overlapping wavefronts from two point sources to find where interference is constructive or destructive.</p>
   </div>
 </header>
 
 <div class="stage">
 <div class="container">
     <div class="controls">
-        <h2>Two-Source<br>Interference</h2>
+        <h2 data-i18n="ui.panelHtml" data-i18n-html>Two-Source<br>Interference</h2>
         <div class="info-box">
-            <strong>🔵 S₁</strong> &nbsp;–&nbsp; <span class="source-s1">Blue source</span><br>
-            <strong>🔴 S₂</strong> &nbsp;–&nbsp; <span class="source-s2">Red source</span><br><br>
-            <strong>——</strong>&ensp; Crest (wave peak)<br>
-            <strong>- - -</strong>&ensp; Trough (wave valley)<br><br>
-            Each source shows <strong>7 crests</strong> and <strong>7 troughs</strong>, spaced one wavelength (λ) apart.
+            <strong>🔵 S₁</strong> &nbsp;–&nbsp; <span class="source-s1" data-i18n="ui.blue">Blue source</span><br>
+            <strong>🔴 S₂</strong> &nbsp;–&nbsp; <span class="source-s2" data-i18n="ui.red">Red source</span><br><br>
+            <strong>——</strong>&ensp; <span data-i18n="ui.crest">Crest (wave peak)</span><br>
+            <strong>- - -</strong>&ensp; <span data-i18n="ui.trough">Trough (wave valley)</span><br><br>
+            <span data-i18n="ui.legendNote" data-i18n-html>Each source shows <strong>7 crests</strong> and <strong>7 troughs</strong>, spaced one wavelength (λ) apart.</span>
         </div>
         <div class="result-box" id="result-box">
-            <strong>📍 Click on the diagram</strong><br><br>
-            Click anywhere on the wavefront pattern to place an observation point (●).<br><br>
-            The path lengths from S₁ and S₂ will be calculated and the interference type will be determined.
+            <strong data-i18n="ui.clickTitle">📍 Click on the diagram</strong><br><br>
+            <span data-i18n-html data-i18n="ui.clickBody">Click anywhere on the wavefront pattern to place an observation point (●).<br><br>The path lengths from S₁ and S₂ will be calculated and the interference type will be determined.</span>
         </div>
         <div class="hint-box">
-            💡 <strong>Interference condition</strong><br>
-            • <strong>Constructive</strong>: |d₁ − d₂| = nλ<br>
-            • <strong>Destructive</strong>: |d₁ − d₂| = (n+½)λ<br><br>
+            💡 <strong data-i18n="ui.cond">Interference condition</strong><br>
+            • <strong data-i18n="ui.con">Constructive</strong>: |d₁ − d₂| = nλ<br>
+            • <strong data-i18n="ui.des">Destructive</strong>: |d₁ − d₂| = (n+½)λ<br><br>
             The lower diagram shows sinusoidal waves from S₁ and S₂ meeting at P. Both waves start at a <strong>crest</strong>.
         </div>
     </div>
@@ -140,6 +142,45 @@
 
 <footer class="copyright">Copyright © 2026 <a href="mailto:physicsgon@gmail.com" class="copyright-link">physicsgon@gmail.com</a> . All rights reserved.</footer>
 
+<script src="i18n.js"></script>
+<script>
+  SimI18n.register({
+    en: {
+      'ui.clickBody': '파면 무늬의 아무 곳이나 클릭하면 관측점(●)이 표시됩니다.<br><br>S₁·S₂까지의 경로 길이를 계산해 간섭 유형을 판별합니다.',
+      'ui.clickTitle': '📍 그림 위를 클릭하세요',
+      'ui.legendNote': '각 파원은 파장(λ) 간격으로 <strong>마루 7개</strong>와 <strong>골 7개</strong>를 보여 줍니다.',
+      'ui.trough': '골 (파저)',
+      'ui.crest': '마루 (파고)',
+      'ui.red': '빨간 파원',
+      'ui.blue': '파란 파원',
+      'ui.panelHtml': '두 점파원의<br>간섭',
+      'ui.title': 'Two-Source Interference',
+      'ui.lead': 'Click anywhere on the overlapping wavefronts from two point sources to find where interference is constructive or destructive.',
+      'ui.panel': 'Two-Source Interference',
+      'ui.click': 'Click on the diagram',
+      'ui.cond': '간섭 조건',
+      'ui.con': '보강 간섭',
+      'ui.des': '상쇄 간섭',
+      'ui.point': 'Observation Point P',
+      'common.eyebrow': 'Physics Simulator'
+    },
+    ko: {
+      'ui.title': '두 점파원의 간섭',
+      'ui.lead': '두 점파원에서 나온 파면이 겹치는 영역을 클릭해 보강·상쇄 간섭이 일어나는 위치를 찾아봅니다.',
+      'ui.panel': '두 점파원의 간섭',
+      'ui.click': '그림 위를 클릭하세요',
+      'ui.cond': '간섭 조건',
+      'ui.con': '보강 간섭',
+      'ui.des': '상쇄 간섭',
+      'ui.point': '관측점 P',
+      'common.eyebrow': '물리학 시뮬레이터'
+    }
+  });
+  SimI18n.boot({ mount: '.lang-mount' });
+  window.addEventListener('sim-langchange', function () {
+    if (typeof window.simRedraw === 'function') window.simRedraw();
+  });
+</script>
 <script>
 /* ═══════════════════════════════════════
    SHARED CONSTANTS

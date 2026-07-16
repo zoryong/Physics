@@ -282,19 +282,22 @@
 
 <header class="page-head">
   <div class="header-inner">
-    <a class="eyebrow" href="https://physics.physicsgon.workers.dev/Simulator/">Physics Simulator</a>
-    <h1>Photoelectric Effect</h1>
-    <p>Shine light of a chosen wavelength and intensity onto a target metal and observe whether electrons are ejected. Explore how work function, photon energy, and stopping voltage relate to Einstein's photoelectric equation.</p>
+    <div class="header-top">
+      <a class="eyebrow" href="https://physics.physicsgon.workers.dev/Simulator/" data-i18n="common.eyebrow">Physics Simulator</a>
+      <div class="lang-mount"></div>
+    </div>
+    <h1 data-i18n="ui.title">Photoelectric Effect</h1>
+    <p data-i18n="ui.lead">Adjust the light's wavelength, intensity, and applied voltage to explore the conditions for electron emission and the stopping voltage.</p>
   </div>
 </header>
 
 <div class="stage">
 <div class="container">
     <div class="controls">
-        <h2>Photoelectric Effect</h2>
+        <h2 data-i18n="ui.panel">Photoelectric Effect</h2>
 
         <div class="control-section">
-            <div class="control-section-title">Target Metal</div>
+            <div class="control-section-title" data-i18n="ui.metal">Target Metal</div>
             <div class="control-group">
                 <select id="metal-select">
                     <option value="1.9">Work Function &phi; of Cesium (Cs) = 1.9 eV</option>
@@ -307,7 +310,7 @@
         </div>
 
         <div class="control-section">
-            <div class="control-section-title">Photon Energy</div>
+            <div class="control-section-title" data-i18n="ui.photon">Photon Energy</div>
             
             <div class="spectrum-slider-wrapper">
                 <div class="spectrum-bar" id="spectrum-bar">
@@ -317,21 +320,21 @@
 
             <div class="values-container">
                 <div class="val-box">
-                    <div class="val-label">Wavelength</div>
+                    <div class="val-label" data-i18n="ui.wavelength">Wavelength</div>
                     <div class="val-num">
                         <input type="number" id="lam-input" value="169" min="50" max="1000">
                         <span class="val-unit">nm</span>
                     </div>
                 </div>
                 <div class="val-box">
-                    <div class="val-label">Frequency</div>
+                    <div class="val-label" data-i18n="ui.frequency">Frequency</div>
                     <div class="val-num">
                         <span id="freq-display">17.69</span>
                         <span class="val-unit">x10¹⁴ Hz</span>
                     </div>
                 </div>
                 <div class="val-box">
-                    <div class="val-label">Energy</div>
+                    <div class="val-label" data-i18n="ui.energy">Energy</div>
                     <div class="val-num">
                         <span id="energy-display">7.32</span>
                         <span class="val-unit">eV</span>
@@ -340,15 +343,15 @@
             </div>
 
             <div class="control-group" style="margin-top: 8px;">
-                <label>Intensity <span id="intensity-display">50 %</span></label>
+                <label><span data-i18n="ui.intensity">Intensity</span> <span id="intensity-display">50 %</span></label>
                 <input type="range" id="intensity-slider" min="0" max="100" step="1" value="50">
             </div>
         </div>
 
         <div class="control-section">
-            <div class="control-section-title">Applied Voltage V</div>
+            <div class="control-section-title" data-i18n="ui.voltage">Applied Voltage V</div>
             <div class="control-group">
-                <label>Adjust Voltage (-3.0V ~ 3.0V)</label>
+                <label data-i18n="ui.adjVolt">Adjust Voltage (-3.0V ~ 3.0V)</label>
                 <input type="range" class="voltage-slider" id="voltage-slider" min="-3.0" max="3.0" step="0.01" value="0.0" list="voltage-ticks">
                 <datalist id="voltage-ticks">
                     <option value="-2">
@@ -357,14 +360,14 @@
                     <option value="1">
                     <option value="2">
                 </datalist>
-                <label style="margin-top: 5px;">Voltage <span id="volt-display">0.00 V</span></label>
+                <label style="margin-top: 5px;"><span data-i18n="ui.volt">Voltage</span> <span id="volt-display">0.00 V</span></label>
             </div>
         </div>
 
         <div class="btn-group" style="margin-top: auto;">
-            <button class="btn active" id="btnStart"   onclick="startEvents()">▶ Start</button>
-            <button class="btn"        id="btnStop"    onclick="stopEvents()">⏸ Stop</button>
-            <button class="btn"        id="btnStep"    onclick="singleEvent()">⏭ Single</button>
+            <button class="btn active" id="btnStart"   onclick="startEvents()">▶ <span data-i18n="ui.start">Start</span></button>
+            <button class="btn"        id="btnStop"    onclick="stopEvents()">⏸ <span data-i18n="ui.stop">Stop</span></button>
+            <button class="btn"        id="btnStep"    onclick="singleEvent()">⏭ <span data-i18n="ui.single">Single</span></button>
         </div>
     </div>
 
@@ -373,7 +376,7 @@
             <canvas id="simCanvas" width="700" height="600"></canvas>
 
             <div class="result-overlay">
-                <strong>📊 Data & Results</strong>
+                <strong>📊 <span data-i18n="ui.results">Data & Results</span></strong>
                 <div class="result-grid">
                     <div class="result-col">
                         <div class="result-label">Photon Energy E</div>
@@ -396,6 +399,53 @@
 
 <footer class="copyright">Copyright © 2026 <a href="mailto:physicsgon@gmail.com" class="copyright-link">physicsgon@gmail.com</a> . All rights reserved.</footer>
 
+<script src="i18n.js"></script>
+<script>
+  SimI18n.register({
+    en: {
+      'ui.results': '데이터 & 결과',
+      'ui.volt': '전압',
+      'ui.adjVolt': '전압 조절 (-3.0V ~ 3.0V)',
+      'ui.energy': '에너지',
+      'ui.frequency': '진동수',
+      'ui.wavelength': '파장',
+      'ui.title': 'Photoelectric Effect',
+      'ui.lead': 'Adjust the light\'s wavelength, intensity, and applied voltage to explore the conditions for electron emission and the stopping voltage.',
+      'ui.panel': 'Photoelectric Effect',
+      'ui.metal': '표적 금속',
+      'ui.photon': '광자 에너지',
+      'ui.intensity': '세기',
+      'ui.voltage': '인가 전압 V',
+      'ui.start': '시작',
+      'ui.stop': '정지',
+      'ui.single': '한 번',
+      'ui.ephot': '광자 에너지 E',
+      'ui.ke': '최대 운동에너지',
+      'ui.stopV': '정지 전압',
+      'common.eyebrow': 'Physics Simulator'
+    },
+    ko: {
+      'ui.title': '광전 효과',
+      'ui.lead': '빛의 파장, 세기, 인가 전압을 바꿔 전자 방출 조건과 정지 전압을 탐구합니다.',
+      'ui.panel': '광전 효과',
+      'ui.metal': '표적 금속',
+      'ui.photon': '광자 에너지',
+      'ui.intensity': '세기',
+      'ui.voltage': '인가 전압',
+      'ui.start': '시작',
+      'ui.stop': '정지',
+      'ui.single': '한 번',
+      'ui.ephot': '광자 에너지 E',
+      'ui.ke': '최대 운동에너지',
+      'ui.stopV': '정지 전압',
+      'common.eyebrow': '물리학 시뮬레이터'
+    }
+  });
+  SimI18n.boot({ mount: '.lang-mount' });
+  window.addEventListener('sim-langchange', function () {
+    if (typeof window.simRedraw === 'function') window.simRedraw();
+  });
+</script>
 <script>
 /* ============================================================
    초기 변수 및 DOM 설정

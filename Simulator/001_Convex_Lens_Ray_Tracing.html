@@ -185,55 +185,58 @@
 <body>
 <header class="page-head">
   <div class="header-inner">
-    <a class="eyebrow" href="https://physics.physicsgon.workers.dev/Simulator/">Physics Simulator</a>
-    <h1>Convex Lens Ray Tracing</h1>
-    <p>An interactive ray diagram for a thin convex lens. Adjust the focal length, object distance, and object height to see how the three principal rays locate the image, and compare with the lens equation.</p>
+    <div class="header-top">
+      <a class="eyebrow" href="https://physics.physicsgon.workers.dev/Simulator/" data-i18n="common.eyebrow">Physics Simulator</a>
+      <div class="lang-mount"></div>
+    </div>
+    <h1 data-i18n="ui.title">Convex Lens Ray Tracing</h1>
+    <p data-i18n="ui.lead">An interactive ray diagram for a thin convex lens. Adjust the focal length, object distance, and object height to see how the three principal rays locate the image, and compare with the lens equation.</p>
   </div>
 </header>
 
 <div class="stage">
 <div class="container">
     <div class="controls">
-        <h2>Convex Lens Ray Tracing</h2>
+        <h2 data-i18n="ui.panel">Convex Lens Ray Tracing</h2>
 
         <div class="control-group">
-            <label>Focal Length (f) <span id="f-val">5</span></label>
+            <label><span data-i18n="ui.f">Focal Length (f)</span> <span id="f-val">5</span></label>
             <input type="range" id="f-slider" min="1" max="8" step="0.5" value="5">
         </div>
 
         <div class="control-group">
-            <label>Object Distance (a) <span id="u-val">10</span></label>
+            <label><span data-i18n="ui.a">Object Distance (a)</span> <span id="u-val">10</span></label>
             <input type="range" id="u-slider" min="0.5" max="16" step="0.5" value="10">
         </div>
 
         <div class="control-group">
-            <label>Object Height (h) <span id="h-val">2</span></label>
+            <label><span data-i18n="ui.h">Object Height (h)</span> <span id="h-val">2</span></label>
             <input type="range" id="h-slider" min="0.5" max="4" step="0.25" value="2">
         </div>
 
         <!-- 왼쪽 패널 하단 정보 표시 -->
         <div class="info-box">
             <div class="info-row">
-                <span class="info-label">Object Distance (a)</span>
+                <span class="info-label" data-i18n="ui.info.a">Object Distance (a)</span>
                 <span class="info-value" id="info-u">—</span>
             </div>
             <div class="info-row">
-                <span class="info-label">Focal Length (f)</span>
+                <span class="info-label" data-i18n="ui.info.f">Focal Length (f)</span>
                 <span class="info-value" id="info-f">—</span>
             </div>
             <div class="info-row">
-                <span class="info-label">Image Distance (b)</span>
+                <span class="info-label" data-i18n="ui.info.b">Image Distance (b)</span>
                 <span class="info-value" id="info-v">—</span>
             </div>
             <div class="info-row">
-                <span class="info-label">Magnification (m)</span>
+                <span class="info-label" data-i18n="ui.info.m">Magnification (m)</span>
                 <span class="info-value" id="info-m">—</span>
             </div>
         </div>
 
         <!-- 렌즈 방정식 계산 과정 -->
         <div class="formula-box">
-            <div class="formula-title">Lens Equation</div>
+            <div class="formula-title" data-i18n="ui.formula">Lens Equation</div>
             <div class="formula-main">1/a + 1/b = 1/f</div>
             <div class="calc-row">
                 <span class="calc-label">1/a</span>
@@ -262,6 +265,49 @@
 
 <footer class="copyright">Copyright © 2026 <a href="mailto:physicsgon@gmail.com" class="copyright-link">physicsgon@gmail.com</a> . All rights reserved.</footer>
 
+<script src="i18n.js"></script>
+<script>
+  SimI18n.register({
+    en: {
+      'ui.title': 'Convex Lens Ray Tracing',
+      'ui.lead': 'An interactive ray diagram for a thin convex lens. Adjust the focal length, object distance, and object height to see how the three principal rays locate the image, and compare with the lens equation.',
+      'ui.panel': 'Convex Lens Ray Tracing',
+      'ui.f': 'Focal Length (f)',
+      'ui.a': 'Object Distance (a)',
+      'ui.h': 'Object Height (h)',
+      'ui.info.a': 'Object Distance (a)',
+      'ui.info.f': 'Focal Length (f)',
+      'ui.info.b': 'Image Distance (b)',
+      'ui.info.m': 'Magnification (m)',
+      'ui.formula': 'Lens Equation',
+      'ui.canvas.object': 'Object',
+      'ui.canvas.real': 'Real Image',
+      'ui.canvas.virtual': 'Virtual Image',
+      'common.eyebrow': 'Physics Simulator'
+    },
+    ko: {
+      'ui.title': '볼록 렌즈 광선 추적',
+      'ui.lead': '얇은 볼록 렌즈의 광선 다이어그램 시뮬레이터입니다. 초점거리, 물체거리, 물체 높이를 조절하며 세 주요 광선이 상의 위치를 어떻게 결정하는지 보고, 렌즈 방정식과 비교해 보세요.',
+      'ui.panel': '볼록 렌즈 광선 추적',
+      'ui.f': '초점거리 (f)',
+      'ui.a': '물체거리 (a)',
+      'ui.h': '물체 높이 (h)',
+      'ui.info.a': '물체거리 (a)',
+      'ui.info.f': '초점거리 (f)',
+      'ui.info.b': '상거리 (b)',
+      'ui.info.m': '배율 (m)',
+      'ui.formula': '렌즈 방정식',
+      'ui.canvas.object': '물체',
+      'ui.canvas.real': '실상',
+      'ui.canvas.virtual': '허상',
+      'common.eyebrow': '물리학 시뮬레이터'
+    }
+  });
+  SimI18n.boot({ mount: '.lang-mount' });
+  window.addEventListener('sim-langchange', function () {
+    if (typeof window.simRedraw === 'function') window.simRedraw();
+  });
+</script>
 <script>
     const canvas = document.getElementById('lensCanvas');
     const CSS_W = canvas.width, CSS_H = canvas.height;   // logical (CSS-pixel) size
@@ -559,7 +605,7 @@
         ctx.fillStyle = '#6b009e';
         ctx.font = 'bold 13px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText("Object", toPixelX(xO), toPixelY(h + 0.5));
+        ctx.fillText(SimI18n.t("ui.canvas.object"), toPixelX(xO), toPixelY(h + 0.5));
 
         // 11. 상 화살표
         if (u !== f && Math.abs(v) <= xMax) {
@@ -569,7 +615,7 @@
             ctx.font = 'bold 13px sans-serif';
             ctx.textAlign = 'center';
             const textOffset = hI >= 0 ? hI + 0.5 : hI - 0.5;
-            ctx.fillText(isReal ? "Real Image" : "Virtual Image", toPixelX(v), toPixelY(textOffset));
+            ctx.fillText(isReal ? SimI18n.t("ui.canvas.real") : SimI18n.t("ui.canvas.virtual"), toPixelX(v), toPixelY(textOffset));
         }
 
         // ※ 캔버스 하단 정보 텍스트 제거 — 왼쪽 패널로 이동

@@ -98,9 +98,12 @@
 <body>
 <header class="page-head">
   <div class="header-inner">
-    <a class="eyebrow" href="https://physics.physicsgon.workers.dev/Simulator/">Physics Simulator</a>
-    <h1>Michelson–Morley Experiment</h1>
-    <p>An interactive recreation of the 1887 Michelson–Morley interferometer experiment. Adjust the aether wind speed, arm length, and rotation angle to see whether a fringe shift appears.</p>
+    <div class="header-top">
+      <a class="eyebrow" href="https://physics.physicsgon.workers.dev/Simulator/" data-i18n="common.eyebrow">Physics Simulator</a>
+      <div class="lang-mount"></div>
+    </div>
+    <h1 data-i18n="ui.title">Michelson–Morley Experiment</h1>
+    <p data-i18n="ui.lead">An interactive recreation of the 1887 Michelson–Morley interferometer experiment. Adjust the aether wind speed, arm length, and rotation angle to see whether a fringe shift appears.</p>
   </div>
 </header>
 
@@ -109,16 +112,16 @@
 
   <!-- ══════════ CONTROL PANEL ══════════ -->
   <div class="controls">
-    <h2>Michelson–Morley<br>Experiment</h2>
+    <h2 data-i18n="ui.panelHtml" data-i18n-html>Michelson–Morley<br>Experiment</h2>
 
     <!-- Aether wind speed -->
     <div class="section">
       <div class="section-title">
         <span class="dot" style="background:#e05a2b;"></span>
-        Aether Wind
+        <span data-i18n="ui.aether">Aether Wind</span>
       </div>
       <div class="ctrl-group">
-        <label>Speed  v/c <span id="lbl-beta">0.00</span></label>
+        <label><span data-i18n="ui.beta">Speed v/c</span> <span id="lbl-beta">0.00</span></label>
         <input type="range" id="sl-beta" min="0" max="0.95" step="0.01" value="0.00">
       </div>
     </div>
@@ -127,38 +130,38 @@
     <div class="section">
       <div class="section-title">
         <span class="dot" style="background:#2b6fe0;"></span>
-        Apparatus
+        <span data-i18n="ui.apparatus">Apparatus</span>
       </div>
       <div class="ctrl-group">
-        <label>Arm length  L <span id="lbl-L">1.00</span></label>
+        <label><span data-i18n="ui.arm">Arm length L</span> <span id="lbl-L">1.00</span></label>
         <input type="range" id="sl-L" min="0.3" max="2.0" step="0.05" value="1.0">
       </div>
       <div class="ctrl-group">
-        <label>Rotation  θ <span id="lbl-theta">0°</span></label>
+        <label><span data-i18n="ui.rot">Rotation θ</span> <span id="lbl-theta">0°</span></label>
         <input type="range" id="sl-theta" min="0" max="360" step="1" value="0">
       </div>
     </div>
 
     <!-- Display options -->
     <div class="section">
-      <div class="section-title">Display</div>
+      <div class="section-title" data-i18n="ui.display">Display</div>
       <div class="ctrl-group">
-        <label>Anim. speed <span id="lbl-speed">1.0×</span></label>
+        <label><span data-i18n="ui.animSpeed">Anim. speed</span> <span id="lbl-speed">1.0×</span></label>
         <input type="range" id="sl-speed" min="0.2" max="2.0" step="0.1" value="1.0">
       </div>
       <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;margin-top:4px;">
-        <input type="checkbox" id="chk-anim" checked style="width:15px;height:15px;accent-color:#0078d4;"> Animate light pulses
+        <input type="checkbox" id="chk-anim" checked style="width:15px;height:15px;accent-color:#0078d4;"> <span data-i18n="ui.anim">Animate light pulses</span>
       </label>
       <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
-        <input type="checkbox" id="chk-lorentz" checked style="width:15px;height:15px;accent-color:#0078d4;"> Show Lorentz contraction
+        <input type="checkbox" id="chk-lorentz" checked style="width:15px;height:15px;accent-color:#0078d4;"> <span data-i18n="ui.lorentz">Show Lorentz contraction</span>
       </label>
     </div>
 
     <!-- Buttons -->
     <div class="btn-group">
-      <button class="btn" id="btn-play"  onclick="firePulse()">▶ Fire</button>
-      <button class="btn" id="btn-pause" onclick="togglePause()">⏸ Pause</button>
-      <button class="btn"               onclick="resetShot()">↺ Reset</button>
+      <button class="btn" id="btn-play"  onclick="firePulse()">▶ <span data-i18n="ui.fire">Fire</span></button>
+      <button class="btn" id="btn-pause" onclick="togglePause()">⏸ <span data-i18n="ui.pause">Pause</span></button>
+      <button class="btn"               onclick="resetShot()">↺ <span data-i18n="ui.reset">Reset</span></button>
     </div>
 
     <!-- Result info box -->
@@ -188,6 +191,50 @@
 
 <footer class="copyright">Copyright © 2026 <a href="mailto:physicsgon@gmail.com" class="copyright-link">physicsgon@gmail.com</a> . All rights reserved.</footer>
 
+<script src="i18n.js"></script>
+<script>
+  SimI18n.register({
+    en: {
+      'ui.animSpeed': '애니 속도',
+      'ui.beta': '속력 v/c',
+      'ui.panelHtml': '마이컬슨–몰리<br>실험',
+      'ui.title': 'Michelson–Morley Experiment',
+      'ui.lead': 'An interactive recreation of the 1887 Michelson–Morley interferometer experiment. Adjust the aether wind speed, arm length, and rotation angle to see whether a fringe shift appears.',
+      'ui.panel': 'Michelson–Morley Experiment',
+      'ui.aether': '에테르 바람',
+      'ui.apparatus': '장치',
+      'ui.display': '표시',
+      'ui.arm': '팔 길이 L',
+      'ui.rot': '회전각 θ',
+      'ui.anim': '빛 펄스 애니메이션',
+      'ui.lorentz': '로렌츠 수축 표시',
+      'ui.fire': '발사',
+      'ui.pause': '일시정지',
+      'ui.reset': '초기화',
+      'common.eyebrow': 'Physics Simulator'
+    },
+    ko: {
+      'ui.title': '마이컬슨–몰리 실험',
+      'ui.lead': '1887년 마이컬슨–몰리 간섭계 실험을 재현합니다. 에테르 바람 속도, 팔 길이, 회전각을 바꿔 간섭무늬 이동이 나타나는지 확인해 보세요.',
+      'ui.panel': '마이컬슨–몰리 실험',
+      'ui.aether': '에테르 바람',
+      'ui.apparatus': '장치',
+      'ui.display': '표시',
+      'ui.arm': '팔 길이 L',
+      'ui.rot': '회전각 θ',
+      'ui.anim': '빛 펄스 애니메이션',
+      'ui.lorentz': '로렌츠 수축 표시',
+      'ui.fire': '발사',
+      'ui.pause': '일시정지',
+      'ui.reset': '초기화',
+      'common.eyebrow': '물리학 시뮬레이터'
+    }
+  });
+  SimI18n.boot({ mount: '.lang-mount' });
+  window.addEventListener('sim-langchange', function () {
+    if (typeof window.simRedraw === 'function') window.simRedraw();
+  });
+</script>
 <script>
 /* ═══════════════════════════════════════════════════
    Canvas setup with devicePixelRatio for crisp text

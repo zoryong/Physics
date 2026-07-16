@@ -118,24 +118,27 @@
 
 <header class="page-head">
   <div class="header-inner">
-    <a class="eyebrow" href="https://physics.physicsgon.workers.dev/Simulator/">Physics Simulator</a>
-    <h1>Anti-Reflection Coating</h1>
-    <p>Light reflecting off the top and bottom of a thin coating interferes with itself. Adjust the wavelength and coating thickness to see when the reflections cancel out and reflection is minimized.</p>
+    <div class="header-top">
+      <a class="eyebrow" href="https://physics.physicsgon.workers.dev/Simulator/" data-i18n="common.eyebrow">Physics Simulator</a>
+      <div class="lang-mount"></div>
+    </div>
+    <h1 data-i18n="ui.title">Anti-Reflection Coating</h1>
+    <p data-i18n="ui.lead">Adjust the coating thickness and light wavelength to see how reflections off the top and bottom of a thin film cancel through destructive interference.</p>
   </div>
 </header>
 
 <div class="stage">
 <div class="container">
     <div class="controls">
-        <h2>Anti-Reflection Coating</h2>
+        <h2 data-i18n="ui.panel">Anti-Reflection Coating</h2>
         
         <div class="control-group">
-            <label>Wavelength (λ) <span id="lambda-val">430 nm</span></label>
+            <label><span data-i18n="ui.lam">Wavelength (λ)</span> <span id="lambda-val">430 nm</span></label>
             <input type="range" id="lambda-slider" min="400" max="700" step="5" value="430">
         </div>
         
         <div class="control-group">
-            <label>Coating Thickness (d) <span id="d-val">205 nm</span></label>
+            <label><span data-i18n="ui.d">Coating Thickness (d)</span> <span id="d-val">205 nm</span></label>
             <input type="range" id="d-slider" min="50" max="250" step="1" value="205">
         </div>
 
@@ -153,6 +156,41 @@
 
 <footer class="copyright">Copyright © 2026 <a href="mailto:physicsgon@gmail.com" class="copyright-link">physicsgon@gmail.com</a> . All rights reserved.</footer>
 
+<script src="i18n.js"></script>
+<script>
+  SimI18n.register({
+    en: {
+      'ui.st.wc': '부분 보강 (보통 반사)',
+      'ui.st.pc': '완전 보강 (강한 반사)',
+      'ui.st.wd': '부분 상쇄 (약한 반사)',
+      'ui.st.pd': '완전 상쇄 (반사 없음)',
+      'ui.title': 'Anti-Reflection Coating',
+      'ui.lead': 'Adjust the coating thickness and light wavelength to see how reflections off the top and bottom of a thin film cancel through destructive interference.',
+      'ui.panel': 'Anti-Reflection Coating',
+      'ui.lam': 'Wavelength (λ)',
+      'ui.d': 'Coating Thickness (d)',
+      'ui.state': '간섭 상태',
+      'ui.path': '경로차',
+      'ui.refl': '반사율',
+      'common.eyebrow': 'Physics Simulator'
+    },
+    ko: {
+      'ui.title': '무반사 코팅',
+      'ui.lead': '코팅 두께와 빛의 파장을 조절하며, 박막 위·아랫면에서 반사된 빛이 상쇄 간섭으로 약해지는 과정을 살펴봅니다.',
+      'ui.panel': '무반사 코팅',
+      'ui.lam': '파장 (λ)',
+      'ui.d': '코팅 두께 (d)',
+      'ui.state': '간섭 상태',
+      'ui.path': '경로차',
+      'ui.refl': '반사율',
+      'common.eyebrow': '물리학 시뮬레이터'
+    }
+  });
+  SimI18n.boot({ mount: '.lang-mount' });
+  window.addEventListener('sim-langchange', function () {
+    if (typeof window.simRedraw === 'function') window.simRedraw();
+  });
+</script>
 <script>
     const canvas = document.getElementById('simCanvas');
     const CSS_W = canvas.width, CSS_H = canvas.height;   // logical (CSS-pixel) size
@@ -283,16 +321,16 @@
         let stateText = "";
         let stateColor = "";
         
-        if (intensity < 0.1) { stateText = "Perfect Destructive (No Refl.)"; stateColor = "#107c10"; }
-        else if (intensity < 0.4) { stateText = "Partial Destructive (Weak Refl.)"; stateColor = "#0078d4"; }
-        else if (intensity > 0.9) { stateText = "Perfect Constructive (Strong Refl.)"; stateColor = "#d13438"; }
-        else { stateText = "Partial Constructive (Moderate Refl.)"; stateColor = "#a80000"; }
+        if (intensity < 0.1) { stateText = SimI18n.t("ui.st.pd"); stateColor = "#107c10"; }
+        else if (intensity < 0.4) { stateText = SimI18n.t("ui.st.wd"); stateColor = "#0078d4"; }
+        else if (intensity > 0.9) { stateText = SimI18n.t("ui.st.pc"); stateColor = "#d13438"; }
+        else { stateText = SimI18n.t("ui.st.wc"); stateColor = "#a80000"; }
 
         resultInfo.innerHTML = `
-            <strong>Interference State:</strong><br>
+            <strong>${SimI18n.t("ui.state")}:</strong><br>
             <span style="color:${stateColor}; font-weight:bold; font-size:14px;">${stateText}</span><br><br>
-            Path Diff. (2nd): ${pathDiff.toFixed(1)} nm<br>
-            Reflectance (Rel.): ${(intensity * 100).toFixed(1)}%
+            ${SimI18n.t("ui.path")}: ${pathDiff.toFixed(1)} nm<br>
+            ${SimI18n.t("ui.refl")}: ${(intensity * 100).toFixed(1)}%
         `;
 
         const visualWavelengthRay = lambda / 15;   
