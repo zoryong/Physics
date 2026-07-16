@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Michelson-Morley Experiment</title>
+<style>
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #f5f6f8;
+    margin: 0;
+  }
+  header.page-head{
+    background:linear-gradient(135deg,#123d63 0%,#0078d4 55%,#2f8fdb 100%);
+    color:#fff;
+    padding:34px 26px 38px;
+  }
+  header.page-head .eyebrow{
+    font-size:12.5px;letter-spacing:.08em;color:#ffb37a;
+    font-weight:700;margin-bottom:10px;text-decoration:none;display:inline-block;transition:color .15s;
+  }
+  header.page-head .eyebrow:hover{color:#fff;text-decoration:underline;}
+  header.page-head h1{
+    font-size:clamp(20px,3.6vw,28px);font-weight:800;margin:0 0 8px;letter-spacing:-.01em;color:#fff;
+  }
+  header.page-head p{color:#dceaf6;font-size:13.5px;margin:0;max-width:660px;line-height:1.6;}
+  .stage{
+    display:flex; justify-content:center; align-items:flex-start;
+    padding:20px;
+  }
+  footer.copyright{margin:0 20px 26px;font-size:11.5px;color:#9AA2B1;text-align:center;}
+  footer.copyright .copyright-link{color:#9AA2B1;text-decoration:underline;text-underline-offset:2px;}
+  footer.copyright .copyright-link:hover{color:#0078d4;}
+  .container {
+    display: flex;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.1);
+    overflow: hidden;
+    border: 1px solid #e0e0e0;
+  }
+  /* ── Left control panel ── */
+  .controls {
+    width: 300px; padding: 25px;
+    background: #f8f9fa;
+    border-right: 1px solid #e0e0e0;
+    display: flex; flex-direction: column; gap: 18px;
+    box-sizing: border-box;
+  }
+  .controls h2 {
+    margin: 0 0 5px; font-size: 17px; font-weight: 700; color: #111;
+    border-bottom: 2px solid #0078d4; padding-bottom: 8px; line-height: 1.4;
+  }
+  .section {
+    background: #fff; border: 1px solid #d0d7de;
+    border-radius: 8px; padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .section-title {
+    font-size: 13.5px; font-weight: 700; color: #222;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .dot { display:inline-block; width:11px; height:11px; border-radius:50%; }
+  .ctrl-group { display: flex; flex-direction: column; gap: 5px; }
+  .ctrl-group label {
+    font-size: 13px; font-weight: 600; color: #444;
+    display: flex; justify-content: space-between;
+  }
+  .ctrl-group label span { color: #0078d4; font-weight: 700; }
+  .ctrl-group input[type=range] { width: 100%; cursor: pointer; accent-color: #0078d4; }
+  .info-box {
+    background: #fff; border: 1px solid #d0d7de;
+    border-radius: 8px; padding: 14px 16px;
+    font-size: 13px; color: #444; line-height: 1.65;
+  }
+  .info-box strong { color: #333; }
+  .btn-group { display: flex; gap: 8px; }
+  .btn {
+    flex: 1; padding: 8px 4px; font-size: 13px; font-weight: 700;
+    border: 1.5px solid #bbb; border-radius: 7px;
+    background: #fff; color: #333; cursor: pointer;
+    transition: background .15s, border-color .15s;
+  }
+  .btn:hover { background: #e8f0fe; border-color: #0078d4; color: #0055aa; }
+  .btn.active { background: #0078d4; color: #fff; border-color: #005fa3; }
+  /* ── Right canvas area ── */
+  .canvas-wrap {
+    padding: 20px; background: #fff;
+    display: flex; flex-direction: column; gap: 16px;
+    align-items: center;
+  }
+  canvas { border-radius: 8px; border: 1px solid #e0e0e0; background: #fafbfc; }
+</style>
+</head>
+<body>
+<header class="page-head">
+  <a class="eyebrow" href="https://physics.physicsgon.workers.dev">An's Physics</a>
+  <h1>Michelson–Morley Experiment</h1>
+  <p>An interactive recreation of the 1887 Michelson–Morley interferometer experiment. Adjust the aether wind speed, arm length, and rotation angle to see whether a fringe shift appears.</p>
+</header>
+
+<div class="stage">
+<div class="container">
+
+  <!-- ══════════ CONTROL PANEL ══════════ -->
+  <div class="controls">
+    <h2>Michelson–Morley<br>Experiment</h2>
+
+    <!-- Aether wind speed -->
+    <div class="section">
+      <div class="section-title">
+        <span class="dot" style="background:#e05a2b;"></span>
+        Aether Wind
+      </div>
+      <div class="ctrl-group">
+        <label>Speed  v/c <span id="lbl-beta">0.00</span></label>
+        <input type="range" id="sl-beta" min="0" max="0.95" step="0.01" value="0.00">
+      </div>
+    </div>
+
+    <!-- Arm length -->
+    <div class="section">
+      <div class="section-title">
+        <span class="dot" style="background:#2b6fe0;"></span>
+        Apparatus
+      </div>
+      <div class="ctrl-group">
+        <label>Arm length  L <span id="lbl-L">1.00</span></label>
+        <input type="range" id="sl-L" min="0.3" max="2.0" step="0.05" value="1.0">
+      </div>
+      <div class="ctrl-group">
+        <label>Rotation  θ <span id="lbl-theta">0°</span></label>
+        <input type="range" id="sl-theta" min="0" max="360" step="1" value="0">
+      </div>
+    </div>
+
+    <!-- Display options -->
+    <div class="section">
+      <div class="section-title">Display</div>
+      <div class="ctrl-group">
+        <label>Anim. speed <span id="lbl-speed">1.0×</span></label>
+        <input type="range" id="sl-speed" min="0.2" max="2.0" step="0.1" value="1.0">
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;margin-top:4px;">
+        <input type="checkbox" id="chk-anim" checked style="width:15px;height:15px;accent-color:#0078d4;"> Animate light pulses
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+        <input type="checkbox" id="chk-lorentz" checked style="width:15px;height:15px;accent-color:#0078d4;"> Show Lorentz contraction
+      </label>
+    </div>
+
+    <!-- Buttons -->
+    <div class="btn-group">
+      <button class="btn" id="btn-play"  onclick="firePulse()">▶ Fire</button>
+      <button class="btn" id="btn-pause" onclick="togglePause()">⏸ Pause</button>
+      <button class="btn"               onclick="resetShot()">↺ Reset</button>
+    </div>
+
+    <!-- Result info box -->
+    <div class="info-box" id="info-result"></div>
+
+    <!-- Explanation -->
+    <div class="info-box" style="font-size:12px;color:#555;line-height:1.6;">
+      <strong>💡 Key Physics</strong><br>
+      If aether exists, the arm <em>along</em> the wind takes longer for light to travel (upstream penalty).
+      The arm <em>across</em> the wind is slightly shorter in travel time.<br><br>
+      Classical prediction: rotating the apparatus changes the arrival time difference,
+      producing a <b>fringe shift</b>.<br>
+      <b>Result (1887):</b> <span style="color:#cc3333;font-weight:700;">No fringe shift</span> — aether does not exist.
+    </div>
+  </div>
+
+  <!-- ══════════ CANVAS AREA ══════════ -->
+  <div class="canvas-wrap">
+    <!-- Main interferometer diagram -->
+    <canvas id="cvMain" width="840" height="500" style="width:840px;height:500px;"></canvas>
+    <!-- Interference pattern strip -->
+    <canvas id="cvFringe" width="840" height="130" style="width:840px;height:130px;"></canvas>
+  </div>
+
+</div>
+</div>
+
+<footer class="copyright">Copyright © 2026 <a href="mailto:physicsgon@gmail.com" class="copyright-link">physicsgon@gmail.com</a> . All rights reserved.</footer>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   Canvas setup with devicePixelRatio for crisp text
+═══════════════════════════════════════════════════ */
+const cvMain   = document.getElementById('cvMain');
+const cvFringe = document.getElementById('cvFringe');
+
+const DPR = window.devicePixelRatio || 1;
+
+// Logical (CSS) sizes
+const CSS_W_MAIN = 840, CSS_H_MAIN = 500;
+const CSS_W_FRG  = 840, CSS_H_FRG  = 130;
+
+function initCanvas(cv, cssW, cssH) {
+  cv.width  = Math.round(cssW * DPR);
+  cv.height = Math.round(cssH * DPR);
+  cv.style.width  = cssW + 'px';
+  cv.style.height = cssH + 'px';
+  const ctx = cv.getContext('2d');
+  ctx.scale(DPR, DPR);   // all draw calls use CSS pixels hereafter
+  return ctx;
+}
+
+const ctxMain   = initCanvas(cvMain,   CSS_W_MAIN, CSS_H_MAIN);
+const ctxFringe = initCanvas(cvFringe, CSS_W_FRG,  CSS_H_FRG);
+
+// Logical sizes used in all drawing code (CSS pixels)
+const MW = CSS_W_MAIN, MH = CSS_H_MAIN;
+
+/* ═══════════════════════════════════════════════════
+   State
+═══════════════════════════════════════════════════ */
+let beta     = 0;      // v/c
+let armL     = 1.0;
+let thetaDeg = 0;
+let animSpeed = 1.0;   // user-controlled speed multiplier (0.2× – 2×)
+
+// One-shot pulse state
+// shotT: elapsed physics time since Fire was pressed (0 = not started, null = idle)
+let shotT    = null;   // null = idle (not fired), number = in progress / finished
+let paused   = false;
+let rafId    = null;
+let lastTS   = null;
+
+// Wind-particle state lives independently (always animating when beta > 0)
+let windRafId   = null;
+let windLastTS  = null;
+
+/* ═══════════════════════════════════════════════════
+   Sliders / labels
+═══════════════════════════════════════════════════ */
+const slBeta  = document.getElementById('sl-beta');
+const slL     = document.getElementById('sl-L');
+const slTheta = document.getElementById('sl-theta');
+const slSpeed = document.getElementById('sl-speed');
+
+slBeta.addEventListener('input',  () => { beta      = +slBeta.value;  updateLabels(); drawAll(); });
+slL.addEventListener('input',     () => { armL      = +slL.value;     updateLabels(); drawAll(); });
+slTheta.addEventListener('input', () => { thetaDeg  = +slTheta.value; updateLabels(); drawAll(); });
+slSpeed.addEventListener('input', () => { animSpeed = +slSpeed.value; updateLabels(); });
+document.getElementById('chk-anim').addEventListener('change',    () => drawAll());
+document.getElementById('chk-lorentz').addEventListener('change', () => drawAll());
+
+function updateLabels() {
+  document.getElementById('lbl-beta').textContent  = beta.toFixed(2);
+  document.getElementById('lbl-L').textContent     = armL.toFixed(2);
+  document.getElementById('lbl-theta').textContent = Math.round(thetaDeg) + '°';
+  document.getElementById('lbl-speed').textContent = animSpeed.toFixed(1) + '×';
+}
+
+/* ═══════════════════════════════════════════════════
+   Button logic
+   Fire  : launch one photon pair from Source → Detector (one-shot)
+   Pause : pause mid-flight; pressing again resumes
+   Reset : clear the shot, return to idle
+═══════════════════════════════════════════════════ */
+function setBtnState() {
+  const playBtn  = document.getElementById('btn-play');
+  const pauseBtn = document.getElementById('btn-pause');
+  const inFlight = (shotT !== null);
+  const done     = inFlight && isShotComplete();
+
+  playBtn.textContent = '▶ Fire';   // always "Fire"
+  playBtn.classList.toggle('active', !inFlight || done);
+  pauseBtn.classList.toggle('active', paused && inFlight && !done);
+}
+
+// Shared helper: compute T_src and T_det using the same physics as drawPulses
+function computeSegmentTimes(phi1, phi2) {
+  const sinP1 = Math.sin(phi1), cosP1 = Math.cos(phi1);
+  const sinP2 = Math.sin(phi2), cosP2 = Math.cos(phi2);
+
+  // S→BS: both photons travel together in phi1 direction
+  const srcX = BSX + Math.cos(phi1 + Math.PI) * SRC_OFF;
+  const srcY = BSY + Math.sin(phi1 + Math.PI) * SRC_OFF;
+  const srcToBSdist = Math.hypot(srcX - BSX, srcY - BSY);
+  const vSrcBS = Math.sqrt(1 - beta*beta*sinP1*sinP1) + beta*cosP1;
+  const T_src  = (srcToBSdist / (armL * ARM_PX_MAX)) / vSrcBS;
+
+  // BS→D: photons travel in phi2+PI direction after returning to BS
+  const detX = BSX + Math.cos(phi2 + Math.PI) * SRC_OFF;
+  const detY = BSY + Math.sin(phi2 + Math.PI) * SRC_OFF;
+  const bsToDetDist = Math.hypot(detX - BSX, detY - BSY);
+  const sinPd = Math.sin(phi2 + Math.PI), cosPd = Math.cos(phi2 + Math.PI);
+  const vBSD  = Math.sqrt(1 - beta*beta*sinPd*sinPd) + beta*cosPd;
+  const T_det = (bsToDetDist / (armL * ARM_PX_MAX)) / vBSD;
+
+  return { T_src, T_det };
+}
+
+function isShotComplete() {
+  if (shotT === null) return false;
+  const phi1 = (thetaDeg * Math.PI) / 180;
+  const phi2  = phi1 + Math.PI / 2;
+  const { T_src, T_det } = computeSegmentTimes(phi1, phi2);
+  const t1 = tArm(armL, beta, phi1);
+  const t2 = tArm(armL, beta, phi2);
+  return shotT >= Math.max(T_src + t1 + T_det, T_src + t2 + T_det);
+}
+
+function firePulse() {
+  // If already done or idle → start fresh shot
+  shotT  = 0;
+  paused = false;
+  lastTS = null;
+  setBtnState();
+  if (!rafId) rafId = requestAnimationFrame(shotLoop);
+}
+
+function togglePause() {
+  if (shotT === null || isShotComplete()) return;
+  paused = !paused;
+  if (!paused) {
+    lastTS = null;
+    if (!rafId) rafId = requestAnimationFrame(shotLoop);
+  }
+  setBtnState();
+}
+
+function resetShot() {
+  // Reset all parameters to initial values
+  beta      = 0;      armL = 1.0;   thetaDeg = 0;   animSpeed = 1.0;
+  slBeta.value  = 0;  slL.value = 1.0;  slTheta.value = 0;  slSpeed.value = 1.0;
+  document.getElementById('chk-anim').checked    = true;
+  document.getElementById('chk-lorentz').checked = true;
+  // Reset shot state
+  shotT  = null;
+  paused = false;
+  lastTS = null;
+  updateLabels();
+  setBtnState();
+  drawAll();
+}
+
+/* ═══════════════════════════════════════════════════
+   Physics helpers
+═══════════════════════════════════════════════════ */
+// Travel time for light in the arm ALONG the wind direction (parallel, upstream+downstream)
+// t_par = 2L/(c(1-β²))   (classical, v relative to aether)
+// We normalise c=1, so t_par = 2L / (1-β²)
+function tParallel(L, b) { return 2 * L / (1 - b * b); }
+
+// Travel time for light in the arm ACROSS the wind direction (transverse)
+// t_perp = 2L / sqrt(1-β²)
+function tTransverse(L, b) { return 2 * L / Math.sqrt(1 - b * b); }
+
+// Given the rotation angle θ, the 'along-wind' component of each arm:
+// Arm 1 angle from wind = θ         → effective β₁ = β cos θ
+// Arm 2 angle from wind = θ + 90°   → effective β₂ = β cos(θ+90) = -β sin θ
+// Full formula for arbitrary angle:
+// t(L, b_eff) using b_eff = b cosφ:
+//   t_φ = 2L [ 1/(1-b_eff²) + ... ]   — but we use the full formula:
+//   t_φ = L/(1-b_eff) + L/(1+b_eff)  =  2L/(1-b_eff²)  for along-wind component
+// But the transverse component adds sqrt(1-b_sin²φ) … 
+// Exact formula for light travel in arm at angle φ to wind:
+//   outward leg length (projected) = L; speed of light in aether frame along arm direction varies.
+// For simplicity (matching original applet): decompose into parallel & perpendicular parts.
+// Time for arm at angle φ:  t = (2L/c) / sqrt(1 - β²sin²φ) / (1 - β²cos²φ) ... 
+// Simplest self-consistent formula used by the applet:
+//   t₁ = 2L / (1 - β²cos²φ) * (1/sqrt(1-β²sin²φ))  ... complex.
+// The applet uses the cleaner approximation shown pedagogically:
+//   arm ALONG wind  → t_par,  arm ACROSS → t_perp, then rotate.
+// We implement the exact classical formula: for arm at angle φ to wind,
+// using vector addition (c²=( u + v·cosφ )² + (v·sinφ)²):
+
+function tArm(L, b, phiRad) {
+  // Round-trip travel time (aether theory, Perspective B: aether flows rightward).
+  // v_out  = √(1−β²sin²φ) + β cosφ   (with aether component → faster)
+  // v_back = √(1−β²sin²φ) − β cosφ   (against aether component → slower)
+  // Total  = L/v_out + L/v_back = 2L√(1−β²sin²φ)/(1−β²sin²φ − β²cos²φ)
+  //        = 2L√(1−β²sin²φ)/(1−β²)
+  // (Same value as Perspective A — round-trip total is frame-independent.)
+  const sinP = Math.sin(phiRad), cosP = Math.cos(phiRad);
+  const vOut  = Math.sqrt(1 - b*b*sinP*sinP) + b*cosP;
+  const vBack = Math.sqrt(1 - b*b*sinP*sinP) - b*cosP;
+  return L/vOut + L/vBack;
+}
+
+// Phase difference in waves (Δt expressed as fraction of period T = λ/c = 1 in our units)
+// We express everything relative to T_0 = 2L (travel time when β=0).
+function phaseDiff() {
+  const phi1 = (thetaDeg * Math.PI) / 180;
+  const phi2 = phi1 + Math.PI / 2;
+  const t1   = tArm(armL, beta, phi1);
+  const t2   = tArm(armL, beta, phi2);
+  return t1 - t2;   // in units where c=1, λ=L (visual λ)
+}
+
+// Lorentz-contracted arm length for display
+function contractedLength(L, b, phiRad) {
+  if (!document.getElementById('chk-lorentz').checked) return L;
+  const cosP = Math.cos(phiRad);
+  const sinP = Math.sin(phiRad);
+  // Along-wind contraction: L_x → L_x/γ, transverse unchanged
+  // Projected arm length:
+  const lx = L * cosP / Math.sqrt(1 - b * b);
+  const ly = L * sinP;
+  return Math.sqrt(lx * lx + ly * ly);
+}
+
+/* ═══════════════════════════════════════════════════
+   Drawing — main interferometer
+═══════════════════════════════════════════════════ */
+// BS is always at the canvas centre.
+// ARM_PX is computed dynamically so that even at armL=2.0, all elements
+// (arms + source + detector labels) stay within the canvas at any rotation.
+const BSX = MW / 2, BSY = MH / 2;
+
+// ARM_PX_MAX: largest scale where armL=2.0 fits at any rotation with 20px border + 35px label room.
+// Bottleneck is vertical (MH/2=250): (250 - 35 - 20) / 2.0 = 97.5
+const ARM_PX_MAX = 97;    // px per arm-length unit
+const SRC_OFF    = 68;    // fixed px: BS → Source / BS → Detector
+
+// Aether-wind particle stream state
+const NUM_WIND_PARTICLES = 28;
+const windParticles = Array.from({length: NUM_WIND_PARTICLES}, (_, i) => ({
+  x: Math.random() * MW,
+  y: 30 + Math.random() * (MH - 60),
+  speed: 0.6 + Math.random() * 0.4,
+}));
+
+function updateWindParticles(dt) {
+  if (beta < 0.01) return;
+  const vPx = beta * 260 * dt;  // pixel displacement per frame, scales with v/c
+  windParticles.forEach(p => {
+    p.x += vPx * p.speed;
+    if (p.x > MW + 10) p.x = -10;
+  });
+}
+
+function drawAetherWind(ctx) {
+  if (beta < 0.01) return;
+  const alpha = Math.min(0.7, beta * 1.4);
+  windParticles.forEach(p => {
+    // Draw a short streak in the wind direction
+    const len = 6 + beta * 20;
+    ctx.save();
+    ctx.globalAlpha = alpha * p.speed * 0.8;
+    ctx.strokeStyle = '#5599ee';
+    ctx.lineWidth = 1.5;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(p.x - len, p.y);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+    // small arrowhead
+    ctx.fillStyle = '#4488dd';
+    ctx.beginPath();
+    ctx.moveTo(p.x + 4, p.y);
+    ctx.lineTo(p.x - 3, p.y - 2.5);
+    ctx.lineTo(p.x - 3, p.y + 2.5);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  });
+}
+
+function drawMain() {
+  const ctx = ctxMain;
+  ctx.clearRect(0, 0, MW, MH);
+
+  const phi1 = (thetaDeg * Math.PI) / 180;   // arm 1 angle
+  const phi2 = phi1 + Math.PI / 2;            // arm 2 angle (⊥)
+  const L1px = contractedLength(armL, beta, phi1) * ARM_PX_MAX;
+  const L2px = contractedLength(armL, beta, phi2) * ARM_PX_MAX;
+
+  // Key positions
+  const m1x = BSX + Math.cos(phi1) * L1px,  m1y = BSY + Math.sin(phi1) * L1px;
+  const m2x = BSX + Math.cos(phi2) * L2px,  m2y = BSY + Math.sin(phi2) * L2px;
+  const srcX = BSX + Math.cos(phi1 + Math.PI) * SRC_OFF;
+  const srcY = BSY + Math.sin(phi1 + Math.PI) * SRC_OFF;
+  const detX = BSX + Math.cos(phi2 + Math.PI) * SRC_OFF;
+  const detY = BSY + Math.sin(phi2 + Math.PI) * SRC_OFF;
+
+  // ── Panel background ──
+  ctx.fillStyle = '#fafbfc';
+  ctx.beginPath(); ctx.roundRect(10, 10, MW - 20, MH - 20, 8); ctx.fill();
+  ctx.strokeStyle = '#d0d7de'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.roundRect(10, 10, MW - 20, MH - 20, 8); ctx.stroke();
+
+  // ── Aether wind particle stream ──
+  drawAetherWind(ctx);
+
+  // ── Title ──
+  ctx.fillStyle = '#333'; ctx.font = 'bold 14px sans-serif';
+  ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  ctx.fillText('Interferometer Diagram', 26, 34);
+
+  // ── Aether wind arrow label ──
+  if (beta > 0.005) {
+    const windLen = 50 + beta * 90;
+    const windX0 = 26, windY0 = MH - 28;
+    ctx.strokeStyle = '#2266cc'; ctx.lineWidth = 2; ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(windX0, windY0); ctx.lineTo(windX0 + windLen, windY0); ctx.stroke();
+    ctx.fillStyle = '#2266cc';
+    ctx.beginPath();
+    ctx.moveTo(windX0 + windLen + 6, windY0);
+    ctx.lineTo(windX0 + windLen - 5, windY0 - 4);
+    ctx.lineTo(windX0 + windLen - 5, windY0 + 4);
+    ctx.closePath(); ctx.fill();
+    ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'left';
+    ctx.fillText('Aether wind  v/c = ' + beta.toFixed(2), windX0 + windLen + 10, windY0 + 4);
+  }
+
+  // ── Optical path lines ──
+  // Source → BS (input beam, dashed)
+  ctx.strokeStyle = '#ccc'; ctx.lineWidth = 1.5; ctx.setLineDash([5, 4]);
+  ctx.beginPath(); ctx.moveTo(srcX, srcY); ctx.lineTo(BSX, BSY); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Arm 1:  BS ↔ Mirror 1  (orange track)
+  ctx.strokeStyle = 'rgba(224,90,43,0.25)'; ctx.lineWidth = 6;
+  ctx.beginPath(); ctx.moveTo(BSX, BSY); ctx.lineTo(m1x, m1y); ctx.stroke();
+  ctx.strokeStyle = '#e05a2b'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(BSX, BSY); ctx.lineTo(m1x, m1y); ctx.stroke();
+
+  // Arm 2:  BS ↔ Mirror 2  (blue track)
+  ctx.strokeStyle = 'rgba(43,111,224,0.20)'; ctx.lineWidth = 6;
+  ctx.beginPath(); ctx.moveTo(BSX, BSY); ctx.lineTo(m2x, m2y); ctx.stroke();
+  ctx.strokeStyle = '#2b6fe0'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(BSX, BSY); ctx.lineTo(m2x, m2y); ctx.stroke();
+
+  // BS → Detector (output beam, dashed)
+  ctx.strokeStyle = '#ccc'; ctx.lineWidth = 1.5; ctx.setLineDash([5, 4]);
+  ctx.beginPath(); ctx.moveTo(BSX, BSY); ctx.lineTo(detX, detY); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // ── Mirrors ──
+  drawMirror(ctx, m1x, m1y, phi1 + Math.PI / 2, 20);
+  drawMirror(ctx, m2x, m2y, phi2 + Math.PI / 2, 20);
+
+  // ── Beam splitter (45° plate) ──
+  ctx.save();
+  ctx.translate(BSX, BSY);
+  ctx.rotate(phi1 + Math.PI / 4);
+  ctx.fillStyle = 'rgba(100,180,255,0.40)';
+  ctx.strokeStyle = '#4499dd'; ctx.lineWidth = 2; ctx.setLineDash([]);
+  ctx.fillRect(-5, -22, 10, 44);
+  ctx.strokeRect(-5, -22, 10, 44);
+  ctx.restore();
+
+  // ── Source ──
+  ctx.fillStyle = '#ffdd00'; ctx.strokeStyle = '#cc9900'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(srcX, srcY, 11, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
+  // rays around source
+  for (let i = 0; i < 8; i++) {
+    const a = (i / 8) * Math.PI * 2;
+    ctx.strokeStyle = '#ffcc00'; ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(srcX + Math.cos(a) * 12, srcY + Math.sin(a) * 12);
+    ctx.lineTo(srcX + Math.cos(a) * 18, srcY + Math.sin(a) * 18);
+    ctx.stroke();
+  }
+  ctx.font = 'bold 11px sans-serif'; ctx.fillStyle = '#555';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('S', srcX, srcY);
+  ctx.textBaseline = 'alphabetic';
+
+  // ── Detector ──
+  ctx.fillStyle = '#d0e8ff'; ctx.strokeStyle = '#2266aa'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(detX, detY, 11, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
+  ctx.font = 'bold 11px sans-serif'; ctx.fillStyle = '#2266aa';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('D', detX, detY);
+  ctx.textBaseline = 'alphabetic';
+
+  // ── Labels with leader lines ──
+  // drawLabel: draws a short dashed leader line from the icon edge to the text,
+  // so text is always clearly separated from the icon and nearby elements.
+  function drawLabel(ix, iy, iconR, angle, text, color, textOff) {
+    const tx = ix + Math.cos(angle) * textOff;
+    const ty = iy + Math.sin(angle) * textOff;
+    ctx.save();
+    ctx.font = 'bold 12px sans-serif';
+    ctx.fillStyle = color;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const lines = text.split('\n');
+    lines.forEach((line, i) => {
+      ctx.fillText(line, tx, ty + (i - (lines.length - 1) / 2) * 14);
+    });
+    ctx.restore();
+  }
+
+  // Mirror 1: label along arm direction, beyond the mirror
+  drawLabel(m1x, m1y, 22, phi1, 'Mirror 1', '#444', 24);
+  // Mirror 2: label along arm direction, beyond the mirror
+  drawLabel(m2x, m2y, 22, phi2, 'Mirror 2', '#444', 24);
+  // Beam Splitter: label in the direction away from arm1, rotated 135° from arm
+  drawLabel(BSX, BSY, 26, phi1 + Math.PI * 0.8, 'Beam\nSplitter', '#2266aa', 52);
+  // Source: label outward from BS (behind arm 1)
+  drawLabel(srcX, srcY, 18, phi1 + Math.PI, 'Source', '#666', 38);
+  // Detector: label outward from BS (behind arm 2)
+  drawLabel(detX, detY, 14, phi2 + Math.PI, 'Detector', '#1a55aa', 38);
+
+  // Arm-length annotations (midpoint, offset perpendicular)
+  annot(ctx, BSX, BSY, m1x, m1y, 'L₁', '#e05a2b');
+  annot(ctx, BSX, BSY, m2x, m2y, 'L₂', '#2b6fe0');
+
+  // ── Animated light pulses ──
+  if (document.getElementById('chk-anim').checked) {
+    drawPulses(ctx, phi1, phi2, L1px, L2px, srcX, srcY, detX, detY);
+  }
+}
+
+function drawMirror(ctx, x, y, angle, half) {
+  ctx.save();
+  ctx.translate(x, y); ctx.rotate(angle);
+  ctx.fillStyle = '#bbb'; ctx.strokeStyle = '#777'; ctx.lineWidth = 2;
+  ctx.fillRect(-half, -5, 2 * half, 10);
+  ctx.strokeRect(-half, -5, 2 * half, 10);
+  ctx.restore();
+}
+
+function labelNear(ctx, x, y, angle, text, color, off) {
+  const OFF = off || 24;
+  const lx = x + Math.cos(angle) * OFF;
+  const ly = y + Math.sin(angle) * OFF;
+  ctx.font = 'bold 11px sans-serif';
+  ctx.fillStyle = color;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const lines = text.split('\n');
+  lines.forEach((line, i) => {
+    ctx.fillText(line, lx, ly + (i - (lines.length - 1) / 2) * 13);
+  });
+  ctx.textBaseline = 'alphabetic';
+}
+
+function annot(ctx, x0, y0, x1, y1, label, color) {
+  const mx = (x0 + x1) / 2;
+  const my = (y0 + y1) / 2;
+  const nx = -(y1 - y0), ny = (x1 - x0);
+  const nlen = Math.sqrt(nx * nx + ny * ny) || 1;
+  const ox = (nx / nlen) * 16, oy = (ny / nlen) * 16;
+  ctx.font = 'bold 12px sans-serif';
+  ctx.fillStyle = color;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(label, mx + ox, my + oy);
+  ctx.textBaseline = 'alphabetic';
+}
+
+/* ── Animated light pulses ──────────────────────────────
+   4-segment timeline (physics time units):
+   [0, T_src)          : both photons travel S → BS together (same speed, same path)
+   [T_src, T_src+t_outN): each photon travels BS → Mirror N independently
+   [T_src+t_outN, T_src+t1or2): each photon travels Mirror N → BS independently
+   [T_src+t1or2, total): each photon travels BS → D (after returning to BS)
+
+   T_src and T_det are fixed visual durations (not physics-dependent),
+   so S→BS is always traversed at exactly the same rate by both photons.
+──────────────────────────────────────────────────────── */
+function drawPulses(ctx, phi1, phi2, L1px, L2px, srcX, srcY, detX, detY) {
+  if (shotT === null) return;
+
+  const m1x = BSX + Math.cos(phi1) * L1px, m1y = BSY + Math.sin(phi1) * L1px;
+  const m2x = BSX + Math.cos(phi2) * L2px, m2y = BSY + Math.sin(phi2) * L2px;
+
+  // Apparatus-frame leg speeds — Perspective B (consistent with wind animation):
+  // "Aether flows rightward at v; apparatus is stationary."
+  // Light going WITH aether wind component → faster: v_out = √(1−β²sin²φ) + β cosφ
+  // Light going AGAINST aether wind component → slower: v_back = √(1−β²sin²φ) − β cosφ
+  //
+  // φ=0° (arm along wind):  v_out = c+v = 1+β (fast ✓),  v_back = c-v = 1−β (slow ✓)
+  // φ=90° (arm ⊥ wind):    v_out = v_back = √(1−β²) (diagonal path ✓)
+  // Round-trip total = same as Perspective A → fringe calculation unchanged ✓
+  const sinP1 = Math.sin(phi1), cosP1 = Math.cos(phi1);
+  const sinP2 = Math.sin(phi2), cosP2 = Math.cos(phi2);
+  const vOut1  = Math.sqrt(1 - beta*beta*sinP1*sinP1) + beta*cosP1;
+  const vBack1 = Math.sqrt(1 - beta*beta*sinP1*sinP1) - beta*cosP1;
+  const vOut2  = Math.sqrt(1 - beta*beta*sinP2*sinP2) + beta*cosP2;
+  const vBack2 = Math.sqrt(1 - beta*beta*sinP2*sinP2) - beta*cosP2;
+  const t_out1  = armL / vOut1;
+  const t_back1 = armL / vBack1;
+  const t_out2  = armL / vOut2;
+  const t_back2 = armL / vBack2;
+
+  // Use shared helper for S→BS and BS→D segment times
+  const { T_src, T_det } = computeSegmentTimes(phi1, phi2);
+
+  // Each photon's full timeline
+  // orange: T_src | t_out1 | t_back1 | T_det
+  // blue:   T_src | t_out2 | t_back2 | T_det
+  const seg1_end = T_src;
+  const seg2_end_ora = seg1_end + t_out1;
+  const seg3_end_ora = seg2_end_ora + t_back1;
+  const total_ora    = seg3_end_ora + T_det;
+
+  const seg2_end_blu = seg1_end + t_out2;
+  const seg3_end_blu = seg2_end_blu + t_back2;
+  const total_blu    = seg3_end_blu + T_det;
+
+  const s = shotT;   // current physics time
+
+  // ── Orange photon (Arm 1) ──
+  if (s < total_ora) {
+    if (s < seg1_end) {
+      // S → BS
+      const frac = s / seg1_end;
+      drawDot(ctx, srcX + (BSX - srcX) * frac, srcY + (BSY - srcY) * frac, '#e05a2b');
+    } else if (s < seg2_end_ora) {
+      // BS → Mirror 1
+      const frac = (s - seg1_end) / t_out1;
+      drawDot(ctx, BSX + (m1x - BSX) * frac, BSY + (m1y - BSY) * frac, '#e05a2b');
+    } else if (s < seg3_end_ora) {
+      // Mirror 1 → BS
+      const frac = (s - seg2_end_ora) / t_back1;
+      drawDot(ctx, m1x + (BSX - m1x) * frac, m1y + (BSY - m1y) * frac, '#e05a2b');
+    } else {
+      // BS → Detector
+      const frac = (s - seg3_end_ora) / T_det;
+      drawDot(ctx, BSX + (detX - BSX) * frac, BSY + (detY - BSY) * frac, '#e05a2b');
+    }
+  }
+
+  // ── Blue photon (Arm 2) ──
+  if (s < total_blu) {
+    if (s < seg1_end) {
+      // S → BS  (exact same position as orange — both on the same path)
+      const frac = s / seg1_end;
+      drawDot(ctx, srcX + (BSX - srcX) * frac, srcY + (BSY - srcY) * frac, '#2b6fe0');
+    } else if (s < seg2_end_blu) {
+      // BS → Mirror 2
+      const frac = (s - seg1_end) / t_out2;
+      drawDot(ctx, BSX + (m2x - BSX) * frac, BSY + (m2y - BSY) * frac, '#2b6fe0');
+    } else if (s < seg3_end_blu) {
+      // Mirror 2 → BS
+      const frac = (s - seg2_end_blu) / t_back2;
+      drawDot(ctx, m2x + (BSX - m2x) * frac, m2y + (BSY - m2y) * frac, '#2b6fe0');
+    } else {
+      // BS → Detector
+      const frac = (s - seg3_end_blu) / T_det;
+      drawDot(ctx, BSX + (detX - BSX) * frac, BSY + (detY - BSY) * frac, '#2b6fe0');
+    }
+  }
+}
+
+function drawDot(ctx, x, y, color) {
+  ctx.beginPath();
+  ctx.arc(x, y, 6, 0, 2 * Math.PI);
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
+  ctx.stroke();
+  // glow
+  // Convert hex color (#rrggbb) to rgba string for gradient
+  let rgbaColor = 'rgba(128,128,128,0.5)';
+  const hexMatch = color.match(/^#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/);
+  if (hexMatch) {
+    const r = parseInt(hexMatch[1], 16);
+    const g = parseInt(hexMatch[2], 16);
+    const b = parseInt(hexMatch[3], 16);
+    rgbaColor = `rgba(${r},${g},${b},0.45)`;
+  }
+  const grd = ctx.createRadialGradient(x, y, 2, x, y, 10);
+  grd.addColorStop(0, rgbaColor);
+  grd.addColorStop(1, 'transparent');
+  grd.addColorStop(1, 'transparent');
+  ctx.beginPath(); ctx.arc(x, y, 10, 0, 2*Math.PI);
+  ctx.fillStyle = grd; ctx.fill();
+}
+
+/* ═══════════════════════════════════════════════════
+   Drawing — fringe pattern
+═══════════════════════════════════════════════════ */
+const FW = CSS_W_FRG, FH = CSS_H_FRG;
+
+function drawFringe() {
+  const ctx = ctxFringe;
+  ctx.clearRect(0, 0, FW, FH);
+
+  // Background
+  ctx.fillStyle = '#fafbfc';
+  ctx.beginPath(); ctx.roundRect(0, 0, FW, FH, 8); ctx.fill();
+  ctx.strokeStyle = '#d0d7de'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.roundRect(0, 0, FW, FH, 8); ctx.stroke();
+
+  // Title
+  ctx.fillStyle = '#333'; ctx.font = 'bold 13px sans-serif';
+  ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  ctx.fillText('Interference Pattern  (path-length difference → fringe shift)', 16, 22);
+
+  const plotX0 = 16, plotX1 = FW - 16;
+  const plotY0 = 32, plotY1 = FH - 22;
+  const plotW  = plotX1 - plotX0;
+  const plotH  = plotY1 - plotY0;
+
+  // Compute Δt = time difference between two arms
+  const phi1 = (thetaDeg * Math.PI) / 180;
+  const phi2  = phi1 + Math.PI / 2;
+  const dt    = tArm(armL, beta, phi1) - tArm(armL, beta, phi2);
+  // Express as Δφ in units of λ (λ = 2 arm_units when β=0, period = 2L)
+  // Fringe shift N = Δt / T₀ where T₀ = 2L (our λ normalisation)
+  const fringeShift = dt / (2 * armL);
+
+  // Draw ~8 fringes across the panel; each fringe = plotW/8 pixels
+  const numFringes = 8;
+  const frWidth = plotW / numFringes;
+
+  for (let px = plotX0; px < plotX1; px++) {
+    // Position in fringe space
+    const fringePos = ((px - plotX0) / frWidth + fringeShift) % 1;
+    const brightness = 0.5 + 0.5 * Math.cos(2 * Math.PI * fringePos);
+    const v = Math.round(brightness * 255);
+    ctx.fillStyle = `rgb(${v},${v},${v})`;
+    ctx.fillRect(px, plotY0, 1, plotH);
+  }
+
+  // Fringe panel border
+  ctx.strokeStyle = '#ccc'; ctx.lineWidth = 1;
+  ctx.strokeRect(plotX0, plotY0, plotW, plotH);
+
+  // ── Annotations ──
+  ctx.fillStyle = '#666'; ctx.font = '11px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('← dark fringes (destructive)', plotX0 + plotW * 0.15, plotY1 + 16);
+  ctx.fillText('← bright (constructive) →',   plotX0 + plotW * 0.55, plotY1 + 16);
+
+  // Fringe shift indicator
+  const dN = fringeShift.toFixed(4);
+  const isZero = Math.abs(fringeShift) < 1e-6;
+  ctx.fillStyle = isZero ? '#2ca060' : '#cc3333';
+  ctx.textAlign = 'right';
+  ctx.font = 'bold 12px sans-serif';
+  ctx.fillText('Fringe shift ΔN = ' + dN, plotX1 - 4, plotY1 + 16);
+
+  // Update sidebar info
+  updateInfo(fringeShift, dt);
+}
+
+/* ═══════════════════════════════════════════════════
+   Sidebar info box
+═══════════════════════════════════════════════════ */
+function updateInfo(fringeShift, dt) {
+  const phi1 = (thetaDeg * Math.PI) / 180;
+  const phi2  = phi1 + Math.PI / 2;
+  const t0   = 2 * armL;   // reference travel time (β=0)
+  const t1   = tArm(armL, beta, phi1).toFixed(4);
+  const t2   = tArm(armL, beta, phi2).toFixed(4);
+  const isZero = Math.abs(fringeShift) < 1e-6;
+
+  document.getElementById('info-result').innerHTML =
+    `<strong>📊 Current State</strong><br>
+    θ = ${Math.round(thetaDeg)}°, v/c = ${beta.toFixed(2)}<br>
+    t₁ (arm 1) = ${t1} <span style="color:#e05a2b;">c⁻¹</span><br>
+    t₂ (arm 2) = ${t2} <span style="color:#2b6fe0;">c⁻¹</span><br>
+    Δt = ${(+t1 - +t2).toFixed(4)} c⁻¹<br>
+    <span style="font-weight:700;color:${isZero ? '#2ca060' : '#cc3333'};">
+      ΔN = ${fringeShift.toFixed(5)} ${isZero ? '✔ (no shift)' : '← shift!'}
+    </span>`;
+}
+
+/* ═══════════════════════════════════════════════════
+   Animation loops
+═══════════════════════════════════════════════════ */
+
+// Shot loop: advances shotT, stops when complete
+function shotLoop(ts) {
+  if (paused || shotT === null) { rafId = null; return; }
+
+  if (lastTS !== null) {
+    const dtReal = Math.min((ts - lastTS) / 1000, 0.1);
+    const dtPhys = dtReal * animSpeed * 0.4;   // physics time per real second
+    shotT += dtPhys;
+  }
+  lastTS = ts;
+  drawAll();
+
+  if (isShotComplete()) {
+    rafId = null;
+    setBtnState();   // switch "Fire" button back to active
+  } else {
+    rafId = requestAnimationFrame(shotLoop);
+  }
+}
+
+// Wind loop: always running to animate aether particles
+function windLoop(ts) {
+  if (windLastTS !== null) {
+    const dt = Math.min((ts - windLastTS) / 1000, 0.1);
+    updateWindParticles(dt);
+    if (shotT === null || isShotComplete()) {
+      // not in shot mode — just redraw static diagram + wind
+      drawAll();
+    }
+    // if shot is in progress, shotLoop already calls drawAll
+  }
+  windLastTS = ts;
+  windRafId = requestAnimationFrame(windLoop);
+}
+
+function drawAll() {
+  drawMain();
+  drawFringe();
+}
+
+/* ═══════════════════════════════════════════════════
+   Init
+═══════════════════════════════════════════════════ */
+updateLabels();
+setBtnState();
+drawAll();
+windRafId = requestAnimationFrame(windLoop);
+</script>
+</body>
+</html>

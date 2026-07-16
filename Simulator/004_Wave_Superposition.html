@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Wave Superposition Simulation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f5f6f8;
+            margin: 0;
+        }
+        header.page-head{
+            background:linear-gradient(135deg,#123d63 0%,#0078d4 55%,#2f8fdb 100%);
+            color:#fff;
+            padding:34px 26px 38px;
+        }
+        header.page-head .eyebrow{
+            font-size:12.5px;letter-spacing:.08em;color:#ffb37a;
+            font-weight:700;margin-bottom:10px;text-decoration:none;display:inline-block;transition:color .15s;
+        }
+        header.page-head .eyebrow:hover{color:#fff;text-decoration:underline;}
+        header.page-head h1{
+            font-size:clamp(20px,3.6vw,28px);font-weight:800;margin:0 0 8px;letter-spacing:-.01em;color:#fff;
+        }
+        header.page-head p{color:#dceaf6;font-size:13.5px;margin:0;max-width:660px;line-height:1.6;}
+        .stage{
+            display:flex; justify-content:center; align-items:flex-start;
+            padding:20px;
+        }
+        footer.copyright{margin:0 20px 26px;font-size:11.5px;color:#9AA2B1;text-align:center;}
+        footer.copyright .copyright-link{color:#9AA2B1;text-decoration:underline;text-underline-offset:2px;}
+        footer.copyright .copyright-link:hover{color:#0078d4;}
+        .container {
+            display: flex;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+        }
+        .controls {
+            width: 300px;
+            padding: 25px;
+            background-color: #f8f9fa;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .controls h2 {
+            margin: 0 0 5px 0;
+            font-size: 18px;
+            font-weight: 700;
+            color: #111;
+            border-bottom: 2px solid #0078d4;
+            padding-bottom: 8px;
+            line-height: 1.4;
+        }
+        .wave-section {
+            background: #fff;
+            border: 1px solid #d0d7de;
+            border-radius: 8px;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .wave-section-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .control-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #444;
+            display: flex;
+            justify-content: space-between;
+        }
+        .control-group label span {
+            color: #0078d4;
+            font-weight: 700;
+        }
+        .control-group input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+            accent-color: #0078d4;
+        }
+        .info-box {
+            background: #fff;
+            border: 1px solid #d0d7de;
+            border-radius: 8px;
+            padding: 14px 16px;
+            font-size: 13px;
+            color: #444;
+            line-height: 1.65;
+        }
+        .info-box strong {
+            color: #333;
+            font-size: 13.5px;
+        }
+        .canvas-container {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            background-color: #ffffff;
+        }
+        canvas {
+            border: 1px solid #e0e0e0;
+            background-color: #fafbfc;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+<header class="page-head">
+  <a class="eyebrow" href="https://physics.physicsgon.workers.dev">An's Physics</a>
+  <h1>Wave Superposition</h1>
+  <p>Two continuous sine waves with independent amplitude and phase combine into a resultant wave. Adjust the phase difference to explore constructive, destructive, and partial interference.</p>
+</header>
+
+<div class="stage">
+<div class="container">
+    <!-- Controls Panel -->
+    <div class="controls">
+        <h2>Wave Superposition Simulation</h2>
+
+        <!-- Wave 1 -->
+        <div class="wave-section">
+            <div class="wave-section-title">
+                <span class="dot" style="background:#e05a2b;"></span>
+                Wave 1
+            </div>
+            <div class="control-group">
+                <label>Amplitude A₁ <span id="a1-val">1.0</span></label>
+                <input type="range" id="a1" min="0" max="2" step="0.1" value="1.0">
+            </div>
+            <div class="control-group">
+                <label>Phase φ₁ <span id="p1-val">0°</span></label>
+                <input type="range" id="p1" min="0" max="360" step="5" value="0">
+            </div>
+        </div>
+
+        <!-- Wave 2 -->
+        <div class="wave-section">
+            <div class="wave-section-title">
+                <span class="dot" style="background:#2b6fe0;"></span>
+                Wave 2
+            </div>
+            <div class="control-group">
+                <label>Amplitude A₂ <span id="a2-val">1.0</span></label>
+                <input type="range" id="a2" min="0" max="2" step="0.1" value="1.0">
+            </div>
+            <div class="control-group">
+                <label>Phase φ₂ <span id="p2-val">180°</span></label>
+                <input type="range" id="p2" min="0" max="360" step="5" value="180">
+            </div>
+        </div>
+
+        <!-- Status Info -->
+        <div class="info-box" id="result-info"></div>
+
+        <!-- Explanation -->
+        <div class="info-box" style="font-size:12.5px; color:#555;">
+            <strong>💡 Superposition Principle</strong><br>
+            When two waves occupy the same space simultaneously, the displacement of the resultant wave equals the sum of the individual displacements.<br><br>
+            • <strong>Constructive</strong>: Δφ = 0° → max amplitude<br>
+            • <strong>Destructive</strong>: Δφ = 180° → min amplitude
+        </div>
+    </div>
+
+    <!-- Canvas Area -->
+    <div class="canvas-container">
+        <canvas id="simCanvas" width="840" height="710"></canvas>
+    </div>
+</div>
+</div>
+
+<footer class="copyright">Copyright © 2026 <a href="mailto:physicsgon@gmail.com" class="copyright-link">physicsgon@gmail.com</a> . All rights reserved.</footer>
+
+<script>
+const canvas = document.getElementById('simCanvas');
+const W = canvas.width, H = canvas.height;   // logical (CSS-pixel) size
+const DPR = window.devicePixelRatio || 1;
+canvas.width  = Math.round(W * DPR);
+canvas.height = Math.round(H * DPR);
+canvas.style.width  = W + 'px';
+canvas.style.height = H + 'px';
+const ctx = canvas.getContext('2d');
+ctx.scale(DPR, DPR);
+
+// Sliders
+const a1Slider = document.getElementById('a1');
+const p1Slider = document.getElementById('p1');
+const a2Slider = document.getElementById('a2');
+const p2Slider = document.getElementById('p2');
+
+// Value displays
+const a1Val = document.getElementById('a1-val');
+const p1Val = document.getElementById('p1-val');
+const a2Val = document.getElementById('a2-val');
+const p2Val = document.getElementById('p2-val');
+
+// Layout constants
+const MARGIN_LEFT  = 80;
+const MARGIN_RIGHT = 20;
+const GRAPH_W = W - MARGIN_LEFT - MARGIN_RIGHT;
+
+// Individual wave panels (Wave 1 & 2): max amplitude A=2 → needs 2 * AMP_PX px each side
+// Resultant panel: max amplitude A1+A2=4 → needs 4 * AMP_PX px each side
+const AMP_PX = 28;          // 1 unit amplitude = 28 px
+const PANEL_PAD = 16;        // vertical padding inside each panel (top & bottom)
+
+// Panel heights: content = 2 * maxAmp * AMP_PX + 2 * PANEL_PAD
+const WAVE_PANEL_H    = 2 * 2 * AMP_PX + 2 * PANEL_PAD;   // 112 + 32 = 144 px (A_max=2)
+const RESULT_PANEL_H  = 2 * 4 * AMP_PX + 2 * PANEL_PAD;   // 224 + 32 = 256 px (A_max=4)
+
+const GAP = 52;   // vertical gap between panels (space for + and = symbols)
+
+// Panel top positions
+const PANEL_TOPS = [
+    20,
+    20 + WAVE_PANEL_H + GAP,
+    20 + WAVE_PANEL_H + GAP + WAVE_PANEL_H + GAP
+];
+
+// Phase grid
+const CYCLES    = 3;
+const PHASE_DIVS = CYCLES * 4;   // 12 lines at 90° intervals
+
+// Label area below resultant panel
+const LABEL_AREA_Y = PANEL_TOPS[2] + RESULT_PANEL_H + 4;
+
+function getParams() {
+    return {
+        A1: parseFloat(a1Slider.value),
+        phi1: parseFloat(p1Slider.value) * Math.PI / 180,
+        A2: parseFloat(a2Slider.value),
+        phi2: parseFloat(p2Slider.value) * Math.PI / 180,
+    };
+}
+
+function waveY(x, A, phi) {
+    // x: 0~1 ratio across graph width; returns displacement in pixels
+    return A * AMP_PX * Math.sin(2 * Math.PI * CYCLES * x - phi);
+}
+
+// Draw the shared vertical phase guide lines spanning the ENTIRE canvas height,
+// drawn LAST so they appear on top of all panel backgrounds and waves.
+function drawPhaseGuides() {
+    const px = MARGIN_LEFT;
+    const pw = GRAPH_W;
+
+    const topY    = PANEL_TOPS[0];                          // top of Wave 1 panel
+    const bottomY = PANEL_TOPS[2] + RESULT_PANEL_H;         // bottom of Resultant panel
+
+    ctx.save();
+
+    for (let i = 1; i < PHASE_DIVS; i++) {
+        const xRatio = i / PHASE_DIVS;
+        const lx     = px + pw * xRatio;
+        const deg    = i * 90;
+
+        // Style by degree type
+        if (deg % 360 === 0) {
+            ctx.strokeStyle = 'rgba(50, 100, 200, 0.55)';
+            ctx.lineWidth   = 1.6;
+            ctx.setLineDash([6, 4]);
+        } else if (deg % 180 === 0) {
+            ctx.strokeStyle = 'rgba(80, 80, 180, 0.45)';
+            ctx.lineWidth   = 1.2;
+            ctx.setLineDash([6, 4]);
+        } else {
+            // 90° / 270° etc.
+            ctx.strokeStyle = 'rgba(100, 120, 160, 0.35)';
+            ctx.lineWidth   = 1.0;
+            ctx.setLineDash([5, 5]);
+        }
+
+        // Single continuous line from top of first panel to bottom of last panel
+        ctx.beginPath();
+        ctx.moveTo(lx, topY);
+        ctx.lineTo(lx, bottomY);
+        ctx.stroke();
+    }
+
+    ctx.setLineDash([]);
+    ctx.restore();
+
+    // Phase labels below the last panel
+    const bottomY2 = PANEL_TOPS[2] + RESULT_PANEL_H;
+    ctx.save();
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'top';
+
+    for (let i = 1; i < PHASE_DIVS; i++) {
+        const xRatio = i / PHASE_DIVS;
+        const lx     = px + pw * xRatio;
+        const deg    = i * 90;
+
+        // Short tick below last panel
+        ctx.setLineDash([]);
+        if (deg % 180 === 0) {
+            ctx.strokeStyle = (deg % 360 === 0) ? '#3366bb' : '#7777aa';
+            ctx.lineWidth   = (deg % 360 === 0) ? 1.5 : 1.0;
+        } else {
+            ctx.strokeStyle = '#aaaacc';
+            ctx.lineWidth   = 0.8;
+        }
+        ctx.beginPath();
+        ctx.moveTo(lx, bottomY2);
+        ctx.lineTo(lx, bottomY2 + 5);
+        ctx.stroke();
+
+        // Label for every 90°
+        if (deg % 360 === 0) {
+            ctx.fillStyle = '#2255aa';
+            ctx.font      = 'bold 10.5px sans-serif';
+        } else if (deg % 180 === 0) {
+            ctx.fillStyle = '#555588';
+            ctx.font      = '10px sans-serif';
+        } else {
+            ctx.fillStyle = '#9999bb';
+            ctx.font      = '9.5px sans-serif';
+        }
+        ctx.fillText(deg + '°', lx, bottomY2 + 7);
+    }
+
+    ctx.restore();
+}
+
+function drawPanel(panelIndex, label, color, A, phi) {
+    const px   = MARGIN_LEFT;
+    const py   = PANEL_TOPS[panelIndex];
+    const pw   = GRAPH_W;
+    const ph   = WAVE_PANEL_H;
+    const midY = py + ph / 2;
+
+    // Background
+    ctx.fillStyle = '#fafbfc';
+    ctx.beginPath();
+    ctx.roundRect(px, py, pw, ph, 8);
+    ctx.fill();
+
+    // Border
+    ctx.strokeStyle = '#d0d7de';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.roundRect(px, py, pw, ph, 8);
+    ctx.stroke();
+
+    // Centre line (y=0)
+    ctx.strokeStyle = '#9aa3ad';
+    ctx.lineWidth = 1.2;
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.moveTo(px, midY);
+    ctx.lineTo(px + pw, midY);
+    ctx.stroke();
+
+    // Wave (waveY already returns pixels)
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2.5;
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    for (let i = 0; i <= pw; i++) {
+        const xRatio = i / pw;
+        const dyPx   = waveY(xRatio, A, phi);  // pixels
+        const canY   = midY - dyPx;
+        if (i === 0) ctx.moveTo(px + i, canY);
+        else         ctx.lineTo(px + i, canY);
+    }
+    ctx.stroke();
+
+    // Label box (left side)
+    const labelW = 64;
+    const labelH = 26;
+    const lx = px - labelW - 6;
+    const ly = midY - labelH / 2;
+    ctx.fillStyle   = '#f0f2f5';
+    ctx.strokeStyle = '#c0c8d0';
+    ctx.lineWidth   = 1;
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.roundRect(lx, ly, labelW, labelH, 5);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle        = '#222';
+    ctx.font             = 'bold 13px sans-serif';
+    ctx.textAlign        = 'center';
+    ctx.textBaseline     = 'alphabetic';
+    ctx.fillText(label, lx + labelW / 2, ly + 17);
+}
+
+function drawSuperposition() {
+    const { A1, phi1, A2, phi2 } = getParams();
+    const px   = MARGIN_LEFT;
+    const py   = PANEL_TOPS[2];
+    const pw   = GRAPH_W;
+    const ph   = RESULT_PANEL_H;
+    const midY = py + ph / 2;
+
+    // Determine interference type & colour
+    const phaseDiff = Math.abs(((parseFloat(p2Slider.value) - parseFloat(p1Slider.value)) + 360) % 360);
+    let resultColor, resultLabel;
+    if (phaseDiff <= 30 || phaseDiff >= 330) {
+        resultColor = '#2ca060';
+        resultLabel = 'Constructive';
+    } else if (phaseDiff >= 150 && phaseDiff <= 210) {
+        resultColor = '#cc3333';
+        resultLabel = 'Destructive';
+    } else {
+        resultColor = '#7755cc';
+        resultLabel = 'Partial';
+    }
+
+    // Background
+    ctx.fillStyle = '#f8fcf8';
+    ctx.beginPath();
+    ctx.roundRect(px, py, pw, ph, 8);
+    ctx.fill();
+    ctx.strokeStyle = '#b0c8b0';
+    ctx.lineWidth   = 1.5;
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.roundRect(px, py, pw, ph, 8);
+    ctx.stroke();
+
+    // Centre line
+    ctx.strokeStyle = '#8aad8a';
+    ctx.lineWidth   = 1.2;
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.moveTo(px, midY);
+    ctx.lineTo(px + pw, midY);
+    ctx.stroke();
+
+    // Resultant wave (waveY already returns pixels)
+    ctx.strokeStyle = resultColor;
+    ctx.lineWidth   = 3;
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    for (let i = 0; i <= pw; i++) {
+        const xRatio = i / pw;
+        const dyPx   = waveY(xRatio, A1, phi1) + waveY(xRatio, A2, phi2);
+        const canY   = midY - dyPx;
+        if (i === 0) ctx.moveTo(px + i, canY);
+        else         ctx.lineTo(px + i, canY);
+    }
+    ctx.stroke();
+
+    // Label box
+    const labelW = 68;
+    const labelH = 26;
+    const lx = px - labelW - 6;
+    const ly = midY - labelH / 2;
+    ctx.fillStyle   = '#e8f4e8';
+    ctx.strokeStyle = '#a0c4a0';
+    ctx.lineWidth   = 1;
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.roundRect(lx, ly, labelW, labelH, 5);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle    = '#1a5c1a';
+    ctx.font         = 'bold 12px sans-serif';
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText('Resultant', lx + labelW / 2, ly + 17);
+
+    return { resultLabel, phaseDiff };
+}
+
+function drawOperatorSymbol(panelIndex, symbol) {
+    // panelIndex=0: between Wave1 and Wave2 (both WAVE_PANEL_H)
+    // panelIndex=1: between Wave2 and Resultant (WAVE_PANEL_H → RESULT_PANEL_H)
+    const topPanelBottom = PANEL_TOPS[panelIndex] + WAVE_PANEL_H;
+    const bottomPanelTop = PANEL_TOPS[panelIndex + 1];
+    const cx = MARGIN_LEFT / 2;
+    const cy = (topPanelBottom + bottomPanelTop) / 2;
+    ctx.fillStyle    = '#555';
+    ctx.font         = 'bold 22px sans-serif';
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(symbol, cx, cy);
+    ctx.textBaseline = 'alphabetic';
+}
+
+function updateInfoBox(resultLabel, phaseDiff) {
+    const { A1, phi1, A2, phi2 } = getParams();
+    const dp = phi2 - phi1;
+    const Amax = Math.sqrt(A1*A1 + A2*A2 + 2*A1*A2*Math.cos(dp));
+    const pd = Math.round(phaseDiff);
+    let stateColor, stateEmoji;
+    if (pd <= 30 || pd >= 330) {
+        stateColor = '#2ca060'; stateEmoji = '🔊';
+    } else if (pd >= 150 && pd <= 210) {
+        stateColor = '#cc3333'; stateEmoji = '🔇';
+    } else {
+        stateColor = '#7755cc'; stateEmoji = '〰️';
+    }
+    document.getElementById('result-info').innerHTML =
+        `<strong>📊 Current State</strong><br>
+        Phase difference Δφ = <b>${pd}°</b><br>
+        Resultant amplitude ≈ <span style="color:${stateColor};font-weight:700;">${Amax.toFixed(2)}</span><br>
+        Interference: <span style="color:${stateColor};font-weight:700;">${stateEmoji} ${resultLabel}</span>`;
+}
+
+function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    const { A1, phi1, A2, phi2 } = getParams();
+
+    // 1. Draw panel backgrounds + waves first
+    drawPanel(0, 'Wave 1', '#e05a2b', A1, phi1);
+    drawOperatorSymbol(0, '+');
+
+    drawPanel(1, 'Wave 2', '#2b6fe0', A2, phi2);
+    drawOperatorSymbol(1, '=');
+
+    const { resultLabel, phaseDiff } = drawSuperposition();
+
+    // 2. Draw phase guide lines LAST so they appear continuously
+    //    on top of all panels and gaps, from Wave 1 top to Resultant bottom.
+    drawPhaseGuides();
+
+    updateInfoBox(resultLabel, phaseDiff);
+}
+
+function updateLabels() {
+    a1Val.textContent = parseFloat(a1Slider.value).toFixed(1);
+    p1Val.textContent = p1Slider.value + '°';
+    a2Val.textContent = parseFloat(a2Slider.value).toFixed(1);
+    p2Val.textContent = p2Slider.value + '°';
+}
+
+function onInput() {
+    updateLabels();
+    draw();
+}
+
+a1Slider.addEventListener('input', onInput);
+p1Slider.addEventListener('input', onInput);
+a2Slider.addEventListener('input', onInput);
+p2Slider.addEventListener('input', onInput);
+
+updateLabels();
+draw();
+</script>
+</body>
+</html>

@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Standing Wave</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f5f6f8;
+            margin: 0;
+        }
+        header.page-head{
+            background:linear-gradient(135deg,#123d63 0%,#0078d4 55%,#2f8fdb 100%);
+            color:#fff;
+            padding:34px 26px 38px;
+        }
+        header.page-head .eyebrow{
+            font-size:12.5px;letter-spacing:.08em;color:#ffb37a;
+            font-weight:700;margin-bottom:10px;text-decoration:none;display:inline-block;transition:color .15s;
+        }
+        header.page-head .eyebrow:hover{color:#fff;text-decoration:underline;}
+        header.page-head h1{
+            font-size:clamp(20px,3.6vw,28px);font-weight:800;margin:0 0 8px;letter-spacing:-.01em;color:#fff;
+        }
+        header.page-head p{color:#dceaf6;font-size:13.5px;margin:0;max-width:660px;line-height:1.6;}
+        .stage{
+            display:flex; justify-content:center; align-items:flex-start;
+            padding:20px;
+        }
+        footer.copyright{margin:0 20px 26px;font-size:11.5px;color:#9AA2B1;text-align:center;}
+        footer.copyright .copyright-link{color:#9AA2B1;text-decoration:underline;text-underline-offset:2px;}
+        footer.copyright .copyright-link:hover{color:#0078d4;}
+        .container {
+            display: flex;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+        }
+        .controls {
+            width: 300px;
+            padding: 25px;
+            background-color: #f8f9fa;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .controls h2 {
+            margin: 0 0 5px 0;
+            font-size: 20px;
+            font-weight: 700;
+            color: #111;
+            border-bottom: 2px solid #0078d4;
+            padding-bottom: 8px;
+            line-height: 1.4;
+        }
+        .wave-section {
+            background: #fff;
+            border: 1px solid #d0d7de;
+            border-radius: 8px;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .wave-section-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .control-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #444;
+            display: flex;
+            justify-content: space-between;
+        }
+        .control-group label span {
+            color: #0078d4;
+            font-weight: 700;
+        }
+        .control-group input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+            accent-color: #0078d4;
+        }
+        /* Toggle checkboxes */
+        .toggle-group {
+            background: #fff;
+            border: 1px solid #d0d7de;
+            border-radius: 8px;
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+        }
+        .toggle-group-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 2px;
+        }
+        .toggle-item {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            font-size: 13px;
+            color: #444;
+            cursor: pointer;
+            user-select: none;
+        }
+        .toggle-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: #0078d4;
+        }
+        /* Play / Pause / Step buttons */
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            flex: 1;
+            padding: 8px 6px;
+            font-size: 13px;
+            font-weight: 700;
+            border: 1.5px solid #bbb;
+            border-radius: 7px;
+            background: #fff;
+            color: #333;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .btn:hover { background: #e8f0fe; border-color: #0078d4; color: #0055aa; }
+        .btn.active { background: #0078d4; color: #fff; border-color: #005fa3; }
+        .canvas-container {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            background-color: #ffffff;
+        }
+        canvas {
+            border: 1px solid #e0e0e0;
+            background-color: #fafbfc;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<header class="page-head">
+  <a class="eyebrow" href="https://physics.physicsgon.workers.dev">An's Physics</a>
+  <h1>Standing Wave</h1>
+  <p>Two waves of equal wavelength and amplitude travel in opposite directions and combine into a standing wave. Toggle nodes, antinodes, and the envelope to explore the resulting pattern.</p>
+</header>
+
+<div class="stage">
+<div class="container">
+    <div class="controls">
+        <h2>Standing Wave</h2>
+
+        <div class="wave-section">
+            <div class="wave-section-title">
+                <span class="dot" style="background:#555;"></span>
+                Wave Speed
+            </div>
+            <div class="control-group">
+                <label>Speed v <span id="v-val">2.0 m/s</span></label>
+                <input type="range" id="speed" min="0" max="4.0" step="0.1" value="2.0">
+            </div>
+        </div>
+
+        <div class="wave-section">
+            <div class="wave-section-title">
+                <span class="dot" style="background:#e05a2b;"></span>
+                Wave 1 &nbsp;(→ right)
+            </div>
+            <div class="control-group">
+                <label>Wavelength λ₁ <span id="lam1-val">2.0 m</span></label>
+                <input type="range" id="lam1" min="0.5" max="4.0" step="0.1" value="2.0">
+            </div>
+            <div class="control-group">
+                <label>Amplitude A₁ <span id="a1-val">1.0</span></label>
+                <input type="range" id="a1" min="0" max="2" step="0.1" value="1.0">
+            </div>
+        </div>
+
+        <div class="wave-section">
+            <div class="wave-section-title">
+                <span class="dot" style="background:#2b6fe0;"></span>
+                Wave 2 &nbsp;(← left)
+            </div>
+            <div class="control-group">
+                <label>Wavelength λ₂ <span id="lam2-val">2.0 m</span></label>
+                <input type="range" id="lam2" min="0.5" max="4.0" step="0.1" value="2.0">
+            </div>
+            <div class="control-group">
+                <label>Amplitude A₂ <span id="a2-val">1.0</span></label>
+                <input type="range" id="a2" min="0" max="2" step="0.1" value="1.0">
+            </div>
+        </div>
+
+        <div class="toggle-group">
+            <div class="toggle-group-title">Display Options</div>
+            <label class="toggle-item">
+                <input type="checkbox" id="showWave1" checked> Show Wave 1 (→)
+            </label>
+            <label class="toggle-item">
+                <input type="checkbox" id="showWave2" checked> Show Wave 2 (←)
+            </label>
+            <label class="toggle-item">
+                <input type="checkbox" id="showResultant" checked> Show Resultant
+            </label>
+            <label class="toggle-item">
+                <input type="checkbox" id="showEnvelope" checked> Show Envelope
+            </label>
+            <label class="toggle-item">
+                <input type="checkbox" id="showNodes"> Show Nodes / Antinodes
+            </label>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn active" id="btnPlay"  onclick="setPlay()">▶ Play</button>
+            <button class="btn"        id="btnPause" onclick="setPause()">⏸ Pause</button>
+            <button class="btn"        id="btnStep"  onclick="doStep()">⏭ Step</button>
+        </div>
+
+    </div>
+
+    <div class="canvas-container">
+        <canvas id="simCanvas" width="840" height="780"></canvas>
+    </div>
+</div>
+</div>
+
+<footer class="copyright">Copyright © 2026 <a href="mailto:physicsgon@gmail.com" class="copyright-link">physicsgon@gmail.com</a> . All rights reserved.</footer>
+
+<script>
+/* ============================================================
+   Canvas & layout setup
+   ============================================================ */
+const canvas = document.getElementById('simCanvas');
+const W = canvas.width, H = canvas.height;   // logical (CSS-pixel) size
+const DPR = window.devicePixelRatio || 1;
+canvas.width  = Math.round(W * DPR);
+canvas.height = Math.round(H * DPR);
+canvas.style.width  = W + 'px';
+canvas.style.height = H + 'px';
+const ctx = canvas.getContext('2d');
+ctx.scale(DPR, DPR);
+
+/* ---------- Layout constants ---------- */
+const MARGIN_LEFT  = 80;
+const MARGIN_RIGHT = 20;
+const GRAPH_W      = W - MARGIN_LEFT - MARGIN_RIGHT;
+
+const AMP_PX      = 32;   // 1 unit amplitude → pixels
+const PANEL_PAD   = 18;
+
+// Panel heights
+const WAVE_PANEL_H   = 2 * 2 * AMP_PX + 2 * PANEL_PAD;   // ±2A
+const RESULT_PANEL_H = 2 * 4 * AMP_PX + 2 * PANEL_PAD;   // ±4A
+const GAP = 50;   // vertical gap between panels
+
+const PANEL_TOPS = [
+    20,
+    20 + WAVE_PANEL_H + GAP,
+    20 + WAVE_PANEL_H + GAP + WAVE_PANEL_H + GAP
+];
+
+/* ---------- Physical constants ---------- */
+const L_DISPLAY = 8.0;   // display length in metres
+const PPM = GRAPH_W / L_DISPLAY;
+
+/* ---------- Sliders & displays ---------- */
+const speedSlider = document.getElementById('speed');
+const lam1Slider  = document.getElementById('lam1');
+const a1Slider    = document.getElementById('a1');
+const lam2Slider  = document.getElementById('lam2');
+const a2Slider    = document.getElementById('a2');
+
+const vVal    = document.getElementById('v-val');
+const lam1Val = document.getElementById('lam1-val');
+const a1Val   = document.getElementById('a1-val');
+const lam2Val = document.getElementById('lam2-val');
+const a2Val   = document.getElementById('a2-val');
+
+/* ---------- Toggles ---------- */
+const showWave1     = document.getElementById('showWave1');
+const showWave2     = document.getElementById('showWave2');
+const showResultant = document.getElementById('showResultant');
+const showEnvelope  = document.getElementById('showEnvelope');
+const showNodes     = document.getElementById('showNodes');
+
+/* ---------- Animation state ---------- */
+let t        = 0;
+let playing  = true;
+let rafId    = null;
+let lastTime = null;
+
+function setPlay() {
+    if (playing) return;
+    playing  = true;
+    lastTime = null;
+    document.getElementById('btnPlay').classList.add('active');
+    document.getElementById('btnPause').classList.remove('active');
+    rafId = requestAnimationFrame(loop);
+}
+function setPause() {
+    playing = false;
+    document.getElementById('btnPause').classList.add('active');
+    document.getElementById('btnPlay').classList.remove('active');
+}
+function doStep() {
+    if (playing) setPause();
+    const p = getParams();
+    
+    // 속력이 0일 경우 주기가 무한대가 되므로 예외 처리
+    let stepSize = 0.05; 
+    if (p.v > 0) {
+        const T = p.lam1 / p.v; 
+        stepSize = T / 32; // 1/32 주기로 변경
+    }
+    
+    // 부동소수점 오차 방지를 위해 근사치에 스텝 추가
+    t = Math.round(t / stepSize) * stepSize + stepSize;
+    draw();
+}
+
+/* ============================================================
+   Physics helpers
+   ============================================================ */
+function getParams() {
+    const v    = parseFloat(speedSlider.value);
+    const lam1 = parseFloat(lam1Slider.value);
+    const A1   = parseFloat(a1Slider.value);
+    const lam2 = parseFloat(lam2Slider.value);
+    const A2   = parseFloat(a2Slider.value);
+    const k1   = 2 * Math.PI / lam1;
+    const k2   = 2 * Math.PI / lam2;
+    const omega1 = v * k1;
+    const omega2 = v * k2;
+    return { v, lam1, A1, k1, omega1, lam2, A2, k2, omega2 };
+}
+
+function y1(x, p) { return p.A1 * AMP_PX * Math.sin(p.k1 * x - p.omega1 * t); }
+function y2(x, p) { return p.A2 * AMP_PX * Math.sin(p.k2 * x + p.omega2 * t); }
+function yR(x, p) { return y1(x, p) + y2(x, p); }
+
+/* ============================================================
+   Drawing helpers
+   ============================================================ */
+
+/* ---- Phase guide lines ---- */
+function drawPhaseGuides(p) {
+    const px = MARGIN_LEFT;
+    const pw = GRAPH_W;
+    const topY    = PANEL_TOPS[0];
+    const bottomY = PANEL_TOPS[2] + RESULT_PANEL_H;
+
+    const lambda = p.lam1;
+    const nLines = Math.floor(L_DISPLAY / (lambda / 4));
+
+    ctx.save();
+    for (let i = 1; i <= nLines; i++) {
+        const xM  = i * (lambda / 4);
+        const lx  = px + xM * PPM;
+        if (lx > px + pw) break;
+
+        const isMult180 = (i % 2 === 0);
+        const isMult360 = (i % 4 === 0);
+
+        if (isMult360) {
+            ctx.strokeStyle = 'rgba(50,100,200,0.50)';
+            ctx.lineWidth   = 1.6;
+            ctx.setLineDash([6, 4]);
+        } else if (isMult180) {
+            ctx.strokeStyle = 'rgba(80,80,180,0.40)';
+            ctx.lineWidth   = 1.2;
+            ctx.setLineDash([6, 4]);
+        } else {
+            ctx.strokeStyle = 'rgba(100,120,160,0.30)';
+            ctx.lineWidth   = 0.9;
+            ctx.setLineDash([5, 5]);
+        }
+        ctx.beginPath();
+        ctx.moveTo(lx, topY);
+        ctx.lineTo(lx, bottomY);
+        ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    ctx.restore();
+
+    // x-axis (숫자 텍스트 표기 삭제됨)
+    const bottomY2 = PANEL_TOPS[2] + RESULT_PANEL_H;
+    ctx.save();
+    for (let xM = 0; xM <= L_DISPLAY; xM += lambda / 4) {
+        const lx = px + xM * PPM;
+        if (lx > px + pw + 1) break;
+
+        const isLambda  = (Math.abs(xM % lambda) < 0.01);
+        const isHalfLam = (!isLambda && Math.abs(xM % (lambda / 2)) < 0.01);
+
+        ctx.setLineDash([]);
+        ctx.strokeStyle = isLambda  ? '#3366bb' :
+                          isHalfLam ? '#7777aa' : '#aaaacc';
+        ctx.lineWidth   = isLambda  ? 1.5 : (isHalfLam ? 1.0 : 0.8);
+        ctx.beginPath();
+        ctx.moveTo(lx, bottomY2);
+        ctx.lineTo(lx, bottomY2 + 5);
+        ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    ctx.restore();
+}
+
+/* ---- Generic panel (Wave 1 or Wave 2) ---- */
+function drawPanel(panelIndex, label, color, yFn, p) {
+    const px   = MARGIN_LEFT;
+    const py   = PANEL_TOPS[panelIndex];
+    const pw   = GRAPH_W;
+    const ph   = WAVE_PANEL_H;
+    const midY = py + ph / 2;
+
+    ctx.fillStyle = '#fafbfc';
+    ctx.beginPath(); ctx.roundRect(px, py, pw, ph, 8); ctx.fill();
+    ctx.strokeStyle = '#d0d7de'; ctx.lineWidth = 1; ctx.setLineDash([]);
+    ctx.beginPath(); ctx.roundRect(px, py, pw, ph, 8); ctx.stroke();
+
+    ctx.strokeStyle = '#9aa3ad'; ctx.lineWidth = 1.2; ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(px, midY); ctx.lineTo(px + pw, midY); ctx.stroke();
+
+    ctx.strokeStyle = color; ctx.lineWidth = 2.5; ctx.setLineDash([]);
+    ctx.beginPath();
+    for (let i = 0; i <= pw; i++) {
+        const xM   = (i / pw) * L_DISPLAY;
+        const dyPx = yFn(xM, p);
+        const canY = midY - dyPx;
+        if (i === 0) ctx.moveTo(px + i, canY);
+        else         ctx.lineTo(px + i, canY);
+    }
+    ctx.stroke();
+
+    const labelW = 64, labelH = 26;
+    const lx = px - labelW - 6;
+    const ly = midY - labelH / 2;
+    ctx.fillStyle = '#f0f2f5'; ctx.strokeStyle = '#c0c8d0'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.roundRect(lx, ly, labelW, labelH, 5); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#222'; ctx.font = 'bold 12px sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+    ctx.fillText(label, lx + labelW / 2, ly + 17);
+}
+
+/* ---- Resultant / Standing Wave panel ---- */
+function drawResultant(p) {
+    const px   = MARGIN_LEFT;
+    const py   = PANEL_TOPS[2];
+    const pw   = GRAPH_W;
+    const ph   = RESULT_PANEL_H;
+    const midY = py + ph / 2;
+
+    const isStanding = (Math.abs(p.lam1 - p.lam2) < 0.01 &&
+                        Math.abs(p.A1   - p.A2  ) < 0.01);
+
+    ctx.fillStyle = isStanding ? '#f4f8f4' : '#fafbfc';
+    ctx.beginPath(); ctx.roundRect(px, py, pw, ph, 8); ctx.fill();
+    ctx.strokeStyle = isStanding ? '#90c890' : '#d0d7de';
+    ctx.lineWidth = 1.5; ctx.setLineDash([]);
+    ctx.beginPath(); ctx.roundRect(px, py, pw, ph, 8); ctx.stroke();
+
+    ctx.strokeStyle = isStanding ? '#7aad7a' : '#9aa3ad';
+    ctx.lineWidth = 1.2; ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(px, midY); ctx.lineTo(px + pw, midY); ctx.stroke();
+
+    /* ---- Envelope ---- */
+    if (showEnvelope.checked) {
+        const envAmp = (p.A1 + p.A2) * AMP_PX;
+        ctx.strokeStyle = 'rgba(120,180,120,0.55)';
+        ctx.lineWidth   = 1.5;
+        ctx.setLineDash([8, 5]);
+        ctx.beginPath();
+        for (let i = 0; i <= pw; i++) {
+            const xM  = (i / pw) * L_DISPLAY;
+            const env = isStanding
+                ? envAmp * Math.abs(Math.sin(p.k1 * xM))
+                : envAmp;
+            const canY = midY - env;
+            if (i === 0) ctx.moveTo(px + i, canY);
+            else         ctx.lineTo(px + i, canY);
+        }
+        ctx.stroke();
+        ctx.beginPath();
+        for (let i = 0; i <= pw; i++) {
+            const xM  = (i / pw) * L_DISPLAY;
+            const env = isStanding
+                ? envAmp * Math.abs(Math.sin(p.k1 * xM))
+                : envAmp;
+            const canY = midY + env;
+            if (i === 0) ctx.moveTo(px + i, canY);
+            else         ctx.lineTo(px + i, canY);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+
+    /* ---- Wave 1 in Resultant (dashed) ---- */
+    if (showWave1.checked) {
+        ctx.strokeStyle = 'rgba(224, 90, 43, 0.7)';
+        ctx.lineWidth   = 1.5;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        for (let i = 0; i <= pw; i++) {
+            const xM   = (i / pw) * L_DISPLAY;
+            const dyPx = y1(xM, p);
+            const canY = midY - dyPx;
+            if (i === 0) ctx.moveTo(px + i, canY);
+            else         ctx.lineTo(px + i, canY);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+
+    /* ---- Wave 2 in Resultant (dashed) ---- */
+    if (showWave2.checked) {
+        ctx.strokeStyle = 'rgba(43, 111, 224, 0.7)';
+        ctx.lineWidth   = 1.5;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        for (let i = 0; i <= pw; i++) {
+            const xM   = (i / pw) * L_DISPLAY;
+            const dyPx = y2(xM, p);
+            const canY = midY - dyPx;
+            if (i === 0) ctx.moveTo(px + i, canY);
+            else         ctx.lineTo(px + i, canY);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+
+    /* ---- Resultant wave ---- */
+    if (showResultant.checked) {
+        ctx.strokeStyle = '#9933bb';
+        ctx.lineWidth   = 3;
+        ctx.setLineDash([]);
+        ctx.beginPath();
+        for (let i = 0; i <= pw; i++) {
+            const xM   = (i / pw) * L_DISPLAY;
+            const dyPx = yR(xM, p);
+            const canY = midY - dyPx;
+            if (i === 0) ctx.moveTo(px + i, canY);
+            else         ctx.lineTo(px + i, canY);
+        }
+        ctx.stroke();
+    }
+
+    /* ---- Nodes & Antinodes markers ---- */
+    if (showNodes.checked && isStanding) {
+        const lam = p.lam1;
+        for (let n = 0; n * lam / 2 <= L_DISPLAY + 0.01; n++) {
+            const xM = n * lam / 2;
+            const lx = px + xM * PPM;
+            if (lx > px + pw) break;
+            ctx.fillStyle = '#cc2222';
+            ctx.beginPath(); ctx.arc(lx, midY, 5, 0, 2 * Math.PI); ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 7px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText('N', lx, midY);
+        }
+        for (let n = 0; (2*n+1) * lam / 4 <= L_DISPLAY + 0.01; n++) {
+            const xM = (2*n+1) * lam / 4;
+            const lx = px + xM * PPM;
+            if (lx > px + pw) break;
+            ctx.fillStyle = '#1a6fc4';
+            ctx.beginPath(); ctx.arc(lx, midY, 5, 0, 2 * Math.PI); ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 7px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText('A', lx, midY);
+        }
+    }
+
+    const labelW = 72, labelH = 26;
+    const lx = px - labelW - 6;
+    const ly = midY - labelH / 2;
+    ctx.fillStyle = isStanding ? '#dff4df' : '#f0f2f5';
+    ctx.strokeStyle = isStanding ? '#90c890' : '#c0c8d0';
+    ctx.lineWidth = 1; ctx.setLineDash([]);
+    ctx.beginPath(); ctx.roundRect(lx, ly, labelW, labelH, 5); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = isStanding ? '#1a5c1a' : '#333';
+    ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+    ctx.fillText('Resultant', lx + labelW / 2, ly + 17);
+
+    return isStanding;
+}
+
+function drawOp(panelIndex, symbol) {
+    const topBottom = PANEL_TOPS[panelIndex] + WAVE_PANEL_H;
+    const botTop    = PANEL_TOPS[panelIndex + 1];
+    const cx = MARGIN_LEFT / 2;
+    const cy = (topBottom + botTop) / 2;
+    ctx.fillStyle = '#555'; ctx.font = 'bold 22px sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(symbol, cx, cy);
+    ctx.textBaseline = 'alphabetic';
+}
+
+/* ============================================================
+   Main draw
+   ============================================================ */
+function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    const p = getParams();
+
+    // 1. Wave 1 panel
+    drawPanel(0, 'Wave 1 →', '#e05a2b', y1, p);
+    drawOp(0, '+');
+
+    // 2. Wave 2 panel
+    drawPanel(1, 'Wave 2 ←', '#2b6fe0', y2, p);
+    drawOp(1, '=');
+
+    // 3. Resultant panel
+    drawResultant(p);
+
+    // 4. Phase guides
+    drawPhaseGuides(p);
+}
+
+/* ============================================================
+   Update labels
+   ============================================================ */
+function updateLabels() {
+    vVal.textContent    = parseFloat(speedSlider.value).toFixed(1) + ' m/s';
+    lam1Val.textContent = parseFloat(lam1Slider.value).toFixed(1) + ' m';
+    a1Val.textContent   = parseFloat(a1Slider.value).toFixed(1);
+    lam2Val.textContent = parseFloat(lam2Slider.value).toFixed(1) + ' m';
+    a2Val.textContent   = parseFloat(a2Slider.value).toFixed(1);
+}
+
+/* ============================================================
+   Animation loop
+   ============================================================ */
+function loop(ts) {
+    if (!playing) {
+        rafId = null;
+        return;
+    }
+    if (lastTime !== null) {
+        const dt = (ts - lastTime) / 1000;
+        t += Math.min(dt, 0.1);
+    }
+    lastTime = ts;
+    draw();
+    rafId = requestAnimationFrame(loop);
+}
+
+/* ============================================================
+   Event listeners
+   ============================================================ */
+[speedSlider, lam1Slider, a1Slider, lam2Slider, a2Slider].forEach(el => {
+    el.addEventListener('input', () => { updateLabels(); if (!playing) draw(); });
+});
+
+[showWave1, showWave2, showResultant, showEnvelope, showNodes].forEach(el => {
+    el.addEventListener('change', () => { if (!playing) draw(); });
+});
+
+/* ============================================================
+   Init
+   ============================================================ */
+updateLabels();
+rafId = requestAnimationFrame(loop);
+</script>
+</body>
+</html>

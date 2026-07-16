@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bohr Model Simulation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f5f6f8;
+            margin: 0;
+        }
+        header.page-head{
+            background:linear-gradient(135deg,#123d63 0%,#0078d4 55%,#2f8fdb 100%);
+            color:#fff;
+            padding:34px 26px 38px;
+        }
+        header.page-head .eyebrow{
+            font-size:12.5px;letter-spacing:.08em;color:#ffb37a;
+            font-weight:700;margin-bottom:10px;text-decoration:none;display:inline-block;transition:color .15s;
+        }
+        header.page-head .eyebrow:hover{color:#fff;text-decoration:underline;}
+        header.page-head h1{
+            font-size:clamp(20px,3.6vw,28px);font-weight:800;margin:0 0 8px;letter-spacing:-.01em;color:#fff;
+        }
+        header.page-head p{color:#dceaf6;font-size:13.5px;margin:0;max-width:660px;line-height:1.6;}
+        .stage{
+            display:flex; justify-content:center; align-items:flex-start;
+            padding:20px;
+        }
+        footer.copyright{margin:0 20px 26px;font-size:11.5px;color:#9AA2B1;text-align:center;}
+        footer.copyright .copyright-link{color:#9AA2B1;text-decoration:underline;text-underline-offset:2px;}
+        footer.copyright .copyright-link:hover{color:#0078d4;}
+        .container {
+            display: flex;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+        }
+        .controls {
+            width: 300px;
+            padding: 25px;
+            background-color: #f8f9fa;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .controls h2 {
+            margin: 0 0 5px 0;
+            font-size: 17px;
+            font-weight: 700;
+            color: #111;
+            border-bottom: 2px solid #0078d4;
+            padding-bottom: 8px;
+            line-height: 1.4;
+        }
+        .wave-section {
+            background: #fff;
+            border: 1px solid #d0d7de;
+            border-radius: 8px;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .wave-section-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        /* Orbit selection grid */
+        .orbit-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .orbit-btn {
+            padding: 9px 4px;
+            font-size: 13.5px;
+            font-weight: 700;
+            border: 1.5px solid #c0c8d0;
+            border-radius: 7px;
+            background: #fff;
+            color: #333;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s, color 0.15s;
+            text-align: center;
+        }
+        .orbit-btn:hover { border-color: #0078d4; color: #0055aa; background:#f0f6fd; }
+        .orbit-btn.active { background: #0078d4; color: #fff; border-color: #005fa3; }
+        .orbit-btn.disabled { opacity: 0.4; cursor: default; pointer-events: none; }
+
+        .info-box {
+            background: #fff;
+            border: 1px solid #d0d7de;
+            border-radius: 8px;
+            padding: 14px 16px;
+            font-size: 13px;
+            color: #444;
+            line-height: 1.65;
+        }
+        .info-box strong { color: #333; font-size: 13.5px; }
+        .info-box .big-lambda {
+            font-size: 15px;
+            font-weight: 800;
+            color: #0078d4;
+        }
+        .legend-row {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 12.5px;
+            color: #444;
+        }
+        .legend-swatch {
+            display: inline-block;
+            width: 18px;
+            height: 4px;
+            border-radius: 2px;
+        }
+        .toggle-group {
+            background: #fff;
+            border: 1px solid #d0d7de;
+            border-radius: 8px;
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+        }
+        .toggle-group-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 2px;
+        }
+        .toggle-item {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            font-size: 13px;
+            color: #444;
+            cursor: pointer;
+            user-select: none;
+        }
+        .toggle-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: #0078d4;
+        }
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            flex: 1;
+            padding: 8px 6px;
+            font-size: 13px;
+            font-weight: 700;
+            border: 1.5px solid #bbb;
+            border-radius: 7px;
+            background: #fff;
+            color: #333;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .btn:hover { background: #e8f0fe; border-color: #0078d4; color: #0055aa; }
+        .btn.active { background: #0078d4; color: #fff; border-color: #005fa3; }
+
+        .canvas-container {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            background-color: #ffffff;
+        }
+        canvas {
+            border: 1px solid #e0e0e0;
+            background-color: #fafbfc;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<header class="page-head">
+  <a class="eyebrow" href="https://physics.physicsgon.workers.dev">An's Physics</a>
+  <h1>Bohr's Hydrogen Atom Model</h1>
+  <p>Click an orbit to trigger an electron transition and see the emitted photon's wavelength, energy level diagram, and spectral line, following Bohr's model of the hydrogen atom.</p>
+</header>
+
+<div class="stage">
+<div class="container">
+    <!-- Controls Panel -->
+    <div class="controls">
+        <h2>Bohr's Hydrogen<br>Atom Model</h2>
+
+        <!-- Orbit selection -->
+        <div class="wave-section">
+            <div class="wave-section-title">
+                <span class="dot" style="background:#0078d4;"></span>
+                Electron Orbit (n)
+            </div>
+            <div class="orbit-grid" id="orbitGrid"></div>
+            <div style="font-size:12px; color:#777; line-height:1.5;">
+                Click an orbit number to instantly transition the electron to that orbit.
+            </div>
+        </div>
+
+        <!-- Display options -->
+        <div class="toggle-group">
+            <div class="toggle-group-title">Display Options</div>
+            <label class="toggle-item">
+                <input type="checkbox" id="showHistory" checked> Show transition arrow
+            </label>
+            <label class="toggle-item">
+                <input type="checkbox" id="showSeriesColor" checked> Show spectral series colors
+            </label>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn" id="btnReset" onclick="resetSim()">↺ Reset</button>
+        </div>
+
+        <!-- Transition info -->
+        <div class="info-box" id="transitionInfo"></div>
+
+        <!-- Series legend -->
+        <div class="info-box">
+            <strong>🌈 Spectral Series</strong>
+            <div style="margin-top:8px; display:flex; flex-direction:column; gap:6px;">
+                <div class="legend-row"><span class="legend-swatch" style="background:#000000;"></span> Lyman series (n→1, UV)</div>
+                <div class="legend-row"><span class="legend-swatch" style="background:#2ca060;"></span> Balmer series (n→2, Visible)</div>
+                <div class="legend-row"><span class="legend-swatch" style="background:#888888;"></span> Paschen series (n→3, IR)</div>
+                <div class="legend-row"><span class="legend-swatch" style="background:#999;"></span> Others (n→4 or higher)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Canvas Area -->
+    <div class="canvas-container">
+        <canvas id="simCanvas" width="1180" height="810"></canvas>
+    </div>
+</div>
+</div>
+
+<footer class="copyright">Copyright © 2026 <a href="mailto:physicsgon@gmail.com" class="copyright-link">physicsgon@gmail.com</a> . All rights reserved.</footer>
+
+<script>
+/* ============================================================
+   Canvas setup
+   ============================================================ */
+const canvas = document.getElementById('simCanvas');
+const W = canvas.width, H = canvas.height;   // logical (CSS-pixel) size
+const DPR = window.devicePixelRatio || 1;
+canvas.width  = Math.round(W * DPR);
+canvas.height = Math.round(H * DPR);
+canvas.style.width  = W + 'px';
+canvas.style.height = H + 'px';
+const ctx    = canvas.getContext('2d');
+ctx.scale(DPR, DPR);
+
+/* ============================================================
+   Physics: Bohr energy levels (hydrogen)
+   E_n = -13.6 / n^2  (eV)
+   ============================================================ */
+const N_MAX = 6;
+function energy(n) { return -13.6 / (n * n); }
+
+const E_LEVELS = [];
+for (let n = 1; n <= N_MAX; n++) E_LEVELS.push(energy(n));
+
+// hc in eV·nm  (Planck constant * speed of light)
+const HC_EV_NM = 1239.84;
+
+function wavelengthNM(nHigh, nLow) {
+    const dE = energy(nLow) - energy(nHigh); // negative of emission energy magnitude... let's be careful
+    // Emission: electron drops nHigh -> nLow (nHigh > nLow), energy released = E(nHigh) - E(nLow) is negative diff,
+    // photon energy = E_upper - E_lower in magnitude = |E(nHigh) - E(nLow)|
+    return HC_EV_NM / Math.abs(energy(nHigh) - energy(nLow));
+}
+
+// Determine spectral series name & color by lower level
+function seriesInfo(nLow) {
+    switch (nLow) {
+        case 1: return { name: 'Lyman',   color: '#000000', region: 'UV' };
+        case 2: return { name: 'Balmer',  color: '#2ca060', region: 'Visible' };
+        case 3: return { name: 'Paschen', color: '#888888', region: 'IR' };
+        default: return { name: `n→${nLow}`, color: '#888888', region: 'IR' };
+    }
+}
+
+// Approximate visible-light wavelength -> RGB (for Balmer series lines only)
+function wavelengthToColor(wl) {
+    // wl in nm; only meaningful for ~380-750nm
+    let r, g, b;
+    if (wl < 380 || wl > 750) return '#9933bb'; // outside visible -> show as violet-ish marker (non-visible)
+    if (wl < 440)      { r = -(wl - 440) / (440 - 380); g = 0; b = 1; }
+    else if (wl < 490) { r = 0; g = (wl - 440) / (490 - 440); b = 1; }
+    else if (wl < 510) { r = 0; g = 1; b = -(wl - 510) / (510 - 490); }
+    else if (wl < 580) { r = (wl - 510) / (580 - 510); g = 1; b = 0; }
+    else if (wl < 645) { r = 1; g = -(wl - 645) / (645 - 580); b = 0; }
+    else                { r = 1; g = 0; b = 0; }
+    const gamma = 0.8;
+    r = Math.pow(Math.max(0, Math.min(1, r)), gamma);
+    g = Math.pow(Math.max(0, Math.min(1, g)), gamma);
+    b = Math.pow(Math.max(0, Math.min(1, b)), gamma);
+    // dim colors that are too bright on a white background (greenish hues) for visibility
+    const brightness = 0.299*r + 0.587*g + 0.114*b;
+    if (brightness > 0.65) {
+        const darken = 0.72;
+        r *= darken; g *= darken; b *= darken;
+    }
+    return `rgb(${Math.round(r*255)},${Math.round(g*255)},${Math.round(b*255)})`;
+}
+
+/* ============================================================
+   Layout
+   ============================================================ */
+// Left: orbit diagram (square)
+const ORBIT_PANEL = { x: 20, y: 20, w: 470, h: 590 };
+// Right: energy level diagram
+const ENERGY_PANEL = { x: 520, y: 20, w: 640, h: 590 };
+// Bottom: spectral line diagram (full width)
+const SPECTRUM_PANEL = { x: 20, y: 632, w: 1140, h: 150 };
+
+/* ============================================================
+   State
+   ============================================================ */
+let currentN = 1;
+let history  = [];   // array of {from, to}
+let animFrom = null, animTo = null, animProgress = 1, animRafId = null;
+let flashLine = null; // {wl, color} for the most recent transition's spectral line, for flashing
+let flashState = true;
+let flashTimer = null;
+
+/* ============================================================
+   Orbit buttons (UI)
+   ============================================================ */
+const orbitGrid = document.getElementById('orbitGrid');
+for (let n = 1; n <= N_MAX; n++) {
+    const btn = document.createElement('div');
+    btn.className = 'orbit-btn';
+    btn.textContent = 'n = ' + n;
+    btn.dataset.n = n;
+    btn.addEventListener('click', () => selectOrbit(n));
+    orbitGrid.appendChild(btn);
+}
+function refreshOrbitButtons() {
+    document.querySelectorAll('.orbit-btn').forEach(b => {
+        const n = parseInt(b.dataset.n);
+        b.classList.toggle('active', n === currentN);
+    });
+}
+
+function selectOrbit(n) {
+    if (n === currentN) return;
+    const from = currentN;
+    const to   = n;
+    history.push({ from, to });
+
+    const nHigh = Math.max(from, to);
+    const nLow  = Math.min(from, to);
+    const wl    = wavelengthNM(nHigh, nLow);
+    const info  = seriesInfo(nLow);
+    flashLine = { wl, color: info.color, nHigh, nLow, isEmission: (to < from) };
+
+    currentN = n;
+    refreshOrbitButtons();
+    startElectronAnim(from, to);
+    updateTransitionInfo(from, to, wl, info);
+}
+
+/* ============================================================
+   Electron orbit animation
+   ============================================================
+   Two-phase sequence so cause and effect read correctly:
+   ABSORPTION (to > from): photon travels in toward the electron FIRST,
+       then (once it "arrives") the electron jumps outward to the higher orbit.
+   EMISSION   (to < from): the electron jumps inward to the lower orbit FIRST,
+       then (once it "lands") a photon is emitted travelling outward.
+   ============================================================ */
+let animPhase = null; // 'photon' or 'electron'
+
+function startElectronAnim(from, to) {
+    animFrom = from;
+    animTo   = to;
+    animProgress = 0;
+    if (animRafId) cancelAnimationFrame(animRafId);
+
+    const isAbsorption = to > from;
+    animPhase = isAbsorption ? 'photon' : 'electron';
+
+    const PHOTON_DURATION   = 550; // ms
+    const ELECTRON_DURATION = 450; // ms
+
+    function runPhase(phase, duration, onDone) {
+        animPhase = phase;
+        animProgress = 0;
+        const t0 = performance.now();
+        function step(ts) {
+            const elapsed = ts - t0;
+            animProgress = Math.min(1, elapsed / duration);
+            draw();
+            if (animProgress < 1) {
+                animRafId = requestAnimationFrame(step);
+            } else {
+                animRafId = null;
+                onDone();
+            }
+        }
+        animRafId = requestAnimationFrame(step);
+    }
+
+    if (isAbsorption) {
+        // Phase 1: photon flies in toward the electron (still resting at `from`)
+        runPhase('photon', PHOTON_DURATION, () => {
+            // Phase 2: electron jumps outward from `from` to `to`
+            runPhase('electron', ELECTRON_DURATION, () => {
+                animFrom = null; animTo = null; animPhase = null;
+                draw();
+            });
+        });
+    } else {
+        // Phase 1: electron jumps inward from `from` to `to`
+        runPhase('electron', ELECTRON_DURATION, () => {
+            // Phase 2: photon flies outward, away from the electron now resting at `to`
+            runPhase('photon', PHOTON_DURATION, () => {
+                animFrom = null; animTo = null; animPhase = null;
+                draw();
+            });
+        });
+    }
+}
+
+/* ============================================================
+   Reset
+   ============================================================ */
+function resetSim() {
+    currentN = 1;
+    history = [];
+    flashLine = null;
+    refreshOrbitButtons();
+    document.getElementById('transitionInfo').innerHTML =
+        `<strong>📍 Current State</strong><br>The electron is in the ground state (n=1).<br>Click an orbit number to start a transition.`;
+    draw();
+}
+
+/* ============================================================
+   Drawing: Orbit diagram (left panel)
+   ============================================================ */
+function drawOrbitPanel() {
+    const { x, y, w, h } = ORBIT_PANEL;
+    ctx.save();
+
+    // Panel background
+    ctx.fillStyle = '#fafbfc';
+    ctx.beginPath(); ctx.roundRect(x, y, w, h, 8); ctx.fill();
+    ctx.strokeStyle = '#d0d7de'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.roundRect(x, y, w, h, 8); ctx.stroke();
+
+    // Panel title
+    ctx.fillStyle = '#333'; ctx.font = 'bold 14px sans-serif';
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    ctx.fillText('Orbit Diagram', x + 14, y + 24);
+
+    const cx = x + w / 2;
+    const cy = y + h / 2 + 14;
+    const maxR = Math.min(w, h - 50) / 2 - 18;
+
+    // Orbit radii scale ~ n^2 but compressed for display (sqrt-like compression so n=6 fits)
+    function orbitRadius(n) {
+        // Use n^2 scaled down with normalization so n=6 fits maxR
+        return maxR * (n * n) / (N_MAX * N_MAX);
+    }
+
+    // Draw orbits (dashed circles), n=6 outermost
+    for (let n = N_MAX; n >= 1; n--) {
+        const r = orbitRadius(n);
+        ctx.beginPath();
+        ctx.setLineDash([4, 4]);
+        ctx.strokeStyle = (n === currentN) ? '#0078d4' : '#888';
+        ctx.lineWidth   = (n === currentN) ? 2.2 : 1.2;
+        ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // n label near top of orbit
+        ctx.fillStyle = (n === currentN) ? '#0078d4' : '#999';
+        ctx.font = (n === currentN) ? 'bold 12px sans-serif' : '11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('n=' + n, cx, cy - r - 6);
+    }
+
+    // Nucleus
+    ctx.beginPath();
+    ctx.fillStyle = '#cc2222';
+    ctx.arc(cx, cy, 6, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.fillStyle = '#333'; ctx.font = '11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('+', cx, cy + 4);
+
+    // Electron position
+    const baseAngle = -Math.PI / 2.3;   // resting angular position (matches reference image)
+    const waveAngle = 0;                // horizontal (3 o'clock) — used during transition so the electron
+                                         // aligns with the horizontal photon wave path
+
+    if (animFrom !== null && animPhase === 'photon') {
+        const isEmission = animTo < animFrom; // dropping to lower n = emission
+        // During the photon phase the electron rests at the orbit it currently occupies:
+        // - absorption: still resting at the lower orbit (`from`), waiting for the photon to arrive
+        // - emission:   already resting at the lower orbit (`to`), the photon is leaving
+        const restN = isEmission ? animTo : animFrom;
+        const r = orbitRadius(restN);
+        const ex = cx + r * Math.cos(waveAngle);
+        const ey = cy + r * Math.sin(waveAngle);
+        drawPhotonWave(x, w, cx, cy, ex, ey, isEmission, animFrom, animTo, animProgress);
+        drawElectron(cx, cy, r, waveAngle);
+    } else if (animFrom !== null && animPhase === 'electron') {
+        // Electron jump phase: interpolate radius, no photon visible (it already arrived / hasn't been emitted yet)
+        const r0 = orbitRadius(animFrom);
+        const r1 = orbitRadius(animTo);
+        const rNow = r0 + (r1 - r0) * easeInOut(animProgress);
+        drawElectron(cx, cy, rNow, waveAngle);
+    } else {
+        const r = orbitRadius(currentN);
+        drawElectron(cx, cy, r, baseAngle);
+    }
+
+    ctx.restore();
+}
+
+function easeInOut(p) { return p < 0.5 ? 2*p*p : 1 - Math.pow(-2*p+2, 2)/2; }
+
+function drawElectron(cx, cy, r, angle) {
+    const ex = cx + r * Math.cos(angle);
+    const ey = cy + r * Math.sin(angle);
+    ctx.beginPath();
+    ctx.fillStyle = '#ffcc00';
+    ctx.strokeStyle = '#cc9900';
+    ctx.lineWidth = 1.5;
+    ctx.arc(ex, ey, 7, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.stroke();
+}
+
+function drawPhotonWave(panelX, panelW, cx, cy, electronX, electronY, isEmission, nFrom, nTo, progress) {
+    // Short sine-wave photon drawn right next to the electron (reference-image style):
+    // Absorption: a short wave + curved arrow comes from outside and curls in toward the electron.
+    // Emission:   a short wave radiates outward from the electron with a straight arrow.
+    const nHigh = Math.max(nFrom, nTo);
+    const nLow  = Math.min(nFrom, nTo);
+    const wl    = wavelengthNM(nHigh, nLow);
+    const inVisible = (wl >= 380 && wl <= 750);
+    const useSeriesColorOrbit = document.getElementById('showSeriesColor').checked;
+    const color = useSeriesColorOrbit
+        ? (inVisible ? wavelengthToColor(wl) : seriesInfo(nLow).color)
+        : (isEmission ? '#2ca060' : '#cc3333');
+
+    const NUM_CYCLES = 3.5;
+    const waveAmp = 7;
+    const waveLen = 70;   // total horizontal length of the wavy segment
+    const gap     = 12;   // gap between electron and the wave
+
+    ctx.save();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = color;
+    ctx.fillStyle   = color;
+
+    if (isEmission) {
+        // Wave starts right next to the electron and travels outward (to the right),
+        // growing in visible length as `progress` goes 0 -> 1.
+        const xStart = electronX + gap;
+        const visibleLen = waveLen * progress;
+        if (visibleLen > 2) {
+            ctx.beginPath();
+            const steps = 60;
+            for (let i = 0; i <= steps; i++) {
+                const xPix = (visibleLen * i) / steps;
+                const phase = (xPix / waveLen) * NUM_CYCLES * 2 * Math.PI;
+                const yPix = electronY + waveAmp * Math.sin(phase);
+                if (i === 0) ctx.moveTo(xStart + xPix, yPix);
+                else         ctx.lineTo(xStart + xPix, yPix);
+            }
+            ctx.stroke();
+
+            // straight arrow head at the tip, pointing outward (away from electron)
+            const phaseTip = (visibleLen / waveLen) * NUM_CYCLES * 2 * Math.PI;
+            const yTip = electronY + waveAmp * Math.sin(phaseTip);
+            const xTip = xStart + visibleLen;
+            ctx.beginPath();
+            ctx.moveTo(xTip + 9, yTip);
+            ctx.lineTo(xTip - 2, yTip - 5);
+            ctx.lineTo(xTip - 2, yTip + 5);
+            ctx.closePath();
+            ctx.fill();
+        }
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('Photon', electronX + gap + waveLen + 14, electronY + 4);
+    } else {
+        // Absorption: a short wave packet starts at the left edge of the panel and
+        // travels horizontally toward the electron, arriving exactly as progress -> 1.
+        const xFar  = panelX + 14;                 // starting point, far to the left
+        const xNear = electronX - 6;                // arrival point, just before the electron
+        const travel = Math.max(0, xNear - xFar);
+        const xStart = xFar + travel * progress;    // current leading position of the wave packet
+
+        ctx.beginPath();
+        const steps = 60;
+        for (let i = 0; i <= steps; i++) {
+            const xPix = (waveLen * i) / steps;
+            const phase = (xPix / waveLen) * NUM_CYCLES * 2 * Math.PI;
+            const yPix = electronY + waveAmp * Math.sin(phase);
+            const xCanvas = xStart + xPix;
+            if (xCanvas > xNear) break; // don't draw past the electron
+            if (i === 0) ctx.moveTo(xCanvas, yPix);
+            else         ctx.lineTo(xCanvas, yPix);
+        }
+        ctx.stroke();
+
+        // straight arrow head at the leading tip, pointing toward the electron (rightward)
+        const tipX = Math.min(xStart + waveLen, xNear);
+        const tipFrac = (tipX - xStart) / waveLen;
+        const yTip = electronY + waveAmp * Math.sin(tipFrac * NUM_CYCLES * 2 * Math.PI);
+        ctx.beginPath();
+        ctx.moveTo(tipX + 9, yTip);
+        ctx.lineTo(tipX - 2, yTip - 5);
+        ctx.lineTo(tipX - 2, yTip + 5);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('Photon', xFar, electronY - waveAmp - 14);
+    }
+
+    ctx.restore();
+}
+
+/* ============================================================
+   Drawing: Energy level diagram (right panel)
+   ============================================================ */
+function drawEnergyPanel() {
+    const { x, y, w, h } = ENERGY_PANEL;
+    ctx.save();
+
+    ctx.fillStyle = '#fafbfc';
+    ctx.beginPath(); ctx.roundRect(x, y, w, h, 8); ctx.fill();
+    ctx.strokeStyle = '#d0d7de'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.roundRect(x, y, w, h, 8); ctx.stroke();
+
+    ctx.fillStyle = '#333'; ctx.font = 'bold 14px sans-serif';
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    ctx.fillText('Energy Levels', x + 14, y + 24);
+
+    const padTop = 90, padBottom = 34;
+    const plotTop = y + padTop;
+    const plotBottom = y + h - padBottom;
+    const plotH = plotBottom - plotTop;
+
+    const lineX0 = x + 110;
+    const lineX1 = x + w * 0.55;
+
+    // map energy to y (E1=-13.6 at bottom, E6=-0.38 near top); use sqrt-ish compression so spacing resembles reference
+    function energyToYRaw(E) {
+        // normalize using -13.6..0 range with mild compression (since E_n converges near 0)
+        const Emin = -13.6, Emax = 0;
+        // use linear in 1/n^2 domain already (E itself), but compress upper region slightly with sqrt of |E|
+        const frac = (E - Emin) / (Emax - Emin); // 0 at E1, ~1 near 0
+        return plotBottom - frac * plotH;
+    }
+
+    // Raw positions for n=1..N_MAX cluster tightly near the top (E4,E5,E6 differ by <1eV out of 13.6eV range),
+    // causing label overlap. Use a geometrically shrinking gap as n increases — wide near the bottom
+    // (E1-E2, E2-E3) and progressively narrower near the top (E5-E6), matching the physical trend
+    // without using the exact (tiny) physical scale for the upper levels.
+    // gap(n -> n+1) = baseGap * ratio^(n-1), so n=1->2 is widest, n=5->6 is narrowest.
+    const baseGap = 70, ratio = 0.62, minGap = 20;
+    const rawY = [];
+    for (let n = 1; n <= N_MAX; n++) rawY[n] = energyToYRaw(energy(n));
+    const adjY = {};
+    adjY[N_MAX] = rawY[N_MAX]; // topmost level keeps its raw position
+    for (let n = N_MAX - 1; n >= 1; n--) {
+        const gap = Math.max(minGap, baseGap * Math.pow(ratio, n - 1));
+        adjY[n] = Math.max(rawY[n], adjY[n + 1] + gap);
+    }
+    function energyToY(E) {
+        // find n matching this energy (levels are discrete in this diagram)
+        for (let n = 1; n <= N_MAX; n++) {
+            if (Math.abs(energy(n) - E) < 1e-9) return adjY[n];
+        }
+        return energyToYRaw(E); // fallback for E=0 (E∞) or other values
+    }
+
+    // Draw level lines
+    ctx.font = '13px sans-serif';
+    for (let n = 1; n <= N_MAX; n++) {
+        const E = energy(n);
+        const ly = energyToY(E);
+        const isCurrent = (n === currentN);
+
+        ctx.strokeStyle = isCurrent ? '#e8b800' : '#cc3333';
+        ctx.lineWidth   = isCurrent ? 3 : 1.6;
+        ctx.beginPath();
+        ctx.moveTo(lineX0, ly);
+        ctx.lineTo(lineX1, ly);
+        ctx.stroke();
+
+        ctx.fillStyle = isCurrent ? '#a87f00' : '#333';
+        ctx.font = isCurrent ? 'bold 13px sans-serif' : '13px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(`E${subscript(n)} = ${E.toFixed(2)} eV`, lineX1 + 8, ly + 4);
+    }
+
+    // n=∞ reference line (E=0) lightly dashed
+    const yInf = energyToY(0);
+    ctx.strokeStyle = '#bbb'; ctx.lineWidth = 1; ctx.setLineDash([3,3]);
+    ctx.beginPath(); ctx.moveTo(lineX0, yInf); ctx.lineTo(lineX1, yInf); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#999'; ctx.font = '11px sans-serif';
+    ctx.fillText('E∞ = 0 eV', lineX1 + 8, yInf + 4);
+
+    // Transition arrow: only the most recent transition is shown (previous ones disappear)
+    if (document.getElementById('showHistory').checked && history.length > 0) {
+        const tr = history[history.length - 1];
+        const ax = lineX0 - 50;
+        const yA = energyToY(energy(tr.from));
+        const yB = energyToY(energy(tr.to));
+
+        const nHigh = Math.max(tr.from, tr.to);
+        const nLow  = Math.min(tr.from, tr.to);
+        const wl    = wavelengthNM(nHigh, nLow);
+        const inVisibleArrow = (wl >= 380 && wl <= 750);
+        const useSeriesColorEnergy = document.getElementById('showSeriesColor').checked;
+        const color = useSeriesColorEnergy
+            ? (inVisibleArrow ? wavelengthToColor(wl) : seriesInfo(nLow).color)
+            : (tr.to < tr.from ? '#2ca060' : '#cc3333');
+
+        ctx.strokeStyle = color;
+        ctx.fillStyle   = color;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(ax, yA);
+        ctx.lineTo(ax, yB);
+        ctx.stroke();
+        // arrow head at destination
+        const headY = yB;
+        const goingUp = yB < yA;
+        ctx.beginPath();
+        if (goingUp) {
+            ctx.moveTo(ax, headY); ctx.lineTo(ax-4, headY+8); ctx.lineTo(ax+4, headY+8);
+        } else {
+            ctx.moveTo(ax, headY); ctx.lineTo(ax-4, headY-8); ctx.lineTo(ax+4, headY-8);
+        }
+        ctx.closePath(); ctx.fill();
+    }
+
+    // Current electron marker on level diagram (small dot at left of current level line)
+    // Keep this in sync with the orbit-panel animation phases so both panels agree visually:
+    // - photon phase (absorption): electron still shown resting at the lower level (`animFrom`)
+    // - photon phase (emission):   electron already resting at the lower level (`animTo`)
+    // - electron phase:            interpolate between the two levels
+    let markerY;
+    if (animFrom !== null && animPhase === 'photon') {
+        const isEmissionMarker = animTo < animFrom;
+        markerY = energyToY(energy(isEmissionMarker ? animTo : animFrom));
+    } else if (animFrom !== null && animPhase === 'electron') {
+        const yA = energyToY(energy(animFrom));
+        const yB = energyToY(energy(animTo));
+        markerY = yA + (yB - yA) * easeInOut(animProgress);
+    } else {
+        markerY = energyToY(energy(currentN));
+    }
+    ctx.beginPath();
+    ctx.fillStyle = '#ffcc00';
+    ctx.strokeStyle = '#cc9900';
+    ctx.lineWidth = 1.5;
+    ctx.arc(lineX0 - 12, markerY, 6, 0, 2*Math.PI);
+    ctx.fill(); ctx.stroke();
+
+    ctx.restore();
+}
+
+function subscript(n) {
+    const subs = ['₀','₁','₂','₃','₄','₅','₆','₇','₈','₉'];
+    return String(n).split('').map(d => subs[parseInt(d)]).join('');
+}
+
+/* ============================================================
+   Drawing: Spectral line diagram (bottom panel)
+   ============================================================ */
+// Precompute all possible emission lines (nHigh>nLow) within n=1..N_MAX for display as a static reference comb (faint),
+// and overlay actual history lines (bright + flashing for the latest).
+function getAllTransitions() {
+    const list = [];
+    for (let hi = 2; hi <= N_MAX; hi++) {
+        for (let lo = 1; lo < hi; lo++) {
+            list.push({ nHigh: hi, nLow: lo, wl: wavelengthNM(hi, lo) });
+        }
+    }
+    return list;
+}
+const ALL_TRANSITIONS = getAllTransitions();
+
+function drawSpectrumPanel() {
+    const { x, y, w, h } = SPECTRUM_PANEL;
+    ctx.save();
+
+    ctx.fillStyle = '#fafbfc';
+    ctx.beginPath(); ctx.roundRect(x, y, w, h, 8); ctx.fill();
+    ctx.strokeStyle = '#d0d7de'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.roundRect(x, y, w, h, 8); ctx.stroke();
+
+    ctx.fillStyle = '#333'; ctx.font = 'bold 14px sans-serif';
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    ctx.fillText('Spectral Lines (Wavelength λ)', x + 14, y + 20);
+
+    const plotX0 = x + 16;
+    const plotX1 = x + w - 270;
+    const plotY0 = y + 36;
+    const plotY1 = y + h - 18;
+    const midY = (plotY0 + plotY1) / 2;
+
+    // baseline
+    ctx.strokeStyle = '#ccc'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(plotX0, plotY1); ctx.lineTo(plotX1, plotY1); ctx.stroke();
+
+    // Use log scale for wavelength so lines spread nicely from ~91nm to ~7500nm+
+    const wlMin = 80, wlMax = 8000;
+    function wlToX(wl) {
+        const lf = Math.log10(wl), l0 = Math.log10(wlMin), l1 = Math.log10(wlMax);
+        return plotX0 + (lf - l0) / (l1 - l0) * (plotX1 - plotX0);
+    }
+
+    const useSeriesColor = document.getElementById('showSeriesColor').checked;
+
+    // faint reference comb (all possible lines)
+    ALL_TRANSITIONS.forEach(tr => {
+        const lx = wlToX(tr.wl);
+        const info = seriesInfo(tr.nLow);
+        ctx.strokeStyle = 'rgba(150,150,150,0.25)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(lx, plotY0 + 6);
+        ctx.lineTo(lx, plotY1 - 6);
+        ctx.stroke();
+    });
+
+    // history lines (actual transitions that occurred), brighter
+    const seen = new Set();
+    history.forEach(tr => {
+        const nHigh = Math.max(tr.from, tr.to);
+        const nLow  = Math.min(tr.from, tr.to);
+        if (nHigh === nLow) return;
+        const key = nHigh + '-' + nLow;
+        const wl = wavelengthNM(nHigh, nLow);
+        const lx = wlToX(wl);
+        const info = seriesInfo(nLow);
+        const inVisible = (wl >= 380 && wl <= 750);
+        const color = useSeriesColor
+            ? (inVisible ? wavelengthToColor(wl) : info.color)
+            : '#333';
+
+        const isLatest = (flashLine && flashLine.nHigh === nHigh && flashLine.nLow === nLow);
+        const visible = isLatest ? flashState : true;
+
+        if (visible) {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = isLatest ? 3.5 : 2.2;
+            ctx.beginPath();
+            ctx.moveTo(lx, plotY0);
+            ctx.lineTo(lx, plotY1);
+            ctx.stroke();
+        }
+        seen.add(key);
+    });
+
+    // axis labels (wavelength tick marks) — numbers only, no "nm" unit
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'center';
+    const tickWLs = [100, 200, 400, 500, 600, 700, 1000, 2000, 5000];
+    // Pre-compute x positions so we can nudge labels apart if they'd overlap (600/700 sit close together)
+    const tickPositions = tickWLs.map(wl => ({ wl, lx: wlToX(wl) }))
+                                   .filter(t => t.lx >= plotX0 && t.lx <= plotX1);
+    for (let i = 0; i < tickPositions.length; i++) {
+        const { wl, lx } = tickPositions[i];
+        const inVisibleTick = (wl >= 400 && wl <= 700);
+        ctx.strokeStyle = inVisibleTick ? '#bbb' : '#ddd';
+        ctx.beginPath(); ctx.moveTo(lx, plotY1); ctx.lineTo(lx, plotY1 + 4); ctx.stroke();
+
+        // Nudge label horizontally away from its neighbor when ticks are closer than ~26px apart
+        let labelX = lx;
+        const prev = tickPositions[i - 1];
+        const next = tickPositions[i + 1];
+        if (prev && (lx - prev.lx) < 26) labelX += 7;
+        if (next && (next.lx - lx) < 26) labelX -= 7;
+
+        ctx.fillStyle = inVisibleTick ? '#777' : '#999';
+        ctx.fillText(String(wl), labelX, plotY1 + 15);
+    }
+
+    // Spectral region labels with arrows: <- Ultraviolet -- Visible Light -- Infrared ->
+    const regionY = plotY1 + 32;
+    const xUVStart   = plotX0;
+    const xUVVisBound = wlToX(380);
+    const xVisIRBound = wlToX(750);
+    const xIREnd      = plotX1;
+
+    function drawRegionSegment(x0, x1, label, color) {
+        const segMidX = (x0 + x1) / 2;
+        ctx.strokeStyle = color;
+        ctx.fillStyle   = color;
+        ctx.lineWidth = 1.2;
+        // horizontal line with small tick marks at both ends
+        ctx.beginPath();
+        ctx.moveTo(x0, regionY);
+        ctx.lineTo(x1, regionY);
+        ctx.stroke();
+        // label, centered, with a small white halo so it reads clearly over the line
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#fafbfc';
+        ctx.fillRect(segMidX - 46, regionY - 8, 92, 14);
+        ctx.fillStyle = color;
+        ctx.fillText(label, segMidX, regionY + 3);
+    }
+
+    drawRegionSegment(xUVStart, xUVVisBound, 'Ultraviolet', '#000000');
+    drawRegionSegment(xUVVisBound, xVisIRBound, 'Visible Light', '#2ca060');
+    drawRegionSegment(xVisIRBound, xIREnd, 'Infrared', '#888888');
+
+    // Arrowheads at the far left (<-) and far right (->) ends of the region strip
+    ctx.fillStyle = '#000000';
+    ctx.beginPath();
+    ctx.moveTo(xUVStart, regionY);
+    ctx.lineTo(xUVStart + 7, regionY - 4);
+    ctx.lineTo(xUVStart + 7, regionY + 4);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = '#888888';
+    ctx.beginPath();
+    ctx.moveTo(xIREnd, regionY);
+    ctx.lineTo(xIREnd - 7, regionY - 4);
+    ctx.lineTo(xIREnd - 7, regionY + 4);
+    ctx.closePath();
+    ctx.fill();
+
+    // λ readout box on right
+    const boxX = plotX1 + 20, boxY = y + 14, boxW = 230, boxH = h - 28;
+    ctx.fillStyle = '#fff'; ctx.strokeStyle = '#d0d7de'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.roundRect(boxX, boxY, boxW, boxH, 6); ctx.fill(); ctx.stroke();
+
+    ctx.textAlign = 'left';
+    if (flashLine) {
+        const info = seriesInfo(flashLine.nLow);
+        ctx.fillStyle = '#333'; ctx.font = 'bold 13px sans-serif';
+        ctx.fillText(flashLine.isEmission ? 'Emission Spectrum' : 'Absorption Spectrum', boxX + 12, boxY + 20);
+        const inVisibleBox = (flashLine.wl >= 380 && flashLine.wl <= 750);
+        ctx.fillStyle = useSeriesColor
+            ? (inVisibleBox ? wavelengthToColor(flashLine.wl) : info.color)
+            : '#0078d4';
+        ctx.font = 'bold 17px sans-serif';
+        ctx.fillText('λ = ' + flashLine.wl.toFixed(1) + ' nm', boxX + 12, boxY + 44);
+        ctx.fillStyle = '#666'; ctx.font = '12px sans-serif';
+        ctx.fillText(`n=${flashLine.nHigh} → n=${flashLine.nLow}`, boxX + 12, boxY + 63);
+        ctx.fillText(info.name + ' series · ' + info.region, boxX + 12, boxY + 80);
+    } else {
+        ctx.fillStyle = '#999'; ctx.font = '12px sans-serif';
+        ctx.fillText('No transition yet', boxX + 12, boxY + 30);
+        ctx.font = '11px sans-serif';
+        ctx.fillText('Click an orbit number to', boxX + 12, boxY + 50);
+        ctx.fillText('start a transition.', boxX + 12, boxY + 66);
+    }
+
+    ctx.restore();
+}
+
+/* ============================================================
+   Transition info box (left sidebar)
+   ============================================================ */
+function updateTransitionInfo(from, to, wl, info) {
+    const isEmission = to < from;
+    const dE = Math.abs(energy(from) - energy(to));
+    document.getElementById('transitionInfo').innerHTML =
+        `<strong>${isEmission ? '🔻 Photon Emission' : '🔺 Photon Absorption'}</strong><br>
+        n=${from} → n=${to}<br>
+        ΔE = ${dE.toFixed(2)} eV<br>
+        <span class="big-lambda">λ = ${wl.toFixed(1)} nm</span><br>
+        ${info.name} series (${info.region})`;
+}
+
+/* ============================================================
+   Main draw
+   ============================================================ */
+function draw() {
+    ctx.clearRect(0, 0, W, H);
+    drawOrbitPanel();
+    drawEnergyPanel();
+    drawSpectrumPanel();
+}
+
+/* ============================================================
+   Flashing for the most recent spectral line
+   ============================================================ */
+function startFlashing() {
+    if (flashTimer) clearInterval(flashTimer);
+    flashTimer = setInterval(() => {
+        flashState = !flashState;
+        draw();
+    }, 450);
+}
+
+/* ============================================================
+   Event listeners
+   ============================================================ */
+document.getElementById('showHistory').addEventListener('change', draw);
+document.getElementById('showSeriesColor').addEventListener('change', draw);
+
+/* ============================================================
+   Init
+   ============================================================ */
+refreshOrbitButtons();
+resetSim();
+startFlashing();
+</script>
+</body>
+</html>

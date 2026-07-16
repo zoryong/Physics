@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Two-Source Interference Simulation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f5f6f8;
+            margin: 0;
+        }
+        header.page-head{
+            background:linear-gradient(135deg,#123d63 0%,#0078d4 55%,#2f8fdb 100%);
+            color:#fff;
+            padding:34px 26px 38px;
+        }
+        header.page-head .eyebrow{
+            font-size:12.5px;letter-spacing:.08em;color:#ffb37a;
+            font-weight:700;margin-bottom:10px;text-decoration:none;display:inline-block;transition:color .15s;
+        }
+        header.page-head .eyebrow:hover{color:#fff;text-decoration:underline;}
+        header.page-head h1{
+            font-size:clamp(20px,3.6vw,28px);font-weight:800;margin:0 0 8px;letter-spacing:-.01em;color:#fff;
+        }
+        header.page-head p{color:#dceaf6;font-size:13.5px;margin:0;max-width:660px;line-height:1.6;}
+        .stage{
+            display:flex; justify-content:center; align-items:flex-start;
+            padding:20px;
+        }
+        footer.copyright{margin:0 20px 26px;font-size:11.5px;color:#9AA2B1;text-align:center;}
+        footer.copyright .copyright-link{color:#9AA2B1;text-decoration:underline;text-underline-offset:2px;}
+        footer.copyright .copyright-link:hover{color:#0078d4;}
+        .container {
+            display: flex;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+        }
+        .controls {
+            width: 300px;
+            padding: 25px;
+            background-color: #f8f9fa;
+            border-right: 1px solid #e0e0e0;
+            display: flex; flex-direction: column; gap: 18px;
+        }
+        .controls h2 {
+            margin: 0 0 4px 0;
+            font-size: 18px; font-weight: 700; color: #111;
+            border-bottom: 2px solid #0078d4;
+            padding-bottom: 8px; line-height: 1.4;
+        }
+        .info-box {
+            background: #fff;
+            border: 1px solid #d0d7de;
+            border-radius: 8px;
+            padding: 14px 16px;
+            font-size: 13px; color: #444; line-height: 1.7;
+        }
+        .info-box strong { color: #333; font-size: 13.5px; }
+        .info-box .source-s1 { color: #2b6fe0; font-weight: 700; }
+        .info-box .source-s2 { color: #cc3333; font-weight: 700; }
+        .result-box {
+            background: #fff;
+            border: 1.5px solid #d0d7de;
+            border-radius: 8px;
+            padding: 14px 16px;
+            font-size: 13px; color: #444; line-height: 1.8;
+            min-height: 120px;
+        }
+        .result-box strong { color: #333; }
+        .hint-box {
+            background: #f0f6ff;
+            border: 1px solid #b8d0f0;
+            border-radius: 8px;
+            padding: 12px 14px;
+            font-size: 12.5px; color: #446;
+            line-height: 1.65;
+        }
+        .canvas-container {
+            padding: 20px;
+            display: flex; justify-content: center; align-items: flex-start;
+            background-color: #ffffff;
+        }
+        .canvases { display: flex; flex-direction: column; gap: 14px; }
+        canvas {
+            border: 1px solid #e0e0e0;
+            background-color: #ffffff;
+            border-radius: 8px;
+            display: block;
+        }
+        #simCanvas { cursor: crosshair; }
+    </style>
+</head>
+<body>
+<header class="page-head">
+  <a class="eyebrow" href="https://physics.physicsgon.workers.dev">An's Physics</a>
+  <h1>Two-Source Interference</h1>
+  <p>Wavefronts spreading from two point sources overlap to create regions of constructive and destructive interference. Click anywhere on the diagram to measure the path-length difference at that point.</p>
+</header>
+
+<div class="stage">
+<div class="container">
+    <div class="controls">
+        <h2>Two-Source<br>Interference</h2>
+        <div class="info-box">
+            <strong>🔵 S₁</strong> &nbsp;–&nbsp; <span class="source-s1">Blue source</span><br>
+            <strong>🔴 S₂</strong> &nbsp;–&nbsp; <span class="source-s2">Red source</span><br><br>
+            <strong>——</strong>&ensp; Crest (wave peak)<br>
+            <strong>- - -</strong>&ensp; Trough (wave valley)<br><br>
+            Each source shows <strong>7 crests</strong> and <strong>7 troughs</strong>, spaced one wavelength (λ) apart.
+        </div>
+        <div class="result-box" id="result-box">
+            <strong>📍 Click on the diagram</strong><br><br>
+            Click anywhere on the wavefront pattern to place an observation point (●).<br><br>
+            The path lengths from S₁ and S₂ will be calculated and the interference type will be determined.
+        </div>
+        <div class="hint-box">
+            💡 <strong>Interference condition</strong><br>
+            • <strong>Constructive</strong>: |d₁ − d₂| = nλ<br>
+            • <strong>Destructive</strong>: |d₁ − d₂| = (n+½)λ<br><br>
+            The lower diagram shows sinusoidal waves from S₁ and S₂ meeting at P. Both waves start at a <strong>crest</strong>.
+        </div>
+    </div>
+    <div class="canvas-container">
+        <div class="canvases">
+            <canvas id="simCanvas" width="840" height="480"></canvas>
+            <canvas id="waveCanvas" width="840" height="220"></canvas>
+        </div>
+    </div>
+</div>
+</div>
+
+<footer class="copyright">Copyright © 2026 <a href="mailto:physicsgon@gmail.com" class="copyright-link">physicsgon@gmail.com</a> . All rights reserved.</footer>
+
+<script>
+/* ═══════════════════════════════════════
+   SHARED CONSTANTS
+═══════════════════════════════════════ */
+const LAMBDA   = 52;
+const N_CRESTS = 7, N_TROUGHS = 7;
+
+/* ═══════════════════════════════════════
+   CANVAS 1 — Wavefront diagram
+═══════════════════════════════════════ */
+const canvas = document.getElementById('simCanvas');
+const W = canvas.width, H = canvas.height;   // logical (CSS-pixel) size
+const DPR = window.devicePixelRatio || 1;
+canvas.width  = Math.round(W * DPR);
+canvas.height = Math.round(H * DPR);
+canvas.style.width  = W + 'px';
+canvas.style.height = H + 'px';
+const ctx = canvas.getContext('2d');
+ctx.scale(DPR, DPR);
+
+const S1 = { x: W/2 - 90, y: H - 55, color: '#2b6fe0', label: 'S₁' };
+const S2 = { x: W/2 + 90, y: H - 55, color: '#cc3333', label: 'S₂' };
+
+let clickPt = null;
+
+function drawArc(cx, cy, r, color, dash, lineW) {
+    if (r <= 0) return;
+    ctx.save();
+    ctx.strokeStyle = color; ctx.lineWidth = lineW; ctx.setLineDash(dash);
+    ctx.beginPath(); ctx.arc(cx, cy, r, Math.PI, 2*Math.PI); ctx.stroke();
+    ctx.restore();
+}
+
+function drawWavefronts(src) {
+    const col = src.color;
+    const r = parseInt(col.slice(1,3),16), g = parseInt(col.slice(3,5),16), b = parseInt(col.slice(5,7),16);
+    const rgba = (a) => `rgba(${r},${g},${b},${a})`;
+    for (let n = 1; n <= N_CRESTS; n++) {
+        drawArc(src.x, src.y, n*LAMBDA, rgba(0.82*(1-(n-1)/(N_CRESTS+2))), [], 1.8);
+    }
+    for (let n = 1; n <= N_TROUGHS; n++) {
+        drawArc(src.x, src.y, (n-0.5)*LAMBDA, rgba(0.82*0.7*(1-(n-1)/(N_TROUGHS+2))), [6,5], 1.4);
+    }
+}
+
+function drawSource(src) {
+    const grad = ctx.createRadialGradient(src.x,src.y,2,src.x,src.y,18);
+    grad.addColorStop(0, src.color+'aa'); grad.addColorStop(1, src.color+'00');
+    ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(src.x,src.y,18,0,2*Math.PI); ctx.fill();
+    ctx.fillStyle = src.color; ctx.beginPath(); ctx.arc(src.x,src.y,9,0,2*Math.PI); ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.fillStyle = src.color; ctx.font = 'bold 14px serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    ctx.fillText(src.label, src.x, src.y-13);
+}
+
+function drawDistanceLine(src, pt, color) {
+    ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = 1.5;
+    ctx.setLineDash([6,4]); ctx.globalAlpha = 0.6;
+    ctx.beginPath(); ctx.moveTo(src.x,src.y); ctx.lineTo(pt.x,pt.y); ctx.stroke();
+    ctx.restore();
+}
+
+function drawDistLabel(src, pt, text, color, side) {
+    const mx=(src.x+pt.x)/2, my=(src.y+pt.y)/2;
+    const dx=pt.x-src.x, dy=pt.y-src.y, len=Math.hypot(dx,dy)||1;
+    const tx=mx+(-dy/len)*side*18, ty=my+(dx/len)*side*18;
+    ctx.save(); ctx.font='bold 13px sans-serif';
+    const tw=ctx.measureText(text).width+14;
+    ctx.fillStyle=color+'cc'; ctx.beginPath(); ctx.roundRect(tx-tw/2,ty-10,tw,20,6); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(text,tx,ty); ctx.restore();
+}
+
+function drawObsPoint(pt) {
+    ctx.save(); ctx.shadowColor='rgba(0,0,0,0.35)'; ctx.shadowBlur=8;
+    ctx.fillStyle='#111'; ctx.beginPath(); ctx.arc(pt.x,pt.y,8,0,2*Math.PI); ctx.fill();
+    ctx.restore();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.arc(pt.x,pt.y,8,0,2*Math.PI); ctx.stroke();
+    ctx.fillStyle='#111'; ctx.font='bold 13px sans-serif';
+    ctx.textAlign='left'; ctx.textBaseline='bottom';
+    ctx.fillText('P', pt.x+11, pt.y-4);
+}
+
+function draw() {
+    ctx.clearRect(0,0,W,H);
+    const bg=ctx.createLinearGradient(0,0,0,H);
+    bg.addColorStop(0,'#f0f5ff'); bg.addColorStop(1,'#e8f0fa');
+    ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+    drawWavefronts(S2); drawWavefronts(S1);
+    if (clickPt) {
+        drawDistanceLine(S1,clickPt,'#2b6fe0');
+        drawDistanceLine(S2,clickPt,'#cc3333');
+        const d1=Math.hypot(clickPt.x-S1.x,clickPt.y-S1.y)/LAMBDA;
+        const d2=Math.hypot(clickPt.x-S2.x,clickPt.y-S2.y)/LAMBDA;
+        drawDistLabel(S1,clickPt,`d₁ = ${d1.toFixed(1)}λ`,'#2b6fe0',-1);
+        drawDistLabel(S2,clickPt,`d₂ = ${d2.toFixed(1)}λ`,'#cc3333', 1);
+        drawObsPoint(clickPt);
+    }
+    drawSource(S1); drawSource(S2);
+    ctx.save(); ctx.strokeStyle='rgba(100,120,160,0.22)'; ctx.lineWidth=1;
+    ctx.setLineDash([4,4]); ctx.beginPath();
+    ctx.moveTo(20,H-55); ctx.lineTo(W-20,H-55); ctx.stroke(); ctx.restore();
+    if (!clickPt) {
+        ctx.save(); ctx.fillStyle='rgba(80,100,140,0.52)'; ctx.font='14px sans-serif';
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText('Click anywhere on the wavefront pattern to place point P', W/2, 26);
+        ctx.restore();
+    }
+}
+
+function updateResult(pt) {
+    const d1=Math.hypot(pt.x-S1.x,pt.y-S1.y)/LAMBDA;
+    const d2=Math.hypot(pt.x-S2.x,pt.y-S2.y)/LAMBDA;
+    const diff=Math.abs(d1-d2);
+    const nInt=Math.round(diff), nHalf=Math.round(diff*2)/2;
+    const toInt=Math.abs(diff-nInt), toHalf=Math.abs(diff-nHalf);
+    let typeHTML, borderColor;
+    if (toInt<=0.15) {
+        typeHTML=`<span style="color:#2ca060;font-weight:700;">🔊 Constructive Interference</span><br>
+                  <span style="font-size:12px;color:#2ca060;">|d₁ − d₂| ≈ ${nInt}λ &nbsp;(n = ${nInt})</span>`;
+        borderColor='#2ca060';
+    } else if (toHalf<=0.15) {
+        typeHTML=`<span style="color:#cc3333;font-weight:700;">🔇 Destructive Interference</span><br>
+                  <span style="font-size:12px;color:#cc3333;">|d₁ − d₂| ≈ ${nHalf}λ</span>`;
+        borderColor='#cc3333';
+    } else {
+        typeHTML=`<span style="color:#7755cc;font-weight:700;">〰️ Partial Interference</span>`;
+        borderColor='#7755cc';
+    }
+    document.getElementById('result-box').style.borderColor=borderColor;
+    document.getElementById('result-box').innerHTML=`
+        <strong>📍 Observation Point P</strong><br><br>
+        <span style="color:#2b6fe0;font-weight:700;">d₁</span> (P → S₁) = <strong>${d1.toFixed(1)} λ</strong><br>
+        <span style="color:#cc3333;font-weight:700;">d₂</span> (P → S₂) = <strong>${d2.toFixed(1)} λ</strong><br>
+        |d₁ − d₂| = <strong>${diff.toFixed(2)} λ</strong><br><br>${typeHTML}`;
+}
+
+/* ═══════════════════════════════════════
+   CANVAS 2 — Wave path diagram
+
+   DESIGN PRINCIPLE:
+   ─ lamV (px/λ) is FIXED → visual wavelength is identical for both waves
+     regardless of how many cycles each wave has.
+   ─ S₁ and S₂ are fixed at a constant pixel separation (D_lam × lamV).
+   ─ P is computed as the geometric intersection of two circles:
+       r1 = n1 × lamV  from S₁
+       r2 = n2 × lamV  from S₂
+   ─ The canvas HEIGHT is adjusted dynamically so P always fits inside.
+   ─ Both waves start at a CREST (cos phase, s=0 at source).
+═══════════════════════════════════════ */
+const wCanvas = document.getElementById('waveCanvas');
+const WW = wCanvas.width;    // 840 (fixed, logical)
+let W2_curH = wCanvas.height; // logical height — tracked separately since it resizes at runtime
+wCanvas.width  = Math.round(WW * DPR);
+wCanvas.height = Math.round(W2_curH * DPR);
+wCanvas.style.width  = WW + 'px';
+wCanvas.style.height = W2_curH + 'px';
+const wCtx = wCanvas.getContext('2d');
+wCtx.scale(DPR, DPR);
+
+// Fixed visual wavelength — same for both waves always
+const W2_LAM_V  = 40;    // px per λ
+
+// S₁S₂ pixel separation = (canvas-1 separation in λ) × lamV
+const W2_D_LAM  = Math.hypot(S2.x - S1.x, S2.y - S1.y) / LAMBDA; // ≈ 3.46λ
+const W2_S1S2PX = W2_D_LAM * W2_LAM_V;   // ≈ 138 px
+
+// Fixed x for both sources (left side)
+const W2_SRC_X  = 75;
+// Vertical padding around the triangle
+const W2_PAD_Y  = 38;
+const W2_PAD_X  = 55;   // right margin for P label
+
+const W2_AMP    = 15;   // wave perpendicular amplitude (px)
+const W2_COL1   = '#2b6fe0';
+const W2_COL2   = '#cc3333';
+
+/* ── Compute P position (pixel coords) + required canvas height ─────────
+   In local coords: S₁=(0,0), S₂=(0, W2_S1S2PX), both on left vertical axis.
+   P = right-side intersection of circle r1=n1·lamV (centred S₁)
+                                 and circle r2=n2·lamV (centred S₂).
+   Law of cosines at S₁: cosA = (r1²+d²−r2²)/(2·r1·d),  d=W2_S1S2PX
+   Px_local = r1·sinA  (always positive → rightward)
+   Py_local = r1·cosA  (positive = below S₁)
+
+   Canvas layout:
+   ─ S₁ is placed at (W2_SRC_X, S1cy) where S1cy centres the S₁S₂ pair.
+   ─ Canvas height grows to accommodate P if needed.                       */
+function computeW2Layout(n1, n2) {
+    const d  = W2_S1S2PX;
+    const r1 = n1 * W2_LAM_V;
+    const r2 = n2 * W2_LAM_V;
+
+    // Triangle inequality — must have a real intersection
+    if (r1 + r2 <= d + 1e-6 || Math.abs(r1 - r2) >= d - 1e-6) return null;
+
+    const cosA = (r1*r1 + d*d - r2*r2) / (2*r1*d);
+    if (Math.abs(cosA) > 1 - 1e-9) return null;
+    const sinA = Math.sqrt(1 - cosA*cosA);
+
+    const Px_l = r1 * sinA;   // local x of P (rightward from sources)
+    const Py_l = r1 * cosA;   // local y of P (down from S₁)
+
+    // Vertical extent in local coords
+    const minY_l = Math.min(0, Py_l);           // top of bounding box
+    const maxY_l = Math.max(d, Py_l);           // bottom
+    const spanY  = maxY_l - minY_l;
+
+    // Canvas height: at least 220, grows to fit
+    const needH = spanY + 2 * W2_PAD_Y;
+    const WH    = Math.max(220, Math.ceil(needH));
+
+    // Place S₁S₂ vertically centred, offset so top of bbox has W2_PAD_Y margin
+    const S1cy = W2_PAD_Y - minY_l;   // S₁ y in canvas
+    const S2cy = S1cy + d;            // S₂ y in canvas
+    const Pcy  = S1cy + Py_l;         // P  y in canvas
+    const Pcx  = W2_SRC_X + Px_l;    // P  x in canvas
+
+    return { WH, S1c:{x:W2_SRC_X, y:S1cy}, S2c:{x:W2_SRC_X, y:S2cy},
+             Pc:{x:Pcx, y:Pcy}, lamV:W2_LAM_V };
+}
+
+/* ── Wave drawing ──────────────────────────────────────────────────────
+   Draws nWaves cosine cycles from (x0,y0) toward (x1,y1).
+   lamV = visual wavelength in px/λ (same for both waves → equal spacing).
+   Arc length = nWaves × lamV px.  Direction = unit vector (x0,y0)→(x1,y1).
+   Phase: cos(2π·s/lamV), s=arc distance from source → CREST at s=0.     */
+function drawWave2(x0, y0, x1, y1, nWaves, lamV, color) {
+    const dx = x1-x0, dy = y1-y0;
+    const pathLen = Math.hypot(dx, dy);
+    if (pathLen < 1) return;
+    const ux = dx/pathLen, uy = dy/pathLen;
+
+    // Perpendicular unit vector, chosen so that ny < 0 (screen-upward).
+    // This ensures cos(0)=1 → first displacement is visually upward → CREST.
+    // Raw left-perp: (-uy, ux). If ny=ux > 0 (downward), flip to (uy, -ux).
+    let nx, ny;
+    if (ux >= 0) {          // wave travels rightward (both S₁→P and S₂→P)
+        nx =  uy; ny = -ux; // right-perp, always points upward when ux>0
+    } else {
+        nx = -uy; ny =  ux; // left-perp
+    }
+    // Final safety: if ny still > 0 (screen-down), flip
+    if (ny > 0) { nx = -nx; ny = -ny; }
+
+    const arcLen = nWaves * lamV;   // total wave arc in px
+    if (arcLen < 2) return;
+
+    wCtx.save();
+    wCtx.strokeStyle = color;
+    wCtx.lineWidth   = 2.4;
+    wCtx.setLineDash([]);
+    wCtx.beginPath();
+    const steps = 1200;
+    for (let i = 0; i <= steps; i++) {
+        // s=0: cos(0)=1, displacement along upward nx,ny → visual CREST at source
+        // s=nWaves·lamV: cos(2π·n)=1 → CREST at P when nWaves is integer
+        const s    = arcLen * (i / steps);
+        const disp = W2_AMP * Math.cos(2 * Math.PI * s / lamV);
+        const qx   = x0 + ux * s + nx * disp;
+        const qy   = y0 + uy * s + ny * disp;
+        i === 0 ? wCtx.moveTo(qx, qy) : wCtx.lineTo(qx, qy);
+    }
+    wCtx.stroke();
+    wCtx.restore();
+}
+
+/* λ-label pill at wave midpoint */
+function drawWave2Label(x0, y0, x1, y1, text, color, lamV, nWaves, side) {
+    // Midpoint along the arc (not the straight line)
+    const dx=x1-x0, dy=y1-y0, pathLen=Math.hypot(dx,dy)||1;
+    const ux=dx/pathLen, uy=dy/pathLen;
+    const nx=-uy, ny=ux;
+    const arcLen = nWaves * lamV;
+    const sMid   = arcLen * 0.5;
+    const mx = x0 + ux*sMid, my = y0 + uy*sMid;
+    const tx = mx + nx*side*(W2_AMP+18);
+    const ty = my + ny*side*(W2_AMP+18);
+    wCtx.save();
+    wCtx.font='bold 13px sans-serif';
+    const tw=wCtx.measureText(text).width+14;
+    const cr=parseInt(color.slice(1,3),16), cg=parseInt(color.slice(3,5),16), cb=parseInt(color.slice(5,7),16);
+    wCtx.fillStyle=`rgba(${cr},${cg},${cb},0.90)`;
+    wCtx.beginPath(); wCtx.roundRect(tx-tw/2, ty-11, tw, 22, 6); wCtx.fill();
+    wCtx.fillStyle='#fff'; wCtx.textAlign='center'; wCtx.textBaseline='middle';
+    wCtx.fillText(text, tx, ty);
+    wCtx.restore();
+}
+
+/* Source dot */
+function drawW2Src(x, y, color, label) {
+    const grad=wCtx.createRadialGradient(x,y,2,x,y,16);
+    grad.addColorStop(0,color+'bb'); grad.addColorStop(1,color+'00');
+    wCtx.fillStyle=grad; wCtx.beginPath(); wCtx.arc(x,y,16,0,2*Math.PI); wCtx.fill();
+    wCtx.fillStyle=color; wCtx.beginPath(); wCtx.arc(x,y,9,0,2*Math.PI); wCtx.fill();
+    wCtx.strokeStyle='#fff'; wCtx.lineWidth=2; wCtx.stroke();
+    wCtx.fillStyle=color; wCtx.font='bold 14px serif';
+    wCtx.textAlign='right'; wCtx.textBaseline='middle';
+    wCtx.fillText(label, x-14, y);
+}
+
+/* P dot */
+function drawW2P(px, py) {
+    wCtx.save();
+    wCtx.shadowColor='rgba(0,0,0,0.35)'; wCtx.shadowBlur=8;
+    wCtx.fillStyle='#111';
+    wCtx.beginPath(); wCtx.arc(px, py, 10, 0, 2*Math.PI); wCtx.fill();
+    wCtx.restore();
+    wCtx.strokeStyle='#fff'; wCtx.lineWidth=2;
+    wCtx.beginPath(); wCtx.arc(px, py, 10, 0, 2*Math.PI); wCtx.stroke();
+    wCtx.fillStyle='#111'; wCtx.font='bold 14px sans-serif';
+    wCtx.textAlign='left'; wCtx.textBaseline='middle';
+    wCtx.fillText('P', px+14, py);
+}
+
+function drawWaveCanvas() {
+    // Distances in wavelengths from canvas-1
+    const n1 = clickPt ? Math.hypot(clickPt.x-S1.x, clickPt.y-S1.y) / LAMBDA : 5;
+    const n2 = clickPt ? Math.hypot(clickPt.x-S2.x, clickPt.y-S2.y) / LAMBDA : 5;
+
+    // Compute layout: fixed lamV, dynamic canvas height
+    const layout = computeW2Layout(n1, n2);
+    const WH = layout ? layout.WH : 220;
+
+    // Resize canvas height if needed (preserves width)
+    if (WH !== W2_curH) {
+        wCanvas.height = Math.round(WH * DPR);
+        wCanvas.style.height = WH + 'px';
+        wCtx.scale(DPR, DPR);   // re-apply: changing .height resets the canvas transform
+        W2_curH = WH;
+    }
+
+    wCtx.clearRect(0, 0, WW, WH);
+    const bg2 = wCtx.createLinearGradient(0, 0, 0, WH);
+    bg2.addColorStop(0, '#f0f5ff'); bg2.addColorStop(1, '#e8f0fa');
+    wCtx.fillStyle = bg2; wCtx.fillRect(0, 0, WW, WH);
+    wCtx.strokeStyle = '#e0e0e0'; wCtx.lineWidth = 1;
+    wCtx.strokeRect(0.5, 0.5, WW-1, WH-1);
+
+    if (!clickPt) {
+        // Static placeholder
+        const s1y = WH*0.30, s2y = WH*0.70;
+        drawW2Src(W2_SRC_X, s1y, W2_COL1, 'S₁');
+        drawW2Src(W2_SRC_X, s2y, W2_COL2, 'S₂');
+        drawW2P(WW - W2_PAD_X - 10, WH*0.50);
+        wCtx.fillStyle='rgba(80,100,140,0.50)'; wCtx.font='14px sans-serif';
+        wCtx.textAlign='center'; wCtx.textBaseline='middle';
+        wCtx.fillText('Click the upper diagram to show wave paths from S₁ and S₂ to P', WW/2, WH/2);
+        return;
+    }
+
+    if (!layout) {
+        wCtx.fillStyle='rgba(80,100,140,0.50)'; wCtx.font='14px sans-serif';
+        wCtx.textAlign='center'; wCtx.textBaseline='middle';
+        wCtx.fillText('Point is on or very near the S₁S₂ axis', WW/2, WH/2);
+        return;
+    }
+
+    const { S1c, S2c, Pc, lamV } = layout;
+
+    // ── Waves (drawn before dots so dots cover wave ends cleanly) ──
+    drawWave2(S1c.x, S1c.y, Pc.x, Pc.y, n1, lamV, W2_COL1);
+    drawWave2(S2c.x, S2c.y, Pc.x, Pc.y, n2, lamV, W2_COL2);
+
+    // ── λ-labels ──
+    drawWave2Label(S1c.x, S1c.y, Pc.x, Pc.y, `${n1.toFixed(1)}λ`, W2_COL1, lamV, n1, -1);
+    drawWave2Label(S2c.x, S2c.y, Pc.x, Pc.y, `${n2.toFixed(1)}λ`, W2_COL2, lamV, n2,  1);
+
+    // ── Dots on top ──
+    drawW2Src(S1c.x, S1c.y, W2_COL1, 'S₁');
+    drawW2Src(S2c.x, S2c.y, W2_COL2, 'S₂');
+    drawW2P(Pc.x, Pc.y);
+}
+
+/* ═══════════════════════════════════════
+   Interaction
+═══════════════════════════════════════ */
+canvas.addEventListener('click', (e) => {
+    const rect=canvas.getBoundingClientRect();
+    clickPt = {
+        x: (e.clientX-rect.left) * (W/rect.width),
+        y: (e.clientY-rect.top)  * (H/rect.height)
+    };
+    updateResult(clickPt);
+    draw();
+    drawWaveCanvas();
+});
+
+draw();
+drawWaveCanvas();
+</script>
+</body>
+</html>

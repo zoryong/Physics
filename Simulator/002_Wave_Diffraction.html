@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Wave Diffraction Simulation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f6f8; margin: 0;
+        }
+        header.page-head{
+            background:linear-gradient(135deg,#123d63 0%,#0078d4 55%,#2f8fdb 100%);
+            color:#fff;
+            padding:34px 26px 38px;
+        }
+        header.page-head .eyebrow{
+            font-size:12.5px;letter-spacing:.08em;color:#ffb37a;
+            font-weight:700;margin-bottom:10px;text-decoration:none;display:inline-block;transition:color .15s;
+        }
+        header.page-head .eyebrow:hover{color:#fff;text-decoration:underline;}
+        header.page-head h1{
+            font-size:clamp(20px,3.6vw,28px);font-weight:800;margin:0 0 8px;letter-spacing:-.01em;color:#fff;
+        }
+        header.page-head p{color:#dceaf6;font-size:13.5px;margin:0;max-width:660px;line-height:1.6;}
+        .stage{
+            display:flex; justify-content:center; align-items:flex-start;
+            padding:20px;
+        }
+        footer.copyright{margin:0 20px 26px;font-size:11.5px;color:#9AA2B1;text-align:center;}
+        footer.copyright .copyright-link{color:#9AA2B1;text-decoration:underline;text-underline-offset:2px;}
+        footer.copyright .copyright-link:hover{color:#0078d4;}
+        .container {
+            display: flex; background-color: white; border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1); overflow: hidden; border: 1px solid #e0e0e0;
+        }
+        .controls {
+            width: 300px; padding: 25px; background-color: #f8f9fa;
+            border-right: 1px solid #e0e0e0; display: flex; flex-direction: column; gap: 20px;
+        }
+        .controls h2 {
+            margin: 0 0 10px 0; font-size: 18px; font-weight: 700; color: #111;
+            border-bottom: 2px solid #0078d4; padding-bottom: 8px;
+        }
+        .control-group { display: flex; flex-direction: column; gap: 8px; }
+        .control-group label {
+            font-size: 14px; font-weight: 700; color: #222;
+            display: flex; justify-content: space-between;
+        }
+        .control-group label span { color: #0078d4; font-weight: 800; }
+        .control-group input[type="range"] { width: 100%; cursor: pointer; }
+        .info-box {
+            padding: 14px 16px; background-color: #eef4fb;
+            border: 1px solid #c5dcf0; border-radius: 8px;
+            font-size: 13px; color: #111; line-height: 2.0;
+        }
+        .info-box .info-row {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #d0e4f5; padding: 2px 0;
+        }
+        .info-box .info-row:last-child { border-bottom: none; }
+        .info-box .info-label { font-weight: 600; color: #444; }
+        .info-box .info-value { font-weight: 800; color: #0078d4; }
+        .formula-box {
+            margin-top: auto; padding: 14px 16px; background-color: #fffbf0;
+            border: 1px solid #f0d080; border-radius: 8px;
+            font-size: 12.5px; color: #333; line-height: 1.75;
+        }
+        .formula-box .formula-title {
+            font-weight: 700; font-size: 13px; color: #7a5800;
+            border-bottom: 1.5px solid #f0d080; padding-bottom: 6px; margin-bottom: 8px;
+        }
+        .formula-box .formula-main {
+            text-align: center; font-size: 14px; font-weight: 700; color: #333; margin-bottom: 8px;
+        }
+        .formula-box .calc-row {
+            display: flex; justify-content: space-between; font-size: 12px; padding: 1px 0;
+        }
+        .formula-box .calc-label { color: #666; }
+        .formula-box .calc-expr  { font-weight: 600; color: #1a6aaa; }
+        .formula-box .calc-result {
+            margin-top: 8px; padding-top: 7px; border-top: 1.5px solid #f0d080;
+            display: flex; justify-content: space-between; font-size: 13px; font-weight: 700;
+        }
+        .formula-box .result-label { color: #7a5800; }
+        .formula-box .result-value { color: #c05000; }
+        .canvas-container {
+            padding: 20px 20px 10px 20px; display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+        }
+        canvas { border-radius: 6px; display: block; }
+    </style>
+</head>
+<body>
+<header class="page-head">
+  <a class="eyebrow" href="https://physics.physicsgon.workers.dev">An's Physics</a>
+  <h1>Wave Diffraction</h1>
+  <p>A single-slit diffraction simulator. Adjust the wavelength and slit width to see how the diffracted wave spreads out, and compare the spread angle with the theoretical d sin θ = mλ condition.</p>
+</header>
+
+<div class="stage">
+<div class="container">
+    <div class="controls">
+        <h2>Wave Diffraction</h2>
+        <div class="control-group">
+            <label>Wavelength (λ) <span id="lam-val">50</span> px</label>
+            <input type="range" id="lam-slider" min="20" max="100" step="5" value="50">
+        </div>
+        <div class="control-group">
+            <label>Slit Width (d) <span id="slit-val">80</span> px</label>
+            <input type="range" id="slit-slider" min="20" max="220" step="10" value="80">
+        </div>
+        <div class="control-group">
+            <label>Wave Speed <span id="spd-val">3</span></label>
+            <input type="range" id="spd-slider" min="1" max="6" step="1" value="3">
+        </div>
+        <div class="info-box">
+            <div class="info-row">
+                <span class="info-label">Wavelength (λ)</span>
+                <span class="info-value" id="info-lam">—</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Slit Width (d)</span>
+                <span class="info-value" id="info-slit">—</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Ratio (λ/d)</span>
+                <span class="info-value" id="info-ratio">—</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Diffraction</span>
+                <span class="info-value" id="info-diff">—</span>
+            </div>
+        </div>
+        <div class="formula-box">
+            <div class="formula-title">Diffraction Condition</div>
+            <div class="formula-main">d sin θ = mλ</div>
+            <div class="calc-row"><span class="calc-label">1st minimum (m = 1)</span></div>
+            <div class="calc-row">
+                <span class="calc-label">sin θ = λ / d</span>
+                <span class="calc-expr" id="calc-sintheta">—</span>
+            </div>
+            <div class="calc-row">
+                <span class="calc-label">θ =</span>
+                <span class="calc-expr" id="calc-theta">—</span>
+            </div>
+            <div class="calc-result">
+                <span class="result-label">Spread angle</span>
+                <span class="result-value" id="calc-spread">—</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="canvas-container">
+        <canvas id="waveCanvas" width="840" height="500"></canvas>
+    </div>
+</div>
+</div>
+
+<footer class="copyright">Copyright © 2026 <a href="mailto:physicsgon@gmail.com" class="copyright-link">physicsgon@gmail.com</a> . All rights reserved.</footer>
+
+<script>
+const canvas = document.getElementById('waveCanvas');
+const W = canvas.width, H = canvas.height;    // logical (CSS-pixel) size, e.g. 840 x 500
+const DPR = window.devicePixelRatio || 1;
+canvas.width  = Math.round(W * DPR);
+canvas.height = Math.round(H * DPR);
+canvas.style.width  = W + 'px';
+canvas.style.height = H + 'px';
+const ctx = canvas.getContext('2d');
+ctx.scale(DPR, DPR);   // crisp text/vector overlay on retina displays
+
+const WALL_X = Math.round(W * 0.40);
+const WALL_W = 12;
+const SX     = WALL_X + WALL_W;
+
+// 오프스크린 캔버스: putImageData는 캔버스 transform(스케일)을 무시하므로,
+// 파동장(색상 필드)은 이 논리 해상도(W x H) 버퍼에 그대로 계산한 뒤
+// drawImage로 (DPR 스케일이 적용된) 화면 캔버스에 얹는다.
+const offCanvas = document.createElement('canvas');
+offCanvas.width  = W;
+offCanvas.height = H;
+const offCtx = offCanvas.getContext('2d');
+
+let phase = 0;
+
+function updateInfo(lam, slit) {
+    document.getElementById('lam-val').innerText   = lam;
+    document.getElementById('slit-val').innerText  = slit;
+    document.getElementById('spd-val').innerText   = document.getElementById('spd-slider').value;
+    document.getElementById('info-lam').innerText  = lam + ' px';
+    document.getElementById('info-slit').innerText = slit + ' px';
+    const ratio = lam / slit;
+    document.getElementById('info-ratio').innerText = ratio.toFixed(3);
+    document.getElementById('info-diff').innerText  =
+        ratio >= 1.0 ? 'Strong ★★★' : ratio >= 0.4 ? 'Moderate ★★' : 'Weak ★';
+    const sinT  = Math.min(ratio, 1.0);
+    const theta = Math.asin(sinT) * 180 / Math.PI;
+    document.getElementById('calc-sintheta').innerText = lam + ' / ' + slit + ' = ' + ratio.toFixed(3);
+    document.getElementById('calc-theta').innerText    = sinT >= 1 ? '90°' : theta.toFixed(1) + '°';
+    document.getElementById('calc-spread').innerText   = sinT >= 1 ? '≥ 90°' : '± ' + theta.toFixed(1) + '°';
+}
+
+function draw() {
+    const lam   = parseInt(document.getElementById('lam-slider').value);
+    const slitH = parseInt(document.getElementById('slit-slider').value);
+    const speed = parseInt(document.getElementById('spd-slider').value);
+
+    phase += speed * 0.07;
+    updateInfo(lam, slitH);
+
+    const slitCY  = H / 2;
+    const yTop    = slitCY - slitH / 2;
+    const yBottom = slitCY + slitH / 2;
+    const k       = 2 * Math.PI / lam;
+    const nSrc    = Math.max(12, Math.round(slitH / 5));
+
+    // ── 정규화 기준: 위상에 무관한 고정값 (RMS 방식) ──
+    // 각 점광원이 r=lam 에서 기여하는 진폭의 RMS 합
+    // cos²의 평균 = 0.5이므로: norm = nSrc * (1/√lam) * √0.5
+    const norm = nSrc * (1.0 / Math.sqrt(lam)) * Math.SQRT1_2;
+
+    // ── 전체 캔버스를 단일 ImageData로 처리 (putImageData 1회) ──
+    const imgData = offCtx.createImageData(W, H);
+    const data    = imgData.data;
+
+    for (let py = 0; py < H; py++) {
+        for (let px = 0; px < W; px++) {
+            let val;
+
+            if (px < WALL_X) {
+                /* 왼쪽: 평면파 */
+                val = Math.cos(k * px - phase);
+
+            } else if (px < SX) {
+                /* 슬릿 벽 영역 — 위/아래는 어둡게, 틈은 투명 처리 */
+                if (py < yTop || py > yBottom) {
+                    // 벽: 짙은 적갈색
+                    const idx = (py * W + px) * 4;
+                    data[idx]     = 138;
+                    data[idx + 1] = 58;
+                    data[idx + 2] = 74;
+                    data[idx + 3] = 255;
+                    continue;
+                } else {
+                    // 슬릿 틈: 하얗게
+                    const idx = (py * W + px) * 4;
+                    data[idx]     = 255;
+                    data[idx + 1] = 255;
+                    data[idx + 2] = 255;
+                    data[idx + 3] = 255;
+                    continue;
+                }
+
+            } else {
+                /* 오른쪽: 하위헌스 합성 */
+                let re = 0;
+                for (let s = 0; s < nSrc; s++) {
+                    const sy = yTop + (s + 0.5) * (slitH / nSrc);
+                    const dx = px - SX;
+                    const dy = py - sy;
+                    const r  = Math.sqrt(dx * dx + dy * dy);
+                    if (r < 0.5) { re += 1; continue; }
+                    re += (1.0 / Math.sqrt(r)) * Math.cos(k * r - phase);
+                }
+                val = re / norm;
+            }
+
+            // val → 색상 (−1: 짙은 남색, +1: 밝은 하늘색)
+            const t   = (Math.max(-1, Math.min(1, val)) + 1) / 2;
+            const idx = (py * W + px) * 4;
+            data[idx]     = Math.round(20  + 160 * t);
+            data[idx + 1] = Math.round(50  + 140 * t);
+            data[idx + 2] = Math.round(120 + 100 * t);
+            data[idx + 3] = 255;
+        }
+    }
+
+    offCtx.putImageData(imgData, 0, 0);   // 단 1회
+    ctx.clearRect(0, 0, W, H);
+    ctx.drawImage(offCanvas, 0, 0);        // 논리 해상도 파동장을 DPR 캔버스 위로
+
+    // 슬릿 벽 테두리 강조
+    ctx.strokeStyle = '#5a2030'; ctx.lineWidth = 1.5;
+    ctx.strokeRect(WALL_X, 0,       WALL_W, yTop);
+    ctx.strokeRect(WALL_X, yBottom, WALL_W, H - yBottom);
+
+    /* ══════════════════════════════════════
+       4. 화살표 + 레이블
+    ══════════════════════════════════════ */
+    // 왼쪽 진행 방향 화살표
+    const ax1 = 18, ax2 = WALL_X - 60;
+    ctx.beginPath();
+    ctx.moveTo(ax1, slitCY); ctx.lineTo(ax2, slitCY);
+    ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 2.2; ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(ax2, slitCY);
+    ctx.lineTo(ax2 - 11, slitCY - 6); ctx.lineTo(ax2 - 11, slitCY + 6);
+    ctx.closePath(); ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.fill();
+
+    // 레이블
+    ctx.font = 'bold 13px Segoe UI, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.90)';
+    ctx.textAlign = 'center';
+    ctx.fillText('Incident Wave',   WALL_X / 2,        20);
+    ctx.fillText('Diffracted Wave', SX + (W - SX) / 2, 20);
+
+    // 슬릿 폭 화살표
+    const bx = SX + 26;
+    ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+    ctx.fillStyle   = 'rgba(255,255,255,0.85)';
+    ctx.lineWidth   = 1.5;
+    ctx.beginPath(); ctx.moveTo(bx, yTop + 8); ctx.lineTo(bx, yBottom - 8); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(bx,yTop);    ctx.lineTo(bx-5,yTop+10);    ctx.lineTo(bx+5,yTop+10);    ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(bx,yBottom); ctx.lineTo(bx-5,yBottom-10); ctx.lineTo(bx+5,yBottom-10); ctx.closePath(); ctx.fill();
+    ctx.font = 'bold 12px Segoe UI, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillStyle = 'rgba(255,255,255,0.90)';
+    ctx.fillText('d = ' + slitH + ' px', bx + 8, slitCY + 5);
+
+    requestAnimationFrame(draw);
+}
+
+draw();
+</script>
+</body>
+</html>

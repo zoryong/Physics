@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Photoelectric Effect</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f5f6f8;
+            margin: 0;
+        }
+        header.page-head{
+            background:linear-gradient(135deg,#123d63 0%,#0078d4 55%,#2f8fdb 100%);
+            color:#fff;
+            padding:34px 26px 38px;
+        }
+        header.page-head .eyebrow{
+            font-size:12.5px;letter-spacing:.08em;color:#ffb37a;
+            font-weight:700;margin-bottom:10px;text-decoration:none;display:inline-block;transition:color .15s;
+        }
+        header.page-head .eyebrow:hover{color:#fff;text-decoration:underline;}
+        header.page-head h1{
+            font-size:clamp(20px,3.6vw,28px);font-weight:800;margin:0 0 8px;letter-spacing:-.01em;color:#fff;
+        }
+        header.page-head p{color:#dceaf6;font-size:13.5px;margin:0;max-width:660px;line-height:1.6;}
+        .stage{
+            display:flex; justify-content:center; align-items:flex-start;
+            padding:20px;
+        }
+        footer.copyright{margin:0 20px 26px;font-size:11.5px;color:#9AA2B1;text-align:center;}
+        footer.copyright .copyright-link{color:#9AA2B1;text-decoration:underline;text-underline-offset:2px;}
+        footer.copyright .copyright-link:hover{color:#0078d4;}
+        .container {
+            display: flex;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+        }
+        .controls {
+            width: 300px;
+            padding: 25px;
+            background-color: #f8f9fa;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .controls h2 {
+            margin: 0 0 5px 0;
+            font-size: 17px;
+            font-weight: 700;
+            color: #111;
+            border-bottom: 2px solid #0078d4;
+            padding-bottom: 8px;
+            line-height: 1.4;
+        }
+        .control-section {
+            background: #fff;
+            border: 1px solid #d0d7de;
+            border-radius: 8px;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .control-section-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .control-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #444;
+            display: flex;
+            justify-content: space-between;
+        }
+        .control-group label span {
+            color: #0078d4;
+            font-weight: 700;
+        }
+        .control-group select {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #c8ced4;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+        
+        .spectrum-slider-wrapper {
+            width: 100%;
+            height: 36px;
+            padding: 4px 0;
+            box-sizing: border-box;
+            margin-bottom: 5px;
+        }
+        .spectrum-bar {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, 
+                #000000 0%, 
+                #000000 35%, 
+                #4b0082 38%, 
+                #0000ff 45%, 
+                #00ff00 55%, 
+                #ffff00 62%, 
+                #ff7f00 68%, 
+                #ff0000 73%, 
+                #330000 80%, 
+                #000000 100%);
+            cursor: pointer;
+            border-radius: 6px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+            position: relative;
+        }
+        .spectrum-handle {
+            position: absolute;
+            top: -4px;
+            bottom: -4px;
+            width: 6px;
+            background: #fff;
+            border: 1px solid #555;
+            border-radius: 3px;
+            transform: translateX(-50%);
+            pointer-events: none;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        .values-container {
+            display: flex;
+            gap: 8px;
+            justify-content: space-between;
+        }
+        .val-box {
+            background: #f8f9fa;
+            border: 1px solid #ced4da;
+            padding: 10px 4px;
+            text-align: center;
+            border-radius: 6px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+        }
+        .val-label {
+            font-size: 12px;
+            color: #555;
+            font-weight: 600;
+        }
+        .val-num {
+            font-size: 15px;
+            font-weight: 700;
+            color: #111;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1.1;
+        }
+        .val-num input {
+            width: 55px; 
+            padding: 2px 0;
+            border: 1px solid #aaa;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 15px;
+            font-family: inherit;
+        }
+        .val-unit {
+            font-size: 11px;
+            color: #666;
+            font-weight: normal;
+            margin-top: 3px;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            accent-color: #0078d4;
+            margin-top: 5px;
+        }
+        .control-group input[type="range"].voltage-slider {
+            accent-color: #e74c3c;
+        }
+        
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            flex: 1;
+            padding: 10px 6px;
+            font-size: 13.5px;
+            font-weight: 700;
+            border: 1.5px solid #bbb;
+            border-radius: 7px;
+            background: #fff;
+            color: #333;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .btn:hover { background: #e8f0fe; border-color: #0078d4; color: #0055aa; }
+        .btn.active { background: #0078d4; color: #fff; border-color: #005fa3; }
+        
+        /* Simulation Area */
+        .canvas-container {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #ffffff;
+        }
+        .canvas-wrapper {
+            position: relative; 
+            display: inline-block;
+        }
+        canvas {
+            border: 1px solid #e0e0e0;
+            background-color: #fafbfc;
+            border-radius: 8px;
+            display: block;
+        }
+        /* 캔버스 위에 띄워질 결과 박스 스타일 */
+        .result-overlay {
+            position: absolute;
+            top: 485px; /* 계기판 아래로 완벽하게 배치 */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 480px;
+            background: #fff;
+            border: 1px solid #d0d7de;
+            border-radius: 8px;
+            padding: 16px 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            box-sizing: border-box;
+        }
+        .result-overlay strong {
+            display: block;
+            text-align: center;
+            font-size: 14.5px;
+            color: #222;
+            margin-bottom: 12px;
+        }
+        .result-grid {
+            display: flex;
+            justify-content: space-between;
+            text-align: center;
+            font-size: 13px;
+        }
+        .result-col {
+            flex: 1;
+        }
+        .result-label {
+            color: #555;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        .result-value span {
+            font-size: 17px;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+
+<header class="page-head">
+  <a class="eyebrow" href="https://physics.physicsgon.workers.dev">An's Physics</a>
+  <h1>Photoelectric Effect</h1>
+  <p>Shine light of a chosen wavelength and intensity onto a target metal and observe whether electrons are ejected. Explore how work function, photon energy, and stopping voltage relate to Einstein's photoelectric equation.</p>
+</header>
+
+<div class="stage">
+<div class="container">
+    <div class="controls">
+        <h2>Photoelectric Effect</h2>
+
+        <div class="control-section">
+            <div class="control-section-title">Target Metal</div>
+            <div class="control-group">
+                <select id="metal-select">
+                    <option value="1.9">Work Function &phi; of Cesium (Cs) = 1.9 eV</option>
+                    <option value="2.3" selected>Work Function &phi; of Sodium (Na) = 2.3 eV</option>
+                    <option value="4.3">Work Function &phi; of Zinc (Zn) = 4.3 eV</option>
+                    <option value="4.7">Work Function &phi; of Copper (Cu) = 4.7 eV</option>
+                    <option value="6.4">Work Function &phi; of Platinum (Pt) = 6.4 eV</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="control-section">
+            <div class="control-section-title">Photon Energy</div>
+            
+            <div class="spectrum-slider-wrapper">
+                <div class="spectrum-bar" id="spectrum-bar">
+                    <div class="spectrum-handle" id="spectrum-handle"></div>
+                </div>
+            </div>
+
+            <div class="values-container">
+                <div class="val-box">
+                    <div class="val-label">Wavelength</div>
+                    <div class="val-num">
+                        <input type="number" id="lam-input" value="169" min="50" max="1000">
+                        <span class="val-unit">nm</span>
+                    </div>
+                </div>
+                <div class="val-box">
+                    <div class="val-label">Frequency</div>
+                    <div class="val-num">
+                        <span id="freq-display">17.69</span>
+                        <span class="val-unit">x10¹⁴ Hz</span>
+                    </div>
+                </div>
+                <div class="val-box">
+                    <div class="val-label">Energy</div>
+                    <div class="val-num">
+                        <span id="energy-display">7.32</span>
+                        <span class="val-unit">eV</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-group" style="margin-top: 8px;">
+                <label>Intensity <span id="intensity-display">50 %</span></label>
+                <input type="range" id="intensity-slider" min="0" max="100" step="1" value="50">
+            </div>
+        </div>
+
+        <div class="control-section">
+            <div class="control-section-title">Applied Voltage V</div>
+            <div class="control-group">
+                <label>Adjust Voltage (-3.0V ~ 3.0V)</label>
+                <input type="range" class="voltage-slider" id="voltage-slider" min="-3.0" max="3.0" step="0.01" value="0.0" list="voltage-ticks">
+                <datalist id="voltage-ticks">
+                    <option value="-2">
+                    <option value="-1">
+                    <option value="0">
+                    <option value="1">
+                    <option value="2">
+                </datalist>
+                <label style="margin-top: 5px;">Voltage <span id="volt-display">0.00 V</span></label>
+            </div>
+        </div>
+
+        <div class="btn-group" style="margin-top: auto;">
+            <button class="btn active" id="btnStart"   onclick="startEvents()">▶ Start</button>
+            <button class="btn"        id="btnStop"    onclick="stopEvents()">⏸ Stop</button>
+            <button class="btn"        id="btnStep"    onclick="singleEvent()">⏭ Single</button>
+        </div>
+    </div>
+
+    <div class="canvas-container">
+        <div class="canvas-wrapper">
+            <canvas id="simCanvas" width="700" height="600"></canvas>
+
+            <div class="result-overlay">
+                <strong>📊 Data & Results</strong>
+                <div class="result-grid">
+                    <div class="result-col">
+                        <div class="result-label">Photon Energy E</div>
+                        <div class="result-value"><span id="final-e-photon" style="color:#0078d4;">7.32</span> eV</div>
+                    </div>
+                    <div class="result-col">
+                        <div class="result-label">Max K.E. K<sub>max</sub></div>
+                        <div class="result-value"><span id="final-k-max" style="color:#2ca060;">5.02</span> eV</div>
+                    </div>
+                    <div class="result-col">
+                        <div class="result-label">Stopping Voltage V<sub>stop</sub></div>
+                        <div class="result-value"><span id="final-v-stop" style="color:#e74c3c;">-5.02</span> V</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<footer class="copyright">Copyright © 2026 <a href="mailto:physicsgon@gmail.com" class="copyright-link">physicsgon@gmail.com</a> . All rights reserved.</footer>
+
+<script>
+/* ============================================================
+   초기 변수 및 DOM 설정
+   ============================================================ */
+const canvas = document.getElementById('simCanvas');
+const W = canvas.width, H = canvas.height;   // logical (CSS-pixel) size
+const DPR = window.devicePixelRatio || 1;
+canvas.width  = Math.round(W * DPR);
+canvas.height = Math.round(H * DPR);
+canvas.style.width  = W + 'px';
+canvas.style.height = H + 'px';
+const ctx = canvas.getContext('2d');
+ctx.scale(DPR, DPR);
+
+const metalSelect = document.getElementById('metal-select');
+const voltageSlider = document.getElementById('voltage-slider');
+const voltDisplay = document.getElementById('volt-display');
+
+const lamInput = document.getElementById('lam-input');
+const spectrumBar = document.getElementById('spectrum-bar');
+const spectrumHandle = document.getElementById('spectrum-handle');
+const freqDisplay = document.getElementById('freq-display');
+const energyDisplay = document.getElementById('energy-display');
+
+const intensitySlider = document.getElementById('intensity-slider');
+const intensityDisplay = document.getElementById('intensity-display');
+
+const finalEPhotonDisplay = document.getElementById('final-e-photon');
+const finalKMaxDisplay = document.getElementById('final-k-max');
+const finalVStopDisplay = document.getElementById('final-v-stop');
+
+let currentWavelength = 169;
+let V_applied = 0;
+let intensityValue = 50;
+let physicsParams = { E: 0, W0: 0, K_max: 0, V_stop: 0, I_val: 0 };
+let particles = [];
+
+let isSimulationRunning = false;
+let lastTime = 0;
+let spawnAccumulator = 0;
+
+/* ============================================================
+   스펙트럼 및 입력 UI 처리
+   ============================================================ */
+let isDraggingHandle = false;
+
+function getWavelengthFromEvent(e) {
+    const rect = spectrumBar.getBoundingClientRect();
+    let x = e.clientX - rect.left;
+    x = Math.max(0, Math.min(x, rect.width));
+    const percentage = x / rect.width;
+    return 50 + percentage * (1000 - 50);
+}
+
+function setWavelength(wl) {
+    currentWavelength = Math.max(50, Math.min(1000, wl));
+    lamInput.value = Math.round(currentWavelength);
+    
+    const percentage = (currentWavelength - 50) / (1000 - 50);
+    spectrumHandle.style.left = (percentage * 100) + '%';
+    
+    const freq = 3000 / currentWavelength;
+    freqDisplay.textContent = freq.toFixed(2);
+    
+    const hc = 1240; 
+    const E = hc / currentWavelength;
+    energyDisplay.textContent = E.toFixed(2);
+    
+    updatePhysicsCalculations();
+}
+
+spectrumBar.addEventListener('mousedown', (e) => {
+    isDraggingHandle = true;
+    setWavelength(getWavelengthFromEvent(e));
+});
+document.addEventListener('mousemove', (e) => {
+    if (isDraggingHandle) setWavelength(getWavelengthFromEvent(e));
+});
+document.addEventListener('mouseup', () => { isDraggingHandle = false; });
+lamInput.addEventListener('change', () => { setWavelength(parseFloat(lamInput.value)); });
+
+intensitySlider.addEventListener('input', (e) => {
+    intensityValue = parseInt(e.target.value);
+    intensityDisplay.textContent = intensityValue + ' %';
+    updatePhysicsCalculations();
+});
+
+/* ============================================================
+   물리 계산 로직
+   ============================================================ */
+function updatePhysicsCalculations() {
+    V_applied = parseFloat(voltageSlider.value);
+    voltDisplay.textContent = V_applied.toFixed(2) + ' V';
+    
+    const hc = 1240; 
+    const E = hc / currentWavelength;
+    const W0 = parseFloat(metalSelect.value);
+    const K_max = E - W0;
+    const V_stop = K_max > 0 ? K_max : 0;
+    
+    let I_val = 0;
+    if (K_max > 0) {
+        let max_current = 15.0 * (intensityValue / 100);
+        if (V_applied >= 0) {
+            I_val = max_current;
+        } else if (V_applied > -V_stop) {
+            I_val = max_current * Math.pow(1 - (-V_applied / V_stop), 2);
+        }
+    }
+    
+    physicsParams = { E, W0, K_max, V_stop, I_val };
+    
+    finalEPhotonDisplay.textContent = E.toFixed(2);
+    finalKMaxDisplay.textContent = Math.max(0, K_max).toFixed(2);
+    finalVStopDisplay.textContent = (-V_stop).toFixed(2);
+}
+
+metalSelect.addEventListener('change', updatePhysicsCalculations);
+voltageSlider.addEventListener('input', updatePhysicsCalculations);
+
+/* ============================================================
+   입자 클래스 (광자 & 전자)
+   ============================================================ */
+function wavelengthToHsl(wl) {
+    if (wl < 380) return `hsl(280, 100%, 30%)`; 
+    if (wl > 750) return `hsl(0, 100%, 30%)`;   
+    const hue = 270 - ((wl - 380) / (750 - 380)) * 270;
+    return `hsl(${hue}, 100%, 50%)`;
+}
+
+class Photon {
+    constructor(startX, startY, targetX, targetY, wl, kMax) {
+        this.x = startX; this.y = startY;
+        this.targetX = targetX; this.targetY = targetY;
+        this.color = wavelengthToHsl(wl);
+        this.kMax = kMax;
+        
+        const dx = targetX - startX; const dy = targetY - startY;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        this.vx = (dx / dist) * 5.0;
+        this.vy = (dy / dist) * 5.0;
+        
+        this.active = true;
+        this.t = 0; 
+        this.angle = Math.atan2(dy, dx);
+    }
+    update() {
+        this.x += this.vx; this.y += this.vy; this.t += 0.5;
+        if (this.x >= this.targetX) {
+            this.active = false;
+            if (this.kMax > 0) {
+                particles.push(new Electron(this.targetX, this.y, this.kMax));
+            }
+        }
+    }
+    draw(ctx) {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.angle);
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        for (let i = -15; i <= 15; i++) {
+            const waveY = 6 * Math.sin(0.4 * i - this.t);
+            const envelope = Math.cos((i / 15) * (Math.PI / 2));
+            if (i === -15) ctx.moveTo(i, waveY * envelope);
+            else ctx.lineTo(i, waveY * envelope);
+        }
+        ctx.stroke();
+        ctx.restore();
+    }
+}
+
+class Electron {
+    constructor(x, y, kMax) {
+        this.startX = x; this.x = x; this.y = y;
+        this.kMax = kMax;
+        this.vx = 4 * Math.sqrt(kMax);
+        this.vy = (Math.random() - 0.5) * 0.5; 
+        this.active = true;
+    }
+    update(V) {
+        const d = 510 - 175;
+        const a = (8.0 / d) * V;
+        
+        this.vx += a;
+        this.x += this.vx;
+        this.y += this.vy;
+        
+        if (this.y < 110 || this.y > 270) this.vy *= -1;
+        
+        if (this.x >= 510) this.active = false; 
+        if (this.x <= this.startX && this.vx < 0) this.active = false; 
+    }
+    draw(ctx) {
+        ctx.fillStyle = '#2980b9'; 
+        ctx.beginPath(); ctx.arc(this.x, this.y, 4, 0, Math.PI*2); ctx.fill();
+    }
+}
+
+/* ============================================================
+   이벤트 타이머 & 렌더링 루프
+   ============================================================ */
+function triggerSpawn() {
+    const startX = 60; const startY = 70;
+    const targetX = 175; const targetY = 160 + Math.random() * 60;
+    particles.push(new Photon(startX, startY, targetX, targetY, currentWavelength, physicsParams.K_max));
+}
+
+function startEvents() {
+    isSimulationRunning = true;
+    document.getElementById('btnStart').classList.add('active');
+    document.getElementById('btnStop').classList.remove('active');
+    triggerSpawn(); 
+}
+
+function stopEvents() {
+    isSimulationRunning = false;
+    document.getElementById('btnStop').classList.add('active');
+    document.getElementById('btnStart').classList.remove('active');
+}
+
+function singleEvent() {
+    stopEvents();
+    triggerSpawn();
+}
+
+function drawDigitalMeter(ctx, x, y, label, valStr, valColor) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.fillStyle = '#e2e6ea'; ctx.strokeStyle = '#888'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.roundRect(-55, -35, 110, 75, 4); ctx.fill(); ctx.stroke();
+    
+    ctx.fillStyle = '#111'; ctx.font = '12px "Segoe UI", Arial';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    ctx.fillText(label, 0, -40);
+    
+    ctx.fillStyle = '#0a0a0a';
+    ctx.fillRect(-45, -25, 90, 42);
+    
+    ctx.fillStyle = valColor; 
+    ctx.font = 'bold 22px Consolas, monospace';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(valStr, 0, -4);
+    
+    ctx.fillStyle = '#c0392b'; ctx.beginPath(); ctx.arc(-30, 27, 4.5, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#2c3e50'; ctx.beginPath(); ctx.arc(30, 27, 4.5, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+}
+
+function render(timestamp) {
+    if (!lastTime) lastTime = timestamp;
+    const dt = timestamp - lastTime;
+    lastTime = timestamp;
+
+    ctx.clearRect(0, 0, W, H);
+    
+    // 회로 전선 
+    ctx.strokeStyle = '#444'; ctx.lineWidth = 2; ctx.beginPath();
+    ctx.moveTo(175, 230); ctx.lineTo(175, 427); ctx.lineTo(215, 427); 
+    ctx.moveTo(275, 427); ctx.lineTo(415, 427);
+    ctx.moveTo(475, 427); ctx.lineTo(510, 427); ctx.lineTo(510, 230);
+    ctx.stroke();
+
+    // 진공 튜브 
+    ctx.fillStyle = 'rgba(240, 248, 255, 0.7)';
+    ctx.strokeStyle = '#b0c4de'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.roundRect(120, 90, 440, 200, 90);
+    ctx.fill(); ctx.stroke();
+
+    // 전기장 표시
+    if (Math.abs(V_applied) > 0.05) {
+        ctx.save();
+        const opacity = Math.min(0.6, Math.abs(V_applied) * 0.2); 
+        ctx.strokeStyle = `rgba(231, 76, 60, ${opacity})`;
+        ctx.lineWidth = 2;
+        
+        const isRight = V_applied < 0; 
+        
+        ctx.beginPath();
+        for (let y = 160; y <= 220; y += 30) {
+            if (isRight) {
+                ctx.moveTo(200, y); ctx.lineTo(480, y);
+                ctx.lineTo(470, y - 5);
+                ctx.moveTo(480, y); ctx.lineTo(470, y + 5);
+            } else {
+                ctx.moveTo(480, y); ctx.lineTo(200, y);
+                ctx.lineTo(210, y - 5);
+                ctx.moveTo(200, y); ctx.lineTo(210, y + 5);
+            }
+        }
+        ctx.stroke();
+        
+        ctx.fillStyle = `rgba(231, 76, 60, ${opacity})`;
+        ctx.font = 'bold 13px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Electric Field', 340, 140);
+        ctx.restore();
+    }
+
+    // 타겟 금속판 
+    ctx.fillStyle = '#7f8c8d'; ctx.fillRect(170, 140, 10, 100);
+    ctx.fillStyle = '#333'; ctx.font = 'bold 13px sans-serif'; ctx.fillText('Target', 175, 260);
+
+    // 컬렉터 금속판
+    ctx.fillStyle = '#95a5a6'; ctx.fillRect(505, 140, 10, 100);
+    ctx.fillText('Collector', 510, 260);
+
+    // 파티클 스폰 처리
+    if (isSimulationRunning && intensityValue > 0) {
+        const spawnsPerSecond = (intensityValue / 100) * 10; 
+        const spawnInterval = 1000 / spawnsPerSecond;
+        
+        spawnAccumulator += dt;
+        while (spawnAccumulator >= spawnInterval) {
+            triggerSpawn();
+            spawnAccumulator -= spawnInterval;
+        }
+    } else {
+        spawnAccumulator = 0;
+    }
+
+    // 파티클 업데이트 및 그리기
+    particles.forEach(p => { p.update(V_applied); p.draw(ctx); });
+    particles = particles.filter(p => p.active);
+
+    // 하단 디지털 계기판 (y=420 중심)
+    drawDigitalMeter(ctx, 245, 420, 'Ammeter (pA)', physicsParams.I_val.toFixed(2), '#00ff00');
+    drawDigitalMeter(ctx, 445, 420, 'Power Supply (V)', V_applied.toFixed(3), '#00ff00');
+
+    requestAnimationFrame(render);
+}
+
+/* ============================================================
+   초기화
+   ============================================================ */
+setWavelength(169); 
+updatePhysicsCalculations();
+requestAnimationFrame(render);
+startEvents();
+
+</script>
+</body>
+</html>

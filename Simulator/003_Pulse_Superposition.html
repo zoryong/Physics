@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Wave Superposition Simulation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f6f8; margin: 0;
+        }
+        header.page-head{
+            background:linear-gradient(135deg,#123d63 0%,#0078d4 55%,#2f8fdb 100%);
+            color:#fff;
+            padding:34px 26px 38px;
+        }
+        header.page-head .eyebrow{
+            font-size:12.5px;letter-spacing:.08em;color:#ffb37a;
+            font-weight:700;margin-bottom:10px;text-decoration:none;display:inline-block;transition:color .15s;
+        }
+        header.page-head .eyebrow:hover{color:#fff;text-decoration:underline;}
+        header.page-head h1{
+            font-size:clamp(20px,3.6vw,28px);font-weight:800;margin:0 0 8px;letter-spacing:-.01em;color:#fff;
+        }
+        header.page-head p{color:#dceaf6;font-size:13.5px;margin:0;max-width:660px;line-height:1.6;}
+        .stage{
+            display:flex; justify-content:center; align-items:flex-start;
+            padding:20px;
+        }
+        footer.copyright{margin:0 20px 26px;font-size:11.5px;color:#9AA2B1;text-align:center;}
+        footer.copyright .copyright-link{color:#9AA2B1;text-decoration:underline;text-underline-offset:2px;}
+        footer.copyright .copyright-link:hover{color:#0078d4;}
+        .container {
+            display: flex; background-color: white; border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1); overflow: hidden; border: 1px solid #e0e0e0;
+        }
+        .controls {
+            width: 300px; padding: 25px; background-color: #f8f9fa;
+            border-right: 1px solid #e0e0e0; display: flex; flex-direction: column; gap: 20px;
+        }
+        .controls h2 {
+            margin: 0 0 10px 0; font-size: 18px; font-weight: 700; color: #111;
+            border-bottom: 2px solid #0078d4; padding-bottom: 8px;
+        }
+        .control-group { display: flex; flex-direction: column; gap: 8px; }
+        .control-group label {
+            font-size: 14px; font-weight: 700; color: #222;
+            display: flex; justify-content: space-between;
+        }
+        .control-group label span { color: #0078d4; font-weight: 800; }
+        .control-group input[type="range"] { width: 100%; cursor: pointer; }
+        .btn-toggle {
+            padding: 12px; background-color: #0078d4; color: white;
+            border: none; border-radius: 6px; font-weight: bold; font-size: 15px;
+            cursor: pointer; transition: background-color 0.2s; margin-top: 5px;
+        }
+        .btn-toggle:hover { background-color: #005a9e; }
+        .btn-toggle.paused { background-color: #27ae60; }
+        .btn-toggle.paused:hover { background-color: #1e8449; }
+        
+        .info-box {
+            padding: 14px 16px; background-color: #eef4fb;
+            border: 1px solid #c5dcf0; border-radius: 8px;
+            font-size: 13px; color: #111; line-height: 2.0;
+        }
+        .info-box .info-row {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #d0e4f5; padding: 2px 0;
+        }
+        .info-box .info-row:last-child { border-bottom: none; }
+        .info-box .info-label { font-weight: 600; color: #444; }
+        .info-box .info-value { font-weight: 800; color: #0078d4; }
+        .formula-box {
+            margin-top: auto; padding: 14px 16px; background-color: #fffbf0;
+            border: 1px solid #f0d080; border-radius: 8px;
+            font-size: 12.5px; color: #333; line-height: 1.75;
+        }
+        .formula-box .formula-title {
+            font-weight: 700; font-size: 13px; color: #7a5800;
+            border-bottom: 1.5px solid #f0d080; padding-bottom: 6px; margin-bottom: 8px;
+        }
+        .formula-box .formula-main {
+            text-align: center; font-size: 15px; font-weight: 700; color: #e65c00; margin-bottom: 8px;
+        }
+        .formula-box .calc-row {
+            display: flex; justify-content: space-between; font-size: 12px; padding: 1px 0;
+        }
+        .formula-box .calc-label { color: #666; }
+        .formula-box .calc-expr  { font-weight: 600; color: #1a6aaa; }
+        .formula-box .calc-result {
+            margin-top: 8px; padding-top: 7px; border-top: 1.5px solid #f0d080;
+            display: flex; justify-content: space-between; font-size: 13px; font-weight: 700;
+        }
+        .formula-box .result-label { color: #7a5800; }
+        .formula-box .result-value { color: #c05000; }
+        .canvas-container {
+            padding: 20px 20px 10px 20px; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; background-color: #ffffff;
+        }
+        canvas { border-radius: 6px; display: block; border: 1px solid #e0e0e0; background-color: #ffffff; }
+    </style>
+</head>
+<body>
+<header class="page-head">
+  <a class="eyebrow" href="https://physics.physicsgon.workers.dev">An's Physics</a>
+  <h1>Wave Superposition (Pulses)</h1>
+  <p>Two Gaussian pulses travel toward each other and overlap. Adjust each pulse's amplitude and width to see constructive and destructive interference in action, following the principle of superposition y = y₁ + y₂.</p>
+</header>
+
+<div class="stage">
+<div class="container">
+    <div class="controls">
+        <h2>Wave Superposition (Interference)</h2>
+        <div class="control-group">
+            <label>Amplitude A (y₁) <span id="y1-val">100</span> px</label>
+            <input type="range" id="y1-slider" min="-150" max="150" step="10" value="100">
+        </div>
+        <div class="control-group">
+            <label>Amplitude B (y₂) <span id="y2-val">60</span> px</label>
+            <input type="range" id="y2-slider" min="-150" max="150" step="10" value="60">
+        </div>
+        <div class="control-group">
+            <label>Pulse Width (w) <span id="w-val">50</span> px</label>
+            <input type="range" id="w-slider" min="20" max="100" step="5" value="50">
+        </div>
+        <div class="control-group">
+            <label>Wave Speed <span id="v-val">4</span></label>
+            <input type="range" id="v-slider" min="1" max="8" step="1" value="4">
+        </div>
+        
+        <button id="playPauseBtn" class="btn-toggle">Pause</button>
+
+        <div class="info-box">
+            <div class="info-row">
+                <span class="info-label">Wave A (y₁)</span>
+                <span class="info-value" id="info-y1">—</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Wave B (y₂)</span>
+                <span class="info-value" id="info-y2">—</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Max Overlap (y)</span>
+                <span class="info-value" id="info-ymax">—</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Interference</span>
+                <span class="info-value" id="info-type">—</span>
+            </div>
+        </div>
+        <div class="formula-box">
+            <div class="formula-title">Principle of Superposition</div>
+            <div class="formula-main">y = y₁ + y₂</div>
+            <div class="calc-row">
+                <span class="calc-label">When pulses completely overlap:</span>
+            </div>
+            <div class="calc-row">
+                <span class="calc-label">y =</span>
+                <span class="calc-expr" id="calc-sum">—</span>
+            </div>
+            <div class="calc-result">
+                <span class="result-label">Resultant Amplitude</span>
+                <span class="result-value" id="calc-result">—</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="canvas-container">
+        <canvas id="waveCanvas" width="840" height="500"></canvas>
+    </div>
+</div>
+</div>
+
+<footer class="copyright">Copyright © 2026 <a href="mailto:physicsgon@gmail.com" class="copyright-link">physicsgon@gmail.com</a> . All rights reserved.</footer>
+
+<script>
+const canvas = document.getElementById('waveCanvas');
+const W = canvas.width, H = canvas.height;   // logical (CSS-pixel) size
+const DPR = window.devicePixelRatio || 1;
+canvas.width  = Math.round(W * DPR);
+canvas.height = Math.round(H * DPR);
+canvas.style.width  = W + 'px';
+canvas.style.height = H + 'px';
+const ctx = canvas.getContext('2d');
+ctx.scale(DPR, DPR);
+const BASELINE = H * 0.65;
+
+let phase = 0;
+let isPaused = false;
+
+document.getElementById('playPauseBtn').addEventListener('click', function() {
+    isPaused = !isPaused;
+    if (isPaused) {
+        this.innerText = "Play";
+        this.classList.add('paused');
+    } else {
+        this.innerText = "Pause";
+        this.classList.remove('paused');
+    }
+});
+
+function drawArrow(x1, y1, x2, y2, color, thickness, headSize = 10) {
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = thickness;
+    
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - headSize * Math.cos(angle - Math.PI / 6), y2 - headSize * Math.sin(angle - Math.PI / 6));
+    ctx.lineTo(x2 - headSize * Math.cos(angle + Math.PI / 6), y2 - headSize * Math.sin(angle + Math.PI / 6));
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+}
+
+function updateInfo(y1, y2) {
+    document.getElementById('y1-val').innerText = y1;
+    document.getElementById('y2-val').innerText = y2;
+    document.getElementById('w-val').innerText = document.getElementById('w-slider').value;
+    document.getElementById('v-val').innerText = document.getElementById('v-slider').value;
+    
+    document.getElementById('info-y1').innerText = y1 + ' px';
+    document.getElementById('info-y2').innerText = y2 + ' px';
+    const sum = y1 + y2;
+    document.getElementById('info-ymax').innerText = sum + ' px';
+    
+    let type = "None";
+    if (y1 !== 0 && y2 !== 0) {
+        if ((y1 > 0 && y2 > 0) || (y1 < 0 && y2 < 0)) type = "Constructive";
+        else type = "Destructive";
+    }
+    document.getElementById('info-type').innerText = type;
+    
+    document.getElementById('calc-sum').innerText = `${y1} + (${y2})`;
+    document.getElementById('calc-result').innerText = `${sum} px`;
+}
+
+function draw() {
+    const y1Amp = parseInt(document.getElementById('y1-slider').value);
+    const y2Amp = parseInt(document.getElementById('y2-slider').value);
+    const width = parseInt(document.getElementById('w-slider').value);
+    const speed = parseInt(document.getElementById('v-slider').value);
+
+    if (!isPaused) {
+        phase += speed * 1.5;
+    }
+    
+    const cycleLength = W + 600; 
+    let current_t = phase % cycleLength;
+    
+    const xA = -300 + current_t;
+    const xB = W + 300 - current_t;
+
+    updateInfo(y1Amp, y2Amp);
+
+    ctx.clearRect(0, 0, W, H);
+
+    ctx.save();
+    ctx.strokeStyle = '#aaaaaa';
+    ctx.setLineDash([5, 5]);
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(0, BASELINE);
+    ctx.lineTo(W, BASELINE);
+    ctx.stroke();
+    ctx.restore();
+
+    const wSq = 2 * width * width;
+    
+    ctx.save();
+    ctx.lineJoin = 'round';
+    
+    const pathA = new Path2D();
+    const pathB = new Path2D();
+    const pathSum = new Path2D();
+    
+    pathA.moveTo(0, BASELINE);
+    pathB.moveTo(0, BASELINE);
+    pathSum.moveTo(0, BASELINE);
+
+    for (let x = 0; x <= W; x++) {
+        let valA = y1Amp * Math.exp(-Math.pow(x - xA, 2) / wSq);
+        let valB = y2Amp * Math.exp(-Math.pow(x - xB, 2) / wSq);
+        let valSum = valA + valB;
+
+        pathA.lineTo(x, BASELINE - valA);
+        pathB.lineTo(x, BASELINE - valB);
+        pathSum.lineTo(x, BASELINE - valSum);
+    }
+
+    ctx.strokeStyle = '#e65c00';
+    ctx.lineWidth = 2.5;
+    ctx.setLineDash([6, 4]);
+    ctx.stroke(pathA);
+
+    ctx.stroke(pathB);
+
+    ctx.setLineDash([]);
+    ctx.lineWidth = 3.5;
+    ctx.stroke(pathSum);
+    ctx.restore();
+
+    const drawDecorations = (xPos, amp, labelStr, isA) => {
+        if (xPos > -50 && xPos < W + 50) {
+            const peakY = BASELINE - amp;
+            const yOffset = amp >= 0 ? -25 : 25;
+            
+            ctx.fillStyle = '#333333';
+            ctx.font = 'bold 18px "Segoe UI", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(labelStr, xPos + (isA ? -35 : 35), peakY + (amp >= 0 ? 5 : 20));
+
+            const arrowColor = isA ? '#2980b9' : '#27ae60';
+            const arrowDir = isA ? 1 : -1;
+            drawArrow(xPos - arrowDir * 15, peakY + yOffset, xPos + arrowDir * 15, peakY + yOffset, arrowColor, 2.5, 8);
+            
+            // y1, y2 진폭 측정 화살표 및 레이블은 제거됨
+        }
+    };
+
+    drawDecorations(xA, y1Amp, 'A', true);
+    drawDecorations(xB, y2Amp, 'B', false);
+
+    requestAnimationFrame(draw);
+}
+
+draw();
+</script>
+</body>
+</html>
