@@ -10,19 +10,24 @@
     margin: 0;
   }
   header.page-head{
-    background:linear-gradient(135deg,#123d63 0%,#0078d4 55%,#2f8fdb 100%);
+    background:linear-gradient(155deg,#152540 0%,#213863 58%,#2B4C7E 100%);
     color:#fff;
-    padding:34px 26px 38px;
+    padding:64px 28px 72px;
+    text-align:center;
   }
+  header.page-head .header-inner{max-width:1080px;margin:0 auto;position:relative;}
   header.page-head .eyebrow{
-    font-size:12.5px;letter-spacing:.08em;color:#ffb37a;
-    font-weight:700;margin-bottom:10px;text-decoration:none;display:inline-block;transition:color .15s;
+    display:inline-flex;align-items:center;gap:7px;
+    font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:#9FB3D6;font-weight:700;margin-bottom:16px;
+    padding:6px 13px;border:1px solid rgba(159,179,214,.35);border-radius:999px;
+    text-decoration:none;transition:color .15s ease, border-color .15s ease;
   }
-  header.page-head .eyebrow:hover{color:#fff;text-decoration:underline;}
+  header.page-head .eyebrow:hover{color:#fff;border-color:rgba(255,255,255,.45);text-decoration:none;}
   header.page-head h1{
-    font-size:clamp(20px,3.6vw,28px);font-weight:800;margin:0 0 8px;letter-spacing:-.01em;color:#fff;
+    font-size:clamp(20px,3.6vw,28px);font-weight:800;margin:0 0 14px;letter-spacing:-.01em;color:#fff;
   }
-  header.page-head p{color:#dceaf6;font-size:13.5px;margin:0;max-width:660px;line-height:1.6;}
+  header.page-head p{margin:0 auto;color:#C7D4E8;font-size:15.5px;line-height:1.7;max-width:1080px;}
   .stage{
     display:flex; justify-content:center; align-items:flex-start;
     padding:20px;
@@ -93,9 +98,11 @@
 </head>
 <body>
 <header class="page-head">
-  <a class="eyebrow" href="https://physics.physicsgon.workers.dev">An's Physics</a>
-  <h1>Michelson–Morley Experiment</h1>
-  <p>An interactive recreation of the 1887 Michelson–Morley interferometer experiment. Adjust the aether wind speed, arm length, and rotation angle to see whether a fringe shift appears.</p>
+  <div class="header-inner">
+    <a class="eyebrow" href="https://physics.physicsgon.workers.dev/Simulator/">Physics Simulator</a>
+    <h1>Michelson–Morley Experiment</h1>
+    <p>An interactive recreation of the 1887 Michelson–Morley interferometer experiment. Adjust the aether wind speed, arm length, and rotation angle to see whether a fringe shift appears.</p>
+  </div>
 </header>
 
 <div class="stage">
