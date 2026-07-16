@@ -12,17 +12,21 @@
             background:linear-gradient(155deg,#152540 0%,#213863 58%,#2B4C7E 100%);
             color:#fff;
             padding:64px 28px 72px;
-        }
-        header.page-head .eyebrow{
-            font-size:12.5px;letter-spacing:.08em;color:#9FB3D6;
-            font-weight:700;margin-bottom:10px;text-decoration:none;display:inline-block;transition:color .15s;
-        }
-        header.page-head .eyebrow:hover{color:#fff;text-decoration:underline;}
-        header.page-head h1{
-            font-size:clamp(20px,3.6vw,28px);font-weight:800;margin:0 0 8px;letter-spacing:-.01em;color:#fff;
+            text-align:center;
         }
         header.page-head .header-inner{max-width:1080px;margin:0 auto;position:relative;}
-        header.page-head p{margin:0;color:#C7D4E8;font-size:15.5px;line-height:1.7;}
+        header.page-head .eyebrow{
+            display:inline-flex;align-items:center;gap:7px;
+            font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;
+            color:#9FB3D6;font-weight:700;margin-bottom:16px;
+            padding:6px 13px;border:1px solid rgba(159,179,214,.35);border-radius:999px;
+            text-decoration:none;transition:color .15s ease, border-color .15s ease;
+        }
+        header.page-head .eyebrow:hover{color:#fff;border-color:rgba(255,255,255,.45);text-decoration:none;}
+        header.page-head h1{
+            font-size:clamp(20px,3.6vw,28px);font-weight:800;margin:0 0 14px;letter-spacing:-.01em;color:#fff;
+        }
+        header.page-head p{margin:0 auto;color:#C7D4E8;font-size:15.5px;line-height:1.7;max-width:1080px;}
         .stage{
             display:flex; justify-content:center; align-items:flex-start;
             padding:20px;
@@ -103,7 +107,7 @@
 <body>
 <header class="page-head">
   <div class="header-inner">
-    <a class="eyebrow" href="https://physics.physicsgon.workers.dev">An's Physics</a>
+    <a class="eyebrow" href="https://physics.physicsgon.workers.dev/Simulator/">Physics Simulator</a>
     <h1>Wave Superposition (Pulses)</h1>
     <p>Two Gaussian pulses travel toward each other and overlap. Adjust each pulse's amplitude and width to see constructive and destructive interference in action, following the principle of superposition y = y₁ + y₂.</p>
   </div>
