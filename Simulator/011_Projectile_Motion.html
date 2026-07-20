@@ -2,24 +2,25 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Projectile Motion Simulation</title>
 <style>
 * { box-sizing: border-box; }
+html, body { max-width:100%; overflow-x:hidden; }
 body { font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif; background:#f5f6f8; margin:0; }
 header.page-head { background:linear-gradient(155deg,#152540 0%,#213863 58%,#2B4C7E 100%); color:#fff; padding:64px 28px 72px; }
 header.page-head .header-inner { max-width:1200px; margin:0 auto; }
-header.page-head .header-top { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+header.page-head .header-top { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
 header.page-head .eyebrow { display:inline-flex; align-items:center; gap:7px; font-size:12.5px; letter-spacing:.14em; text-transform:uppercase; color:#9FB3D6; font-weight:700; margin-bottom:16px; padding:6px 13px; border:1px solid rgba(159,179,214,.35); border-radius:999px; text-decoration:none; transition:color .15s ease,border-color .15s ease; }
 header.page-head .eyebrow:hover { color:#fff; border-color:rgba(255,255,255,.45); }
 header.page-head h1 { font-size:clamp(20px,3.6vw,28px); font-weight:800; margin:0 0 14px; letter-spacing:-.01em; color:#fff; }
 header.page-head p { margin:0; color:#C7D4E8; font-size:15.5px; line-height:1.7; }
-/* ── Lang mount placeholder ── */
-.stage { display:flex; justify-content:center; align-items:flex-start; padding:20px; }
+.stage { display:flex; justify-content:center; align-items:flex-start; padding:20px; width:100%; max-width:100%; box-sizing:border-box; }
 footer.copyright { margin:0 20px 26px; font-size:11.5px; color:#9AA2B1; text-align:center; }
 footer.copyright .copyright-link { color:#9AA2B1; text-decoration:underline; text-underline-offset:2px; }
 footer.copyright .copyright-link:hover { color:#0078d4; }
-.container { display:flex; background:#fff; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,.1); overflow:hidden; border:1px solid #e0e0e0; }
-.controls { width:300px; padding:22px 20px; background:#f8f9fa; border-right:1px solid #e0e0e0; display:flex; flex-direction:column; gap:13px; flex-shrink:0; }
+.container { display:flex; background:#fff; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,.1); overflow:hidden; border:1px solid #e0e0e0; max-width:100%; width:fit-content; }
+.controls { width:300px; max-width:100%; padding:22px 20px; background:#f8f9fa; border-right:1px solid #e0e0e0; display:flex; flex-direction:column; gap:13px; flex-shrink:0; }
 .controls h2 { margin:0 0 2px; font-size:16px; font-weight:700; color:#111; border-bottom:2px solid #0078d4; padding-bottom:7px; line-height:1.4; }
 .section { background:#fff; border:1px solid #d0d7de; border-radius:8px; padding:12px 14px; display:flex; flex-direction:column; gap:9px; }
 .section-title { font-size:13px; font-weight:700; color:#222; display:flex; align-items:center; gap:7px; }
@@ -42,8 +43,26 @@ footer.copyright .copyright-link:hover { color:#0078d4; }
 .info-box { background:#fff; border:1px solid #d0d7de; border-radius:8px; padding:12px 14px; font-size:12.5px; color:#444; line-height:1.7; }
 .info-box strong { color:#222; font-size:13px; }
 .drag-note { font-size:11.5px; color:#888; margin-top:4px; line-height:1.55; }
-.canvas-wrap { padding:16px; background:#fff; display:flex; justify-content:center; align-items:flex-start; }
-canvas { border-radius:8px; border:1px solid #e0e0e0; display:block; }
+.canvas-wrap { padding:16px; background:#fff; display:flex; justify-content:center; align-items:flex-start; max-width:100%; min-width:0; }
+canvas { border-radius:8px; border:1px solid #e0e0e0; display:block; max-width:100%; }
+
+@media (max-width: 960px) {
+  header.page-head { padding:36px 20px 40px; }
+  .stage { padding:12px; }
+  .container { flex-direction:column; width:100%; max-width:100%; }
+  .controls { width:100%; border-right:none; border-bottom:1px solid #e0e0e0; }
+  .canvas-wrap { flex:none; width:100%; padding:12px; }
+  .btn-row { flex-wrap:wrap; }
+  .btn { flex:1 1 calc(50% - 4px); }
+}
+@media (max-width: 480px) {
+  header.page-head { padding:28px 16px 32px; }
+  header.page-head p { font-size:14px; }
+  .stage { padding:10px; }
+  .controls { padding:16px 14px; }
+  .btn { font-size:12px; }
+  .proj-grid { grid-template-columns:1fr 1fr; }
+}
 </style>
 </head>
 <body>
@@ -156,18 +175,16 @@ window.addEventListener('sim-langchange',function(){
 <script>
 /* ── Canvas ── */
 var cv=document.getElementById('cv');
-var DPR=window.devicePixelRatio||1;
+var ctx=cv.getContext('2d');
+var DPR=1;
 var CW=830,CH=620;
-cv.width=Math.round(CW*DPR); cv.height=Math.round(CH*DPR);
-cv.style.width=CW+'px'; cv.style.height=CH+'px';
-var ctx=cv.getContext('2d'); ctx.scale(DPR,DPR);
 var W=CW,H=CH;
-
 var ML=68,MT=28,MR=20;
 var RES_H=88;
 var GND_PAD=30;
 var GND_Y=H-RES_H-GND_PAD;
 var PW=W-ML-MR;
+var BASE_W=830,BASE_H=620;
 
 var S=2.5;
 function WX(x){return ML+x*S;}
@@ -177,6 +194,65 @@ function autoScale(mx,my){
   var sy=(GND_Y-MT-20)/Math.max(my,1);
   S=Math.min(sx,sy)*0.88;
 }
+function sizeCanvas(){
+  var wrap=cv.parentElement;
+  var cs=wrap?getComputedStyle(wrap):null;
+  var padX=cs?((parseFloat(cs.paddingLeft)||0)+(parseFloat(cs.paddingRight)||0)):0;
+  var stacked=window.matchMedia('(max-width: 960px)').matches;
+  var avail;
+  if(stacked){
+    var wrapW=wrap&&wrap.clientWidth?wrap.clientWidth:window.innerWidth;
+    avail=Math.floor(wrapW-padX);
+  }else{
+    var controlsEl=document.querySelector('.container .controls');
+    var controlsW=controlsEl?controlsEl.offsetWidth:300;
+    var stageEl=document.querySelector('.stage');
+    var stagePad=0;
+    if(stageEl){
+      var ss=getComputedStyle(stageEl);
+      stagePad=(parseFloat(ss.paddingLeft)||0)+(parseFloat(ss.paddingRight)||0);
+    }
+    avail=Math.floor(window.innerWidth-controlsW-stagePad-padX-8);
+  }
+  avail=Math.max(260,Math.min(BASE_W,avail));
+  CW=avail;
+  CH=Math.round(BASE_H*(CW/BASE_W));
+  if(CW<420) CH=Math.max(CH,Math.round(CW*0.92));
+  DPR=window.devicePixelRatio||1;
+  cv.width=Math.round(CW*DPR);
+  cv.height=Math.round(CH*DPR);
+  cv.style.width=CW+'px';
+  cv.style.height=CH+'px';
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.scale(DPR,DPR);
+  W=CW; H=CH;
+  ML=CW<360?36:(CW<480?48:68);
+  MR=CW<360?10:(CW<480?14:20);
+  MT=CW<480?20:28;
+  RES_H=CW<360?70:(CW<480?78:88);
+  GND_Y=H-RES_H-GND_PAD;
+  PW=W-ML-MR;
+}
+function afterResize(){
+  sizeCanvas();
+  if(typeof live!=='undefined'&&live){
+    var estX=Math.max(live.range||0, live.x||0, 1)*1.15;
+    var estY=Math.max(live.peakY||0, live.y||0, live.h0||0, 1)*1.25;
+    autoScale(estX,estY);
+  }
+  if(typeof draw==='function') draw();
+}
+sizeCanvas();
+window.addEventListener('resize',function(){
+  clearTimeout(window.__pmResizeTimer);
+  window.__pmResizeTimer=setTimeout(afterResize,120);
+});
+window.addEventListener('orientationchange',function(){
+  setTimeout(afterResize,220);
+});
+window.addEventListener('load',function(){
+  requestAnimationFrame(afterResize);
+});
 
 /* ── Projectiles ── */
 var PROJ=[
@@ -461,7 +537,9 @@ function drawResBox(){
     ctx.fillStyle='#bbb';ctx.font='13px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.fillText(SimI18n.t('ui.resWaiting'),W/2,bY+RES_H/2);return;
   }
-  ctx.fillStyle='#555';ctx.font='bold 11.5px sans-serif';ctx.textAlign='left';ctx.textBaseline='top';
+  var titleSz=CW<360?10:11.5;
+  var valSz=CW<360?16:(CW<480?20:24);
+  ctx.fillStyle='#555';ctx.font='bold '+titleSz+'px sans-serif';ctx.textAlign='left';ctx.textBaseline='top';
   ctx.fillText('📊 '+SimI18n.t('ui.resTitle'),ML,bY+9);
   var cols=[
     {lbl:SimI18n.t('ui.resPeak'), val:R.peakY.toFixed(2),     unit:'m'},
@@ -473,7 +551,7 @@ function drawResBox(){
     var cx=cW*i+cW/2;
     ctx.fillStyle='#8a96a8';ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.textBaseline='alphabetic';
     ctx.fillText(col.lbl.toUpperCase(),cx,midY-12);
-    ctx.fillStyle=R.color||'#111';ctx.font='bold 24px sans-serif';ctx.fillText(col.val,cx,midY+12);
+    ctx.fillStyle=R.color||'#111';ctx.font='bold '+valSz+'px sans-serif';ctx.fillText(col.val,cx,midY+12);
     ctx.fillStyle='#aaa';ctx.font='12px sans-serif';ctx.fillText(col.unit,cx,midY+27);
     if(i<2){ctx.strokeStyle='#dde2ea';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(cW*(i+1),bY+8);ctx.lineTo(cW*(i+1),bY+RES_H-8);ctx.stroke();}
   });
