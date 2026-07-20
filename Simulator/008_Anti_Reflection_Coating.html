@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Anti-Reflection Coating Simulation</title>
     <style>
         body {
@@ -112,7 +113,33 @@
             background-color: #fafbfc;
             border-radius: 8px;
         }
-    </style>
+    
+        /* --- mobile responsive --- */
+        html, body { max-width:100%; overflow-x:hidden; }
+        * { box-sizing: border-box; }
+        .stage { width:100%; max-width:100%; }
+        .container { max-width:100%; width:fit-content; }
+        .controls { max-width:100%; flex-shrink:0; }
+        .canvas-container, .canvas-wrap, .canvases { max-width:100%; min-width:0; }
+        canvas { max-width:100%; height:auto; display:block; }
+        header.page-head .header-top{
+            display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+        }
+        @media (max-width: 960px) {
+            header.page-head { padding:36px 20px 40px; }
+            .stage { padding:12px; }
+            .container { flex-direction:column; width:100%; max-width:100%; }
+            .controls { width:100% !important; border-right:none; border-bottom:1px solid #e0e0e0; }
+            .canvas-container, .canvas-wrap { flex:none; width:100%; padding:12px; }
+            .canvases { flex:none; width:100%; }
+        }
+        @media (max-width: 480px) {
+            header.page-head { padding:28px 16px 32px; }
+            header.page-head p { font-size:14px; }
+            .stage { padding:10px; }
+            .controls { padding:16px 14px; }
+        }
+</style>
 </head>
 <body>
 
@@ -193,14 +220,64 @@
 </script>
 <script>
     const canvas = document.getElementById('simCanvas');
-    const CSS_W = canvas.width, CSS_H = canvas.height;   // logical (CSS-pixel) size
-    const DPR = window.devicePixelRatio || 1;
-    canvas.width  = Math.round(CSS_W * DPR);
-    canvas.height = Math.round(CSS_H * DPR);
-    canvas.style.width  = CSS_W + 'px';
-    canvas.style.height = CSS_H + 'px';
     const ctx = canvas.getContext('2d');
-    ctx.scale(DPR, DPR);
+    const BASE_W = 880, BASE_H = 640;
+    const CSS_W = BASE_W, CSS_H = BASE_H;
+    let DPR = 1, viewScale = 1;
+
+function __simAvailWidth(wrap) {
+    var cs = wrap ? getComputedStyle(wrap) : null;
+    var padX = cs ? ((parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0)) : 0;
+    var stacked = window.matchMedia('(max-width: 960px)').matches;
+    var avail;
+    if (stacked) {
+        var wrapW = wrap && wrap.clientWidth ? wrap.clientWidth : window.innerWidth;
+        avail = Math.floor(wrapW - padX);
+    } else {
+        var controlsEl = document.querySelector('.container .controls');
+        var controlsW = controlsEl ? controlsEl.offsetWidth : 300;
+        var stageEl = document.querySelector('.stage');
+        var stagePad = 0;
+        if (stageEl) {
+            var ss = getComputedStyle(stageEl);
+            stagePad = (parseFloat(ss.paddingLeft) || 0) + (parseFloat(ss.paddingRight) || 0);
+        }
+        avail = Math.floor(window.innerWidth - controlsW - stagePad - padX - 8);
+    }
+    return Math.max(260, avail);
+}
+function __simBindResize(fn) {
+    window.addEventListener('resize', function () {
+        clearTimeout(window.__simResizeTimer);
+        window.__simResizeTimer = setTimeout(fn, 120);
+    });
+    window.addEventListener('orientationchange', function () {
+        setTimeout(fn, 220);
+    });
+    window.addEventListener('load', function () {
+        requestAnimationFrame(fn);
+    });
+}
+
+    function sizeCanvas() {
+        const wrap = canvas.parentElement;
+        const avail = Math.min(BASE_W, __simAvailWidth(wrap));
+        viewScale = avail / BASE_W;
+        const cssW = Math.round(BASE_W * viewScale);
+        const cssH = Math.round(BASE_H * viewScale);
+        DPR = window.devicePixelRatio || 1;
+        canvas.width = Math.round(cssW * DPR);
+        canvas.height = Math.round(cssH * DPR);
+        canvas.style.width = cssW + 'px';
+        canvas.style.height = cssH + 'px';
+        ctx.setTransform(DPR * viewScale, 0, 0, DPR * viewScale, 0, 0);
+    }
+    function afterResize() {
+        sizeCanvas();
+        if (typeof draw === 'function') draw();
+    }
+    sizeCanvas();
+    __simBindResize(afterResize);
 
     const lambdaSlider = document.getElementById('lambda-slider');
     const dSlider = document.getElementById('d-slider');

@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Michelson-Morley Experiment</title>
 <style>
   body {
@@ -93,6 +94,32 @@
     align-items: center;
   }
   canvas { border-radius: 8px; border: 1px solid #e0e0e0; background: #fafbfc; }
+
+        /* --- mobile responsive --- */
+        html, body { max-width:100%; overflow-x:hidden; }
+        * { box-sizing: border-box; }
+        .stage { width:100%; max-width:100%; }
+        .container { max-width:100%; width:fit-content; }
+        .controls { max-width:100%; flex-shrink:0; }
+        .canvas-container, .canvas-wrap, .canvases { max-width:100%; min-width:0; }
+        canvas { max-width:100%; height:auto; display:block; }
+        header.page-head .header-top{
+            display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+        }
+        @media (max-width: 960px) {
+            header.page-head { padding:36px 20px 40px; }
+            .stage { padding:12px; }
+            .container { flex-direction:column; width:100%; max-width:100%; }
+            .controls { width:100% !important; border-right:none; border-bottom:1px solid #e0e0e0; }
+            .canvas-container, .canvas-wrap { flex:none; width:100%; padding:12px; }
+            .canvases { flex:none; width:100%; }
+        }
+        @media (max-width: 480px) {
+            header.page-head { padding:28px 16px 32px; }
+            header.page-head p { font-size:14px; }
+            .stage { padding:10px; }
+            .controls { padding:16px 14px; }
+        }
 </style>
 </head>
 <body>
@@ -181,9 +208,9 @@
   <!-- ══════════ CANVAS AREA ══════════ -->
   <div class="canvas-wrap">
     <!-- Main interferometer diagram -->
-    <canvas id="cvMain" width="840" height="500" style="width:840px;height:500px;"></canvas>
+    <canvas id="cvMain" width="840" height="500"></canvas>
     <!-- Interference pattern strip -->
-    <canvas id="cvFringe" width="840" height="130" style="width:840px;height:130px;"></canvas>
+    <canvas id="cvFringe" width="840" height="130"></canvas>
   </div>
 
 </div>
@@ -242,27 +269,73 @@
 const cvMain   = document.getElementById('cvMain');
 const cvFringe = document.getElementById('cvFringe');
 
-const DPR = window.devicePixelRatio || 1;
+let DPR = 1, viewScale = 1;
 
-// Logical (CSS) sizes
+// Logical (CSS) sizes used by all drawing code
 const CSS_W_MAIN = 840, CSS_H_MAIN = 500;
 const CSS_W_FRG  = 840, CSS_H_FRG  = 130;
+const MW = CSS_W_MAIN, MH = CSS_H_MAIN;
 
-function initCanvas(cv, cssW, cssH) {
+const ctxMain = cvMain.getContext('2d');
+const ctxFringe = cvFringe.getContext('2d');
+
+function __simAvailWidth(wrap) {
+    var cs = wrap ? getComputedStyle(wrap) : null;
+    var padX = cs ? ((parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0)) : 0;
+    var stacked = window.matchMedia('(max-width: 960px)').matches;
+    var avail;
+    if (stacked) {
+        var wrapW = wrap && wrap.clientWidth ? wrap.clientWidth : window.innerWidth;
+        avail = Math.floor(wrapW - padX);
+    } else {
+        var controlsEl = document.querySelector('.container .controls');
+        var controlsW = controlsEl ? controlsEl.offsetWidth : 300;
+        var stageEl = document.querySelector('.stage');
+        var stagePad = 0;
+        if (stageEl) {
+            var ss = getComputedStyle(stageEl);
+            stagePad = (parseFloat(ss.paddingLeft) || 0) + (parseFloat(ss.paddingRight) || 0);
+        }
+        avail = Math.floor(window.innerWidth - controlsW - stagePad - padX - 8);
+    }
+    return Math.max(260, avail);
+}
+function __simBindResize(fn) {
+    window.addEventListener('resize', function () {
+        clearTimeout(window.__simResizeTimer);
+        window.__simResizeTimer = setTimeout(fn, 120);
+    });
+    window.addEventListener('orientationchange', function () {
+        setTimeout(fn, 220);
+    });
+    window.addEventListener('load', function () {
+        requestAnimationFrame(fn);
+    });
+}
+
+function sizeOneCanvas(cv, ctx, baseW, baseH) {
+  const cssW = Math.round(baseW * viewScale);
+  const cssH = Math.round(baseH * viewScale);
   cv.width  = Math.round(cssW * DPR);
   cv.height = Math.round(cssH * DPR);
   cv.style.width  = cssW + 'px';
   cv.style.height = cssH + 'px';
-  const ctx = cv.getContext('2d');
-  ctx.scale(DPR, DPR);   // all draw calls use CSS pixels hereafter
-  return ctx;
+  ctx.setTransform(DPR * viewScale, 0, 0, DPR * viewScale, 0, 0);
 }
-
-const ctxMain   = initCanvas(cvMain,   CSS_W_MAIN, CSS_H_MAIN);
-const ctxFringe = initCanvas(cvFringe, CSS_W_FRG,  CSS_H_FRG);
-
-// Logical sizes used in all drawing code (CSS pixels)
-const MW = CSS_W_MAIN, MH = CSS_H_MAIN;
+function sizeCanvas() {
+  const wrap = document.querySelector('.canvas-wrap') || cvMain.parentElement;
+  const avail = Math.min(CSS_W_MAIN, __simAvailWidth(wrap));
+  viewScale = avail / CSS_W_MAIN;
+  DPR = window.devicePixelRatio || 1;
+  sizeOneCanvas(cvMain, ctxMain, CSS_W_MAIN, CSS_H_MAIN);
+  sizeOneCanvas(cvFringe, ctxFringe, CSS_W_FRG, CSS_H_FRG);
+}
+function afterResize() {
+  sizeCanvas();
+  if (typeof drawAll === 'function') drawAll();
+}
+sizeCanvas();
+__simBindResize(afterResize);
 
 /* ═══════════════════════════════════════════════════
    State
