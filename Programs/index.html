@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>An's Physics Programs</title>
+<meta name="description" content="브라우저에서 바로 쓰는 유틸리티 프로그램 모음 - An's Physics Programs">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B2430;
+    --ink-soft:#57616F;
+    --line:#E2E6EB;
+    --paper:#F6F7F9;
+    --card:#FFFFFF;
+    --navy:#213863;
+    --navy-deep:#152540;
+    --teal:#0F8A82;
+    --teal-soft:#E3F4F1;
+    --amber:#C8791C;
+    --amber-soft:#FBF0DF;
+    --violet:#6E56A6;
+    --violet-soft:#EEEAF7;
+    --indigo:#4C51BF;
+    --indigo-soft:#E9E9FA;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,sans-serif;
+    line-height:1.5;
+    padding-bottom:60px;
+  }
+
+  header{
+    background:linear-gradient(155deg,var(--navy-deep) 0%,var(--navy) 58%,#2B4C7E 100%);
+    color:#fff;
+    padding:64px 28px 72px;
+    position:relative;
+    overflow:hidden;
+  }
+  header::after{
+    content:'';
+    position:absolute;
+    right:-80px;top:-80px;
+    width:320px;height:320px;
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(255,255,255,.06) 0%, rgba(255,255,255,0) 70%);
+    pointer-events:none;
+  }
+  .header-inner{max-width:1080px;margin:0 auto;position:relative;z-index:1;}
+  header .eyebrow-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;}
+  header .eyebrow{
+    display:inline-flex;align-items:center;gap:7px;
+    font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:#9FB3D6;font-weight:700;
+    padding:6px 13px;border:1px solid rgba(159,179,214,.35);border-radius:999px;
+    text-decoration:none;transition:color .15s ease, border-color .15s ease;
+  }
+  header .eyebrow:hover{color:#fff;border-color:rgba(255,255,255,.45);}
+  header h1{
+    margin:0 0 14px;
+    font-size:clamp(30px,5vw,44px);
+    font-weight:900;
+    letter-spacing:-.02em;
+  }
+  header p{
+    margin:0;color:#C7D4E8;font-size:15.5px;
+    line-height:1.7;
+  }
+  .header-meta{
+    margin-top:28px;padding-top:20px;
+    border-top:1px solid rgba(159,179,214,.25);
+  }
+  .header-meta .hm-note{
+    margin:0;font-size:13.5px;color:#C7D4E8;line-height:1.75;
+  }
+  .header-meta .hm-note b{color:#fff;}
+  .email-mask{
+    color:#fff;text-decoration:underline;text-underline-offset:2px;font-weight:700;
+    transition:color .15s ease;
+  }
+  .email-mask:hover, .email-mask:focus{color:var(--teal);}
+
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px;}
+
+  .section-label{
+    margin-top:44px;
+    padding-bottom:12px;
+    border-bottom:2px solid var(--line);
+    font-size:14.5px;font-weight:800;color:var(--teal);
+    display:flex;align-items:center;gap:8px;
+  }
+  .section-label .count{
+    font-size:11px;font-weight:600;color:var(--teal);
+    font-family:'JetBrains Mono',monospace;opacity:.8;
+  }
+
+  .tool-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:16px;
+    margin-top:28px;
+  }
+  @media(max-width:720px){.tool-grid{grid-template-columns:1fr;}}
+
+  .tool-card{
+    display:flex;flex-direction:column;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:22px 22px 20px;
+    text-decoration:none;
+    color:inherit;
+    transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    position:relative;
+    overflow:hidden;
+  }
+  .tool-card::before{
+    content:'';
+    position:absolute;left:0;top:0;bottom:0;width:3px;
+    background:var(--card-accent, var(--teal));
+    opacity:0;transition:opacity .15s ease;
+  }
+  .tool-card:hover{
+    transform:translateY(-3px);
+    box-shadow:0 10px 28px rgba(21,37,64,.10);
+    border-color:var(--card-accent, var(--teal));
+  }
+  .tool-card:hover::before{opacity:1;}
+
+  .tc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .tc-icon{
+    width:42px;height:42px;border-radius:11px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:20px;
+    background:var(--card-accent-soft, var(--teal-soft));
+  }
+  .tc-tag{
+    font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;
+    color:var(--card-accent, var(--teal));background:var(--card-accent-soft, var(--teal-soft));
+  }
+  .tc-title{font-size:16.5px;font-weight:800;margin:0 0 8px;color:var(--ink);letter-spacing:-.01em;}
+  .tc-desc{font-size:13px;color:var(--ink-soft);line-height:1.6;margin:0;flex:1;}
+  .tc-cta{
+    display:inline-flex;align-items:center;gap:5px;
+    margin-top:16px;font-size:13px;font-weight:700;color:var(--card-accent, var(--teal));
+  }
+  .tool-card:hover .tc-cta{gap:8px;}
+  .tc-cta .arrow{transition:transform .15s ease;}
+  .tool-card:hover .tc-cta .arrow{transform:translateX(2px);}
+
+  .tool-card.accent-teal{--card-accent:var(--teal);--card-accent-soft:var(--teal-soft);}
+  .tool-card.accent-amber{--card-accent:var(--amber);--card-accent-soft:var(--amber-soft);}
+  .tool-card.accent-violet{--card-accent:var(--violet);--card-accent-soft:var(--violet-soft);}
+  .tool-card.accent-indigo{--card-accent:var(--indigo);--card-accent-soft:var(--indigo-soft);}
+
+  footer.copyright{margin-top:52px;font-size:11.5px;color:#9AA2B1;text-align:center;}
+  footer.copyright .copyright-link{color:#9AA2B1;text-decoration:underline;text-underline-offset:2px;}
+  footer.copyright .copyright-link:hover{color:var(--teal);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="eyebrow-row">
+      <a class="eyebrow" href="https://physics.physicsgon.workers.dev">⚛️ AN'S PHYSICS</a>
+    </div>
+    <h1>프로그램</h1>
+    <p>브라우저에서 바로 쓸 수 있는 유틸리티 프로그램 모음입니다. 파일을 올리면 이 기기 안에서만 처리되며, 외부 서버로 전송되지 않습니다.</p>
+    <div class="header-meta">
+      <p class="hm-note">현재 <b>프로그램 1개</b>가 공개되어 있습니다. 오류를 발견하거나 개선 아이디어가 있으면 <a href="mailto:physicsgon@gmail.com" class="email-mask">이메일</a>로 알려 주세요.</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="section-label">
+    <span>🛠️ Utilities</span>
+    <span class="count">1</span>
+  </div>
+
+  <div class="tool-grid">
+    <a class="tool-card accent-teal" href="file-merger.html">
+      <div class="tc-top">
+        <span class="tc-icon">📎</span>
+        <span class="tc-tag">Utility</span>
+      </div>
+      <h3 class="tc-title">파일 통합 프로그램</h3>
+      <p class="tc-desc">여러 엑셀·PDF·사진(HEIC 포함)을 올려 하나의 파일로 합칩니다. 모든 처리는 브라우저 안에서만 이루어집니다.</p>
+      <span class="tc-cta">열기 <span class="arrow">→</span></span>
+    </a>
+  </div>
+
+  <footer class="copyright">Copyright &copy; 2026 <a href="mailto:physicsgon@gmail.com" class="copyright-link">physicsgon@gmail.com</a> . All rights reserved.</footer>
+</div>
+
+</body>
+</html>

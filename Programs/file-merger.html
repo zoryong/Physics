@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>파일 통합 프로그램</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js" crossorigin="anonymous"></script>
+<style>
+  :root{
+    --ink:#1B2430;
+    --ink-soft:#57616F;
+    --paper:#F6F7F9;
+    --card:#FFFFFF;
+    --line:#E2E6EB;
+    --navy:#213863;
+    --navy-deep:#152540;
+    --teal:#0F8A82;
+    --teal-soft:#E3F4F1;
+    --amber:#C8791C;
+    --amber-soft:#FBF0DF;
+    --rose:#B8465A;
+    --rose-soft:#FBEAEC;
+    --violet:#6E56A6;
+    --violet-soft:#EEEAF7;
+    --radius:14px;
+    --mono:'JetBrains Mono','Noto Sans KR',monospace;
+    --sans:'Noto Sans KR',-apple-system,BlinkMacSystemFont,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:var(--sans);
+    background:var(--paper);
+    color:var(--ink);
+    line-height:1.55;
+    word-break:keep-all;
+    overflow-wrap:break-word;
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:44px 28px 96px;}
+  header.page-head{
+    background:linear-gradient(155deg,var(--navy-deep) 0%,var(--navy) 62%,#2B4C7E 100%);
+    color:#fff;
+    padding:38px 28px 46px;
+    margin-bottom:0;
+  }
+  header.page-head .header-inner{max-width:980px;margin:0 auto;}
+  header.page-head .eyebrow{
+    display:inline-flex;align-items:center;gap:7px;
+    font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:#9FB3D6;font-weight:700;margin-bottom:16px;
+    padding:6px 13px;border:1px solid rgba(159,179,214,.35);border-radius:999px;
+    text-decoration:none;transition:color .15s ease, border-color .15s ease;
+  }
+  header.page-head .eyebrow:hover{color:#fff;border-color:rgba(255,255,255,.45);}
+  header.page-head h1{
+    font-size:clamp(22px,4vw,30px);
+    font-weight:900;
+    margin:0 0 10px;
+    letter-spacing:-.01em;
+    color:#fff;
+  }
+  header.page-head p{
+    color:#C7D4E8;
+    font-size:14.5px;
+    margin:0;
+    line-height:1.7;
+  }
+
+  .step{
+    display:grid;
+    grid-template-columns:48px 1fr;
+    gap:0 22px;
+    position:relative;
+  }
+  .step + .step{margin-top:6px;}
+  .step .rail{
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .step .num{
+    width:34px;height:34px;border-radius:50%;
+    background:var(--card);
+    border:1.5px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--mono);
+    font-weight:700;
+    font-size:13px;
+    color:var(--ink-soft);
+    flex:0 0 auto;
+    z-index:1;
+  }
+  .step.active .num{border-color:var(--teal);color:var(--teal);background:var(--teal-soft);}
+  .step .rail .line{
+    flex:1;
+    width:1.5px;
+    background:var(--line);
+    margin-top:4px;
+  }
+  .step:last-child .rail .line{display:none;}
+  .step .body{padding-bottom:40px;}
+  .step h2{font-size:16.5px;margin:5px 0 4px;font-weight:700;}
+  .step .desc{color:var(--ink-soft);font-size:13.5px;margin-bottom:16px;}
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:20px 22px;
+    box-shadow:0 1px 2px rgba(21,37,64,.04);
+  }
+  .card + .card{margin-top:14px;}
+
+  .program-download-row{display:flex;justify-content:flex-end;margin-bottom:12px;}
+
+  .drop{
+    border:1.5px dashed #B9C4D4;
+    border-radius:12px;
+    padding:22px;
+    text-align:center;
+    cursor:pointer;
+    transition:.15s border-color, .15s background;
+    background:#FAFBFC;
+  }
+  .drop:hover, .drop.drag{border-color:var(--teal);background:var(--teal-soft);}
+  .drop.disabled{cursor:not-allowed;opacity:.55;}
+  .drop input{display:none;}
+  .drop .icon{font-size:22px;margin-bottom:6px;}
+  .drop .t1{font-size:14px;font-weight:600;}
+  .drop .t2{font-size:12.5px;color:var(--ink-soft);margin-top:2px;}
+
+  .note-box{
+    margin-top:6px;font-size:12.5px;color:var(--ink-soft);line-height:1.65;word-break:keep-all;
+    background:#FAFBFC;border:1px dashed #C7CEDA;border-radius:9px;padding:12px 14px;
+  }
+  .note-box b{color:var(--ink);}
+
+  .file-list{margin-top:14px;display:flex;flex-direction:column;gap:8px;max-height:420px;overflow-y:auto;}
+  .file-row{
+    display:flex;align-items:center;gap:12px;
+    background:#FAFBFC;border:1px solid var(--line);border-radius:10px;
+    padding:10px 14px;border-left:3px solid var(--line);
+    transition:opacity .12s, border-color .12s;
+  }
+  .file-row.dragging{opacity:.4;}
+  .file-row.drag-over-top{border-top:2px solid var(--teal);}
+  .file-row.drag-over-bottom{border-bottom:2px solid var(--teal);}
+  .fr-drag-handle{
+    flex:0 0 auto;font-size:15px;color:var(--ink-soft);cursor:grab;
+    padding:0 2px;user-select:none;line-height:1;
+  }
+  .fr-drag-handle:active{cursor:grabbing;}
+  .reorder-hint{
+    margin-top:10px;padding:9px 12px;font-size:12px;color:var(--ink-soft);
+    background:var(--teal-soft);border-radius:8px;line-height:1.5;
+  }
+  .reorder-hint b{color:var(--teal);}
+  .file-row .fr-icon{font-size:16px;flex:0 0 auto;}
+  .file-row .fr-meta{flex:1;min-width:0;}
+  .file-row .fr-name{font-weight:700;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .file-row .fr-sub{font-size:11.5px;color:var(--ink-soft);font-family:var(--mono);margin-top:1px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .file-row.status-ok{border-left-color:var(--teal);}
+  .file-row.status-error{border-left-color:var(--rose);}
+  .file-row.status-processing{border-left-color:var(--violet);}
+  .fr-badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;flex:0 0 auto;white-space:nowrap;}
+  .fr-badge.pending{color:var(--ink-soft);background:#EDEFF3;}
+  .fr-badge.ok{color:var(--teal);background:var(--teal-soft);}
+  .fr-badge.error{color:var(--rose);background:var(--rose-soft);}
+  .fr-badge.processing{color:var(--violet);background:var(--violet-soft);}
+  .file-row button.remove{
+    border:none;background:none;color:var(--ink-soft);cursor:pointer;font-size:15px;
+    padding:5px 9px;border-radius:8px;flex:0 0 auto;line-height:1;
+  }
+  .file-row button.remove:hover{background:#fff;color:var(--rose);}
+  .file-row button.remove:disabled{opacity:.35;cursor:not-allowed;}
+  .file-empty{padding:14px 4px;color:var(--ink-soft);font-size:13px;}
+
+  .field-row{display:flex;gap:14px;margin-top:16px;flex-wrap:wrap;}
+  .field{flex:1;min-width:160px;}
+  .field label{
+    display:block;font-size:11.5px;color:var(--ink-soft);
+    font-weight:700;letter-spacing:.03em;margin-bottom:6px;text-transform:uppercase;
+  }
+  select, input[type=text]{
+    width:100%;padding:9px 11px;border-radius:9px;border:1px solid var(--line);
+    background:var(--card);font-family:var(--sans);font-size:13.5px;color:var(--ink);
+  }
+  select:focus, input[type=text]:focus{outline:2px solid var(--teal);outline-offset:1px;border-color:var(--teal);}
+  input[type=range]{width:100%;accent-color:var(--teal);height:20px;}
+  .quality-row{display:flex;align-items:center;gap:16px;}
+  .quality-row .field{flex:1;}
+  .quality-value{font-family:var(--mono);font-size:18px;font-weight:800;color:var(--teal);min-width:52px;text-align:right;}
+  .size-estimate{margin-top:10px;}
+
+  button.primary{
+    background:var(--navy);color:#fff;border:none;border-radius:10px;
+    padding:13px 22px;font-size:14.5px;font-weight:700;cursor:pointer;
+    font-family:var(--sans);
+    transition:.15s transform, .15s background;
+  }
+  button.primary:hover:not(:disabled){background:var(--navy-deep);}
+  button.primary:active:not(:disabled){transform:scale(.98);}
+  button.primary:disabled{background:#C7CCD6;cursor:not-allowed;}
+  button.ghost{
+    background:#fff;color:var(--navy);border:1.5px solid #C7CEDA;
+    border-radius:10px;padding:12px 18px;font-size:13.5px;font-weight:600;cursor:pointer;
+    font-family:var(--sans);transition:.15s background;
+  }
+  button.ghost:hover:not(:disabled){background:#F1F4F8;}
+  button.ghost:disabled{opacity:.5;cursor:not-allowed;}
+
+  .action-row{display:flex;gap:10px;align-items:center;margin-top:18px;flex-wrap:wrap;}
+  .hint{font-size:12.5px;color:var(--ink-soft);}
+
+  .progress-wrap{margin-top:16px;}
+  .progress-bar{height:10px;border-radius:6px;background:#EDEFF3;overflow:hidden;}
+  .progress-fill{height:100%;width:0%;background:var(--teal);transition:width .15s ease;}
+  .progress-label{margin-top:7px;font-size:12.5px;color:var(--ink-soft);font-family:var(--mono);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+  .stats{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0;}
+  .stat{
+    flex:1;min-width:140px;
+    background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:14px 16px;
+  }
+  .stat .v{font-family:var(--mono);font-size:22px;font-weight:800;}
+  .stat .l{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  .stat.warn .v{color:var(--amber);}
+  .stat.bad .v{color:var(--rose);}
+  .stat.good .v{color:var(--teal);}
+
+  .warn-box{
+    border:1px solid #EBCF9C;background:var(--amber-soft);border-radius:12px;
+    padding:14px 16px;font-size:13px;margin-top:4px;margin-bottom:14px;
+  }
+  .warn-box summary{cursor:pointer;font-weight:700;color:var(--amber);font-size:13.5px;}
+  .warn-box ul{margin:10px 0 0;padding-left:18px;}
+  .warn-box li{margin-bottom:4px;}
+
+  .success-box{
+    margin-top:14px;padding:14px 16px;border-radius:12px;
+    background:var(--teal-soft);border:1px solid #BFE3DF;
+    font-size:13.5px;color:var(--ink);line-height:1.6;
+  }
+  .success-box b{color:var(--teal);}
+
+  footer.copyright{margin-top:18px;font-size:11.5px;color:#9AA2B1;text-align:center;}
+  footer.copyright .copyright-link{color:#9AA2B1;text-decoration:underline;text-underline-offset:2px;}
+  footer.copyright .copyright-link:hover{color:var(--teal);}
+
+  .guide-panel{
+    border:1px solid var(--line);border-radius:14px;background:var(--card);
+    margin-bottom:40px;overflow:hidden;
+    box-shadow:0 1px 3px rgba(20,30,50,.04);
+  }
+  .guide-toggle{
+    width:100%;display:flex;align-items:center;gap:12px;
+    padding:16px 22px;cursor:pointer;background:none;border:none;
+    font-family:var(--sans);text-align:left;
+  }
+  .guide-toggle .gt-icon{
+    font-size:15px;width:32px;height:32px;border-radius:50%;
+    background:var(--teal-soft);display:flex;align-items:center;justify-content:center;
+    flex:0 0 auto;
+  }
+  .guide-toggle .gt-title{font-size:15px;font-weight:800;color:var(--ink);flex:1;}
+  .guide-toggle .gt-hint{font-size:12.5px;color:var(--ink-soft);}
+  .guide-toggle .gt-arrow{
+    font-size:11px;color:var(--ink-soft);transition:.2s transform;flex:0 0 auto;
+  }
+  .guide-panel.open .gt-arrow{transform:rotate(180deg);}
+  .guide-body{
+    display:none;padding:0 22px 22px;border-top:1px solid var(--line);
+  }
+  .guide-panel.open .guide-body{display:block;}
+
+  .guide-steps{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+    gap:12px;margin-top:18px;
+  }
+  .guide-step{
+    background:var(--paper);border:1px solid var(--line);border-radius:10px;
+    padding:14px 15px;
+  }
+  .guide-step .gs-num{
+    font-family:var(--mono);font-size:10.5px;font-weight:800;color:var(--teal);
+    letter-spacing:.08em;margin-bottom:6px;
+  }
+  .guide-step .gs-title{font-size:13.5px;font-weight:800;color:var(--ink);margin-bottom:7px;}
+  .guide-step .gs-body{font-size:12.5px;color:var(--ink-soft);line-height:1.65;word-break:keep-all;}
+  .guide-step .gs-body b{color:var(--ink);}
+
+  .guide-tip{
+    margin-top:14px;padding:13px 16px;
+    background:var(--teal-soft);border-radius:10px;
+    font-size:12.5px;color:var(--ink-soft);line-height:1.65;word-break:keep-all;
+  }
+  .guide-tip b{color:var(--teal);}
+
+  ::-webkit-scrollbar{height:10px;width:10px;}
+  ::-webkit-scrollbar-thumb{background:#D7DCE4;border-radius:6px;}
+</style>
+</head>
+<body>
+
+<header class="page-head">
+  <div class="header-inner">
+    <a class="eyebrow" href="https://physics.physicsgon.workers.dev/Programs/">프로그램</a>
+    <h1>파일 통합 프로그램</h1>
+    <p>여러 개의 엑셀 파일, 여러 개의 PDF 파일, 또는 여러 장의 사진(HEIC 포함)을 한 번에 올리면, 엑셀은 모든 시트를 하나의 통합 워크북으로, PDF는 모든 페이지를 하나의 PDF로, 사진은 한 장씩 페이지로 순서대로 합쳐 드립니다. 모든 처리는 이 브라우저 안에서만 이루어지고, 파일이 외부로 전송되지 않습니다.</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="program-download-row">
+    <button class="ghost" id="downloadProgramBtn" type="button">⬇️ 이 프로그램 다운받기</button>
+  </div>
+
+  <div class="guide-panel" id="guidePanel">
+    <button class="guide-toggle" id="guideToggle" type="button">
+      <span class="gt-icon">📖</span>
+      <span class="gt-title">사용 방법</span>
+      <span class="gt-hint">처음 사용하신다면 클릭해서 확인하세요</span>
+      <span class="gt-arrow">▼</span>
+    </button>
+    <div class="guide-body">
+      <div class="guide-steps">
+        <div class="guide-step">
+          <div class="gs-num">STEP 01</div>
+          <div class="gs-title">파일 선택</div>
+          <div class="gs-body">합칠 엑셀 파일들, PDF 파일들, 또는 사진(JPG/PNG/HEIC 등)들을 클릭하거나 끌어다 놓아 한 번에 여러 개 추가하세요. 형식은 자동으로 인식되며, 서로 다른 형식(엑셀·PDF·사진)은 함께 합칠 수 없어 다른 형식을 올리면 안내와 함께 제외됩니다. 같은 파일을 여러 번 추가해도 중복 없이 한 번만 처리됩니다. 목록에서 각 항목 왼쪽의 <b>⠿</b> 를 드래그하면 순서를 바꿀 수 있습니다.</div>
+        </div>
+        <div class="guide-step">
+          <div class="gs-num">STEP 02</div>
+          <div class="gs-title">합치기</div>
+          <div class="gs-body">[합치기]를 누르면 파일을 업로드된 순서대로 읽어 하나로 합칩니다. 엑셀은 시트 단위로, PDF는 페이지 단위로, 사진은 한 장당 한 페이지로 순서를 그대로 유지합니다. 사진 모드에서는 슬라이더로 화질과 예상 용량을 조절할 수 있습니다. 손상된 파일은 자동으로 건너뛰고 목록에 표시됩니다.</div>
+        </div>
+        <div class="guide-step">
+          <div class="gs-num">STEP 03</div>
+          <div class="gs-title">저장</div>
+          <div class="gs-body">파일명을 확인하거나 수정한 뒤 저장하세요. Chrome/Edge 최신 버전에서는 저장 위치도 직접 선택할 수 있습니다.</div>
+        </div>
+      </div>
+      <div class="guide-tip">
+        <b>엑셀 시트 이름 규칙.</b> 파일에 시트가 1개면 "파일이름"으로, 여러 개면 "파일이름_시트이름"으로 자동 지정됩니다. 이름이 31자를 넘거나 다른 시트와 겹치면 자동으로 조정됩니다.<br><br>
+        <b>PDF 병합 방식.</b> 각 PDF의 모든 페이지가 업로드한 순서대로, 원본 페이지 순서를 유지한 채 그대로 이어붙습니다.<br><br>
+        <b>사진→PDF 변환.</b> 사진 1장이 PDF 1페이지가 되며, HEIC 파일은 자동으로 변환됩니다. <b>화질</b> 슬라이더는 JPEG 압축률을, <b>해상도</b> 슬라이더는 원본 대비 사진 크기(가로·세로 픽셀)를 조절합니다. 화질만으로는 용량이 일정 수준 이하로 줄지 않는 한계가 있는데, 이때 해상도를 함께 낮추면 더 줄일 수 있습니다.<br><br>
+        <b>대량 처리 팁.</b> 100개 이상의 파일도 처리할 수 있지만, 파일 수와 용량이 클수록 시간이 걸릴 수 있어요. 처리 중에는 브라우저 탭을 닫지 마세요.
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="step active" id="step1">
+    <div class="rail"><div class="num">01</div><div class="line"></div></div>
+    <div class="body">
+      <h2>파일 선택</h2>
+      <div class="desc" id="step1Desc">합칠 엑셀 파일들, PDF 파일들, 또는 사진들을 여러 개 선택하거나 끌어다 놓으세요. 형식은 자동으로 인식됩니다.</div>
+      <div class="card">
+        <div id="dropZone" class="drop">
+          <input type="file" id="fileInput" accept=".xlsx,.xls,.xlsm,.xlsb,.pdf,.jpg,.jpeg,.png,.heic,.heif,.webp" multiple>
+          <div class="icon" id="dropIcon">📁</div>
+          <div class="t1" id="dropT1">클릭해서 여러 파일 선택 또는 끌어다 놓기</div>
+          <div class="t2" id="dropT2">엑셀(.xlsx 등) · PDF · 사진(JPG/PNG/HEIC 등) · 여러 개 동시 선택 가능 · 한 번에 한 형식만</div>
+        </div>
+        <div class="hint" id="pickStatus" style="margin-top:10px;"></div>
+        <div class="reorder-hint" id="reorderHint" style="display:none;">💡 파일을 올리면, 항목 왼쪽의 <b>⠿</b> 를 드래그해서 순서를 바꿀 수 있습니다.</div>
+        <div class="file-list" id="fileList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step" id="step2">
+    <div class="rail"><div class="num">02</div></div>
+    <div class="body">
+      <h2>합치기 &amp; 저장</h2>
+      <div class="desc" id="step2Desc">선택한 파일들을 업로드 순서대로 하나로 합칩니다.</div>
+      <div class="card">
+        <div class="note-box" id="modeNoteBox">파일을 올리면 엑셀은 시트 단위로, PDF는 페이지 단위로, 사진은 한 장당 한 페이지로 자동 병합됩니다.</div>
+
+        <div class="card" id="imageQualityCard" style="display:none;margin-top:14px;">
+          <div class="quality-row">
+            <div class="field">
+              <label>화질 (JPEG 압축률)</label>
+              <input type="range" id="qualitySlider" min="1" max="100" value="80">
+            </div>
+            <div class="quality-value" id="qualityValue">80%</div>
+          </div>
+          <div class="quality-row" style="margin-top:12px;">
+            <div class="field">
+              <label>해상도 (원본 대비)</label>
+              <input type="range" id="resolutionSlider" min="10" max="100" value="100">
+            </div>
+            <div class="quality-value" id="resolutionValue">100%</div>
+          </div>
+          <div class="note-box size-estimate" id="sizeEstimateBox">사진을 추가하면 예상 용량이 표시됩니다.</div>
+        </div>
+
+        <div class="action-row">
+          <button class="primary" id="mergeBtn" type="button" disabled>합치기</button>
+          <button class="ghost" id="resetBtn" type="button">전체 초기화</button>
+          <span class="hint" id="mergeHint">먼저 파일을 추가하세요.</span>
+        </div>
+
+        <div class="progress-wrap" id="progressWrap" style="display:none">
+          <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+          <div class="progress-label" id="progressLabel"></div>
+        </div>
+
+        <div id="resultArea" style="display:none">
+          <div class="stats" id="mergeStatsRow"></div>
+          <div id="skipWarnArea"></div>
+          <div class="field-row">
+            <div class="field" style="flex:2;min-width:240px;">
+              <label>저장할 파일명</label>
+              <input type="text" id="outFileName">
+            </div>
+          </div>
+          <div class="action-row">
+            <button class="primary" id="saveBtn" type="button">저장 위치 선택하고 저장</button>
+            <span class="hint" id="saveHint"></span>
+          </div>
+          <div class="success-box" id="saveSuccessBox" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="copyright">Copyright © 2026 <a href="mailto:physicsgon@gmail.com" class="copyright-link">physicsgon@gmail.com</a> . All rights reserved.</footer>
+</div>
+
+<script>
+// 페이지가 로드된 시점(어떤 사용자 조작도 일어나기 전)의 원본 HTML을 미리 캡처해 둔다.
+// 병합 결과가 화면에 그려진 뒤의 상태가 아니라, 항상 '깨끗한' 최초 상태를 다운로드하기 위함.
+const ORIGINAL_HTML = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+
+(function(){
+  const dropZone = document.getElementById('dropZone');
+  const fileInput = document.getElementById('fileInput');
+  const pickStatus = document.getElementById('pickStatus');
+  const reorderHint = document.getElementById('reorderHint');
+  const fileListEl = document.getElementById('fileList');
+  const mergeBtn = document.getElementById('mergeBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const mergeHint = document.getElementById('mergeHint');
+  const progressWrap = document.getElementById('progressWrap');
+  const progressFill = document.getElementById('progressFill');
+  const progressLabel = document.getElementById('progressLabel');
+  const resultArea = document.getElementById('resultArea');
+  const mergeStatsRow = document.getElementById('mergeStatsRow');
+  const skipWarnArea = document.getElementById('skipWarnArea');
+  const outFileName = document.getElementById('outFileName');
+  const saveBtn = document.getElementById('saveBtn');
+  const saveHint = document.getElementById('saveHint');
+  const saveSuccessBox = document.getElementById('saveSuccessBox');
+  const dropIcon = document.getElementById('dropIcon');
+  const dropT1 = document.getElementById('dropT1');
+  const dropT2 = document.getElementById('dropT2');
+  const step1Desc = document.getElementById('step1Desc');
+  const step2Desc = document.getElementById('step2Desc');
+  const modeNoteBox = document.getElementById('modeNoteBox');
+  const imageQualityCard = document.getElementById('imageQualityCard');
+  const qualitySlider = document.getElementById('qualitySlider');
+  const qualityValue = document.getElementById('qualityValue');
+  const resolutionSlider = document.getElementById('resolutionSlider');
+  const resolutionValue = document.getElementById('resolutionValue');
+  const sizeEstimateBox = document.getElementById('sizeEstimateBox');
+
+  const NEUTRAL_INFO = {
+    accept: '.xlsx,.xls,.xlsm,.xlsb,.pdf,.jpg,.jpeg,.png,.heic,.heif,.webp',
+    icon: '📁',
+    t1: '클릭해서 여러 파일 선택 또는 끌어다 놓기',
+    t2: '엑셀(.xlsx 등) · PDF · 사진(JPG/PNG/HEIC 등) · 여러 개 동시 선택 가능 · 한 번에 한 형식만',
+    desc1: '합칠 엑셀 파일들, PDF 파일들, 또는 사진들을 여러 개 선택하거나 끌어다 놓으세요. 형식은 자동으로 인식됩니다.',
+    desc2: '선택한 파일들을 업로드 순서대로 하나로 합칩니다.',
+    noteBox: '파일을 올리면 엑셀은 시트 단위로, PDF는 페이지 단위로, 사진은 한 장당 한 페이지로 자동 병합됩니다.',
+  };
+  const MODE_INFO = {
+    excel: {
+      accept: '.xlsx,.xls,.xlsm,.xlsb',
+      icon: '📊',
+      t1: '클릭해서 여러 파일 선택 또는 끌어다 놓기',
+      t2: '.xlsx / .xls / .xlsm / .xlsb · 여러 개 동시 선택 가능',
+      desc1: '합칠 엑셀 파일을 여러 개 선택하거나 끌어다 놓으세요.',
+      desc2: '선택한 모든 파일의 시트를 업로드 순서대로 하나의 엑셀 파일로 합칩니다.',
+      noteBox: '<b>시트 이름 규칙:</b> 파일에 시트가 1개면 "파일이름", 여러 개면 "파일이름_시트이름"으로 자동 지정됩니다.',
+      defaultFileName: () => '엑셀_통합_' + todayStr() + '.xlsx',
+    },
+    pdf: {
+      accept: '.pdf',
+      icon: '📄',
+      t1: '클릭해서 여러 PDF 선택 또는 끌어다 놓기',
+      t2: '.pdf · 여러 개 동시 선택 가능',
+      desc1: '합칠 PDF 파일을 여러 개 선택하거나 끌어다 놓으세요.',
+      desc2: '선택한 모든 PDF의 모든 페이지를 업로드 순서대로 하나의 PDF로 합칩니다.',
+      noteBox: '<b>병합 방식:</b> 각 PDF의 모든 페이지가 파일을 올린 순서대로, 원본 페이지 순서를 유지한 채 이어붙습니다.',
+      defaultFileName: () => 'PDF_통합_' + todayStr() + '.pdf',
+    },
+    image: {
+      accept: '.jpg,.jpeg,.png,.heic,.heif,.webp',
+      icon: '🖼️',
+      t1: '클릭해서 여러 사진 선택 또는 끌어다 놓기',
+      t2: '.jpg / .jpeg / .png / .heic / .heif / .webp · 여러 개 동시 선택 가능',
+      desc1: '합칠 사진을 여러 개 선택하거나 끌어다 놓으세요. HEIC 사진도 지원됩니다.',
+      desc2: '선택한 사진을 업로드 순서대로 한 장씩 PDF 페이지로 만들어 합칩니다.',
+      noteBox: '<b>사진→PDF 변환:</b> 사진 1장이 PDF 1페이지가 되며, 업로드한 순서대로 합쳐집니다. 아래 화질/해상도 슬라이더로 예상 용량을 조절하세요.',
+      defaultFileName: () => '사진_PDF_' + todayStr() + '.pdf',
+    },
+  };
+
+  function detectFileType(file){
+    const name = file.name.toLowerCase();
+    if (/\.(xlsx|xls|xlsm|xlsb)$/.test(name)) return 'excel';
+    if (/\.pdf$/.test(name)) return 'pdf';
+    if (/\.(jpe?g|png|heic|heif|webp)$/.test(name)) return 'image';
+    return null;
+  }
+
+  let currentMode = null; // null | 'excel' | 'pdf' - 업로드된 파일로부터 자동으로 정해짐
+
+  let fileEntries = [];
+  let fileKeys = new Set();
+  let isProcessing = false;
+  let mergedResult = null;
+  let mergeSummary = null;
+  let dragSrcKey = null;
+  let estimateTimer = null;
+  let estimateToken = 0;
+
+  function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+  function escapeAttr(s){ return escapeHtml(s); }
+
+  function humanSize(bytes){
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+    return (bytes/1024/1024).toFixed(2) + ' MB';
+  }
+
+  function fileKey(file){
+    return file.name + '::' + file.size + '::' + file.lastModified;
+  }
+
+  function baseName(filename){
+    return String(filename).replace(/\.(xlsx|xls|xlsm|xlsb|pdf|jpe?g|png|heic|heif|webp)$/i, '');
+  }
+
+  // 비트맵을 지정한 배율(scale)로 리사이즈한 뒤 지정한 화질(0~1)의 JPEG Blob으로 압축.
+  // 미리보기 용량 계산과 실제 병합에서 공용으로 사용.
+  function compressToJpeg(bitmap, quality, scale){
+    return new Promise((resolve, reject) => {
+      const w = Math.max(1, Math.round(bitmap.width * scale));
+      const h = Math.max(1, Math.round(bitmap.height * scale));
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(bitmap, 0, 0, w, h);
+      canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('이미지 압축에 실패했습니다.')), 'image/jpeg', quality);
+    });
+  }
+
+  // 사진 파일 1개를 디코딩해서 ImageBitmap을 확보 (HEIC/HEIF는 heic2any로 먼저 JPEG 변환).
+  async function decodeImageEntry(entry){
+    entry.status = 'processing';
+    renderFileList();
+    try {
+      let decodeSource = entry.file;
+      if (/\.(heic|heif)$/i.test(entry.file.name)) {
+        if (typeof heic2any === 'undefined') throw new Error('HEIC 변환 라이브러리를 불러오지 못했습니다.');
+        let converted = await heic2any({ blob: entry.file, toType: 'image/jpeg', quality: 0.92 });
+        if (Array.isArray(converted)) converted = converted[0];
+        decodeSource = converted;
+      }
+      entry.bitmap = await createImageBitmap(decodeSource, { imageOrientation: 'from-image' });
+      entry.width = entry.bitmap.width;
+      entry.height = entry.bitmap.height;
+      entry.status = 'ok';
+    } catch (err) {
+      entry.status = 'error';
+      entry.errorMsg = (err && err.message) ? err.message : '사진을 읽을 수 없습니다.';
+    }
+    renderFileList();
+    updateMergeButtonState();
+  }
+
+  // 새로 추가된 사진들을 순서대로 디코딩한 뒤 예상 용량을 다시 계산.
+  async function processImageQueue(entries){
+    for (const entry of entries) {
+      await decodeImageEntry(entry);
+    }
+    if (currentMode === 'image') scheduleEstimate();
+  }
+
+  function scheduleEstimate(){
+    sizeEstimateBox.textContent = '예상 용량 계산 중...';
+    clearTimeout(estimateTimer);
+    estimateTimer = setTimeout(runEstimate, 300);
+  }
+
+  async function runEstimate(){
+    const token = ++estimateToken;
+    const quality = Number(qualitySlider.value) / 100;
+    const scale = Number(resolutionSlider.value) / 100;
+    const validEntries = fileEntries.filter(e => e.status === 'ok' && e.bitmap);
+    if (!validEntries.length) {
+      sizeEstimateBox.textContent = '사진을 추가하면 예상 용량이 표시됩니다.';
+      return;
+    }
+    let compressedTotal = 0, originalTotal = 0;
+    for (const entry of validEntries) {
+      if (token !== estimateToken) return; // 이후 요청이 들어와 이 계산은 폐기
+      originalTotal += entry.file.size;
+      const blob = await compressToJpeg(entry.bitmap, quality, scale);
+      entry.compressedBlob = blob;
+      entry.compressedQuality = quality;
+      entry.compressedScale = scale;
+      compressedTotal += blob.size;
+      await yieldToUI();
+    }
+    if (token !== estimateToken) return;
+    const overhead = validEntries.length * 400; // PDF 페이지당 대략적인 오버헤드
+    const estTotal = compressedTotal + overhead;
+    const diffPct = originalTotal ? Math.round((1 - estTotal / originalTotal) * 100) : 0;
+    const diffLabel = diffPct >= 0 ? (diffPct + '% 감소') : (Math.abs(diffPct) + '% 증가');
+    sizeEstimateBox.innerHTML = '예상 용량: <b>' + humanSize(estTotal) + '</b> (원본 총 ' + humanSize(originalTotal) + ' 대비 ' + diffLabel + ')';
+  }
+
+  function sanitizeSheetName(name){
+    let s = String(name).replace(/[\\\/\?\*\[\]\:]/g, '_').trim();
+    if (!s) s = 'Sheet';
+    if (s.length > 31) s = s.slice(0, 31);
+    return s;
+  }
+
+  function uniqueSheetName(base, usedSet){
+    let name = sanitizeSheetName(base);
+    if (!usedSet.has(name)) { usedSet.add(name); return name; }
+    let n = 2;
+    while (true) {
+      const suffix = '_' + n;
+      let candidate = (name.length + suffix.length > 31)
+        ? name.slice(0, 31 - suffix.length) + suffix
+        : name + suffix;
+      if (!usedSet.has(candidate)) { usedSet.add(candidate); return candidate; }
+      n++;
+    }
+  }
+
+  function sanitizeExcelFileName(name){
+    let n = String(name || '').trim();
+    if (!n) n = '엑셀_통합_결과';
+    n = n.replace(/[\\\/\:\*\?"<>\|]/g, '_');
+    if (!/\.xlsx$/i.test(n)) n += '.xlsx';
+    return n;
+  }
+
+  function sanitizePdfFileName(name){
+    let n = String(name || '').trim();
+    if (!n) n = 'PDF_통합_결과';
+    n = n.replace(/[\\\/\:\*\?"<>\|]/g, '_');
+    if (!/\.pdf$/i.test(n)) n += '.pdf';
+    return n;
+  }
+
+  function todayStr(){
+    const d = new Date();
+    const p = n => String(n).padStart(2, '0');
+    return d.getFullYear() + p(d.getMonth()+1) + p(d.getDate());
+  }
+
+  function yieldToUI(){ return new Promise(r => setTimeout(r, 0)); }
+
+  function updateMergeButtonState(){
+    const has = fileEntries.length > 0;
+    mergeBtn.disabled = !has || isProcessing;
+    if (!isProcessing) {
+      mergeHint.textContent = has
+        ? (fileEntries.length + '개 파일이 추가되었습니다. "합치기"를 눌러 진행하세요.')
+        : '먼저 파일을 추가하세요.';
+    }
+  }
+
+  function renderFileList(){
+    reorderHint.style.display = fileEntries.length > 1 ? 'block' : 'none';
+    if (!fileEntries.length) {
+      fileListEl.innerHTML = '<div class="file-empty">아직 추가된 파일이 없습니다.</div>';
+      return;
+    }
+    fileListEl.innerHTML = fileEntries.map(e => {
+      let badge, sub;
+      if (e.status === 'ok') {
+        let unitLabel;
+        if (currentMode === 'pdf') unitLabel = e.pageCount + '페이지';
+        else if (currentMode === 'image') unitLabel = e.width + '×' + e.height;
+        else unitLabel = '시트 ' + e.sheetCount + '개';
+        badge = '<span class="fr-badge ok">완료 · ' + unitLabel + '</span>';
+        sub = humanSize(e.file.size);
+      } else if (e.status === 'error') {
+        badge = '<span class="fr-badge error">손상됨</span>';
+        sub = humanSize(e.file.size) + ' · ' + escapeHtml(e.errorMsg || '읽기 실패');
+      } else if (e.status === 'processing') {
+        badge = '<span class="fr-badge processing">처리 중...</span>';
+        sub = humanSize(e.file.size);
+      } else {
+        badge = '<span class="fr-badge pending">대기중</span>';
+        sub = humanSize(e.file.size);
+      }
+      return '<div class="file-row status-' + e.status + '" draggable="' + (!isProcessing) + '" data-key="' + escapeAttr(e.key) + '">' +
+        '<div class="fr-drag-handle" title="드래그해서 순서 변경">⠿</div>' +
+        '<div class="fr-icon">📄</div>' +
+        '<div class="fr-meta">' +
+          '<div class="fr-name">' + escapeHtml(e.file.name) + '</div>' +
+          '<div class="fr-sub">' + sub + '</div>' +
+        '</div>' +
+        badge +
+        '<button class="remove" type="button" data-key="' + escapeAttr(e.key) + '" ' + (isProcessing ? 'disabled' : '') + '>✕</button>' +
+      '</div>';
+    }).join('');
+
+    fileListEl.querySelectorAll('button.remove').forEach(btn => {
+      btn.addEventListener('click', () => removeFile(btn.dataset.key));
+    });
+    attachDragHandlers();
+  }
+
+  function attachDragHandlers(){
+    fileListEl.querySelectorAll('.file-row').forEach(row => {
+      row.addEventListener('dragstart', e => {
+        if (isProcessing) { e.preventDefault(); return; }
+        dragSrcKey = row.dataset.key;
+        row.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        try { e.dataTransfer.setData('text/plain', dragSrcKey); } catch (err) {}
+      });
+      row.addEventListener('dragend', () => {
+        row.classList.remove('dragging');
+        fileListEl.querySelectorAll('.file-row').forEach(r => r.classList.remove('drag-over-top', 'drag-over-bottom'));
+        dragSrcKey = null;
+      });
+      row.addEventListener('dragover', e => {
+        if (isProcessing || !dragSrcKey || row.dataset.key === dragSrcKey) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        const rect = row.getBoundingClientRect();
+        const isAfter = (e.clientY - rect.top) > rect.height / 2;
+        row.classList.toggle('drag-over-bottom', isAfter);
+        row.classList.toggle('drag-over-top', !isAfter);
+      });
+      row.addEventListener('dragleave', () => {
+        row.classList.remove('drag-over-top', 'drag-over-bottom');
+      });
+      row.addEventListener('drop', e => {
+        if (isProcessing || !dragSrcKey || row.dataset.key === dragSrcKey) return;
+        e.preventDefault();
+        const rect = row.getBoundingClientRect();
+        const isAfter = (e.clientY - rect.top) > rect.height / 2;
+        reorderFiles(dragSrcKey, row.dataset.key, isAfter);
+      });
+    });
+  }
+
+  function reorderFiles(srcKey, targetKey, insertAfter){
+    const srcIdx = fileEntries.findIndex(e => e.key === srcKey);
+    if (srcIdx === -1) return;
+    const moved = fileEntries.splice(srcIdx, 1)[0];
+    const targetIdx = fileEntries.findIndex(e => e.key === targetKey);
+    if (targetIdx === -1) {
+      fileEntries.push(moved);
+    } else {
+      const insertIdx = insertAfter ? targetIdx + 1 : targetIdx;
+      fileEntries.splice(insertIdx, 0, moved);
+    }
+    renderFileList();
+    pickStatus.textContent = '파일 순서를 변경했습니다.';
+  }
+
+  function removeFile(key){
+    if (isProcessing) return;
+    const idx = fileEntries.findIndex(e => e.key === key);
+    if (idx >= 0) { fileEntries.splice(idx, 1); fileKeys.delete(key); }
+    if (fileEntries.length === 0) {
+      currentMode = null;
+      mergedResult = null;
+      mergeSummary = null;
+      resultArea.style.display = 'none';
+      saveSuccessBox.style.display = 'none';
+      applyModeUI();
+    } else if (currentMode === 'image') {
+      scheduleEstimate();
+    }
+    renderFileList();
+    updateMergeButtonState();
+  }
+
+  function addFiles(newFiles){
+    if (isProcessing) return;
+    let added = 0, dup = 0, unsupported = 0;
+    const mismatched = [];
+    const newImageEntries = [];
+    for (const f of newFiles) {
+      const type = detectFileType(f);
+      if (!type) { unsupported++; continue; }
+      if (currentMode === null) {
+        currentMode = type;
+        applyModeUI();
+      } else if (type !== currentMode) {
+        mismatched.push(f.name);
+        continue;
+      }
+      const key = fileKey(f);
+      if (fileKeys.has(key)) { dup++; continue; }
+      fileKeys.add(key);
+      const entry = { file: f, key: key, status: 'pending' };
+      fileEntries.push(entry);
+      if (type === 'image') newImageEntries.push(entry);
+      added++;
+    }
+    renderFileList();
+    updateMergeButtonState();
+    if (newImageEntries.length) processImageQueue(newImageEntries);
+
+    const parts = [];
+    if (added > 0) parts.push(added + '개 파일이 추가되었습니다.');
+    if (dup > 0) parts.push('중복 ' + dup + '개는 제외됨.');
+    if (unsupported > 0) parts.push('지원하지 않는 형식 ' + unsupported + '개는 제외됨.');
+    if (mismatched.length > 0) {
+      const modeLabel = currentMode === 'pdf' ? 'PDF' : (currentMode === 'image' ? '사진' : '엑셀');
+      parts.push('⚠️ 지금은 ' + modeLabel + ' 파일을 합치는 중이라 다른 형식(' + mismatched.join(', ') + ')은 추가되지 않았습니다. 서로 다른 형식을 함께 합칠 수는 없어요.');
+    }
+    if (parts.length > 0) pickStatus.textContent = parts.join(' ');
+  }
+
+  dropZone.addEventListener('click', () => { if (!isProcessing) fileInput.click(); });
+  fileInput.addEventListener('change', e => { addFiles(e.target.files); fileInput.value = ''; });
+  ['dragover'].forEach(ev => dropZone.addEventListener(ev, e => { e.preventDefault(); if (!isProcessing) dropZone.classList.add('drag'); }));
+  ['dragleave','drop'].forEach(ev => dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.remove('drag'); }));
+  dropZone.addEventListener('drop', e => {
+    if (isProcessing) return;
+    if (e.dataTransfer.files && e.dataTransfer.files.length) addFiles(e.dataTransfer.files);
+  });
+
+  qualitySlider.addEventListener('input', () => {
+    qualityValue.textContent = qualitySlider.value + '%';
+    if (currentMode === 'image') scheduleEstimate();
+  });
+  resolutionSlider.addEventListener('input', () => {
+    resolutionValue.textContent = resolutionSlider.value + '%';
+    if (currentMode === 'image') scheduleEstimate();
+  });
+
+  function updateProgress(done, total, currentName){
+    const pct = total ? Math.round(done / total * 100) : 0;
+    progressFill.style.width = pct + '%';
+    progressLabel.textContent = currentName
+      ? ('처리 중... (' + done + '/' + total + ') ' + currentName)
+      : ('완료 (' + done + '/' + total + ')');
+  }
+
+  function renderMergeStats(s){
+    let html = '';
+    html += '<div class="stat good"><div class="v mono">' + s.okCount + '</div><div class="l">성공한 파일</div></div>';
+    if (currentMode === 'pdf') {
+      html += '<div class="stat"><div class="v mono">' + s.totalPages + '</div><div class="l">병합된 페이지</div></div>';
+    } else if (currentMode === 'image') {
+      html += '<div class="stat"><div class="v mono">' + humanSize(s.totalBytes) + '</div><div class="l">예상 용량</div></div>';
+    } else {
+      html += '<div class="stat"><div class="v mono">' + s.totalSheets + '</div><div class="l">병합된 시트</div></div>';
+    }
+    if (s.errorCount > 0) {
+      html += '<div class="stat bad"><div class="v mono">' + s.errorCount + '</div><div class="l">건너뛴 파일</div></div>';
+    }
+    mergeStatsRow.innerHTML = html;
+  }
+
+  function renderSkipWarn(skipped){
+    if (!skipped.length) { skipWarnArea.innerHTML = ''; return; }
+    let html = '<details class="warn-box" open>' +
+      '<summary>손상되었거나 읽을 수 없어 건너뛴 파일 ' + skipped.length + '건</summary><ul>';
+    skipped.forEach(s => {
+      html += '<li><b>' + escapeHtml(s.name) + '</b> — ' + escapeHtml(s.reason) + '</li>';
+    });
+    html += '</ul></details>';
+    skipWarnArea.innerHTML = html;
+  }
+
+  mergeBtn.addEventListener('click', () => {
+    if (currentMode === 'pdf') runPdfMerge();
+    else if (currentMode === 'image') runImageMerge();
+    else runExcelMerge();
+  });
+
+  async function runExcelMerge(){
+    if (!fileEntries.length || isProcessing) return;
+    isProcessing = true;
+    mergeBtn.disabled = true;
+    resetBtn.disabled = true;
+    dropZone.classList.add('disabled');
+    fileInput.disabled = true;
+    resultArea.style.display = 'none';
+    saveSuccessBox.style.display = 'none';
+    progressWrap.style.display = 'block';
+    mergeHint.textContent = '';
+
+    fileEntries.forEach(e => { e.status = 'pending'; e.sheetCount = undefined; e.errorMsg = undefined; });
+    renderFileList();
+
+    const outWb = XLSX.utils.book_new();
+    const usedNames = new Set();
+    const skipped = [];
+    let okCount = 0, totalSheets = 0;
+    const total = fileEntries.length;
+
+    for (let i = 0; i < total; i++) {
+      const entry = fileEntries[i];
+      entry.status = 'processing';
+      renderFileList();
+      updateProgress(i, total, entry.file.name);
+      await yieldToUI();
+
+      try {
+        const buf = await entry.file.arrayBuffer();
+        const wb = XLSX.read(buf, { type: 'array', cellStyles: true });
+        const sheetNames = wb.SheetNames || [];
+        if (!sheetNames.length) throw new Error('시트를 찾을 수 없습니다.');
+        const base = baseName(entry.file.name);
+
+        if (sheetNames.length === 1) {
+          const ws = wb.Sheets[sheetNames[0]];
+          const newName = uniqueSheetName(base, usedNames);
+          XLSX.utils.book_append_sheet(outWb, ws, newName);
+          totalSheets++;
+        } else {
+          for (const sn of sheetNames) {
+            const ws = wb.Sheets[sn];
+            const newName = uniqueSheetName(base + '_' + sn, usedNames);
+            XLSX.utils.book_append_sheet(outWb, ws, newName);
+            totalSheets++;
+          }
+        }
+        entry.status = 'ok';
+        entry.sheetCount = sheetNames.length;
+        okCount++;
+      } catch (err) {
+        entry.status = 'error';
+        entry.errorMsg = (err && err.message) ? err.message : '파일을 읽을 수 없습니다.';
+        skipped.push({ name: entry.file.name, reason: entry.errorMsg });
+      }
+      renderFileList();
+      await yieldToUI();
+    }
+
+    updateProgress(total, total);
+
+    isProcessing = false;
+    resetBtn.disabled = false;
+    dropZone.classList.remove('disabled');
+    fileInput.disabled = false;
+    updateMergeButtonState();
+
+    if (okCount === 0) {
+      mergeHint.textContent = '병합할 수 있는 파일이 없습니다. 파일을 확인해주세요.';
+      progressWrap.style.display = 'none';
+      return;
+    }
+
+    mergedResult = outWb;
+    mergeSummary = { totalFiles: total, okCount: okCount, errorCount: skipped.length, totalSheets: totalSheets };
+
+    renderMergeStats(mergeSummary);
+    renderSkipWarn(skipped);
+    resultArea.style.display = 'block';
+  }
+
+  async function runPdfMerge(){
+    if (!fileEntries.length || isProcessing) return;
+    isProcessing = true;
+    mergeBtn.disabled = true;
+    resetBtn.disabled = true;
+    dropZone.classList.add('disabled');
+    fileInput.disabled = true;
+    resultArea.style.display = 'none';
+    saveSuccessBox.style.display = 'none';
+    progressWrap.style.display = 'block';
+    mergeHint.textContent = '';
+
+    fileEntries.forEach(e => { e.status = 'pending'; e.pageCount = undefined; e.errorMsg = undefined; });
+    renderFileList();
+
+    const outPdf = await PDFLib.PDFDocument.create();
+    const skipped = [];
+    let okCount = 0, totalPages = 0;
+    const total = fileEntries.length;
+
+    for (let i = 0; i < total; i++) {
+      const entry = fileEntries[i];
+      entry.status = 'processing';
+      renderFileList();
+      updateProgress(i, total, entry.file.name);
+      await yieldToUI();
+
+      try {
+        const buf = await entry.file.arrayBuffer();
+        const srcPdf = await PDFLib.PDFDocument.load(buf, { ignoreEncryption: true });
+        const pageCount = srcPdf.getPageCount();
+        if (!pageCount) throw new Error('페이지를 찾을 수 없습니다.');
+        const copiedPages = await outPdf.copyPages(srcPdf, srcPdf.getPageIndices());
+        copiedPages.forEach(p => outPdf.addPage(p));
+        entry.status = 'ok';
+        entry.pageCount = pageCount;
+        totalPages += pageCount;
+        okCount++;
+      } catch (err) {
+        entry.status = 'error';
+        entry.errorMsg = (err && err.message) ? err.message : '파일을 읽을 수 없습니다.';
+        skipped.push({ name: entry.file.name, reason: entry.errorMsg });
+      }
+      renderFileList();
+      await yieldToUI();
+    }
+
+    updateProgress(total, total);
+
+    isProcessing = false;
+    resetBtn.disabled = false;
+    dropZone.classList.remove('disabled');
+    fileInput.disabled = false;
+    updateMergeButtonState();
+
+    if (okCount === 0) {
+      mergeHint.textContent = '병합할 수 있는 파일이 없습니다. 파일을 확인해주세요.';
+      progressWrap.style.display = 'none';
+      return;
+    }
+
+    mergedResult = outPdf;
+    mergeSummary = { totalFiles: total, okCount: okCount, errorCount: skipped.length, totalPages: totalPages };
+
+    renderMergeStats(mergeSummary);
+    renderSkipWarn(skipped);
+    resultArea.style.display = 'block';
+  }
+
+  async function runImageMerge(){
+    if (!fileEntries.length || isProcessing) return;
+    isProcessing = true;
+    mergeBtn.disabled = true;
+    resetBtn.disabled = true;
+    dropZone.classList.add('disabled');
+    fileInput.disabled = true;
+    qualitySlider.disabled = true;
+    resolutionSlider.disabled = true;
+    resultArea.style.display = 'none';
+    saveSuccessBox.style.display = 'none';
+    progressWrap.style.display = 'block';
+    mergeHint.textContent = '';
+
+    const quality = Number(qualitySlider.value) / 100;
+    const scale = Number(resolutionSlider.value) / 100;
+    const outPdf = await PDFLib.PDFDocument.create();
+    const skipped = [];
+    let okCount = 0, totalBytes = 0;
+    const total = fileEntries.length;
+
+    for (let i = 0; i < total; i++) {
+      const entry = fileEntries[i];
+      updateProgress(i, total, entry.file.name);
+
+      if (entry.status === 'error' || !entry.bitmap) {
+        skipped.push({ name: entry.file.name, reason: entry.errorMsg || '읽을 수 없는 사진입니다.' });
+        renderFileList();
+        continue;
+      }
+
+      entry.status = 'processing';
+      renderFileList();
+      await yieldToUI();
+
+      try {
+        const blob = (entry.compressedBlob && entry.compressedQuality === quality && entry.compressedScale === scale)
+          ? entry.compressedBlob
+          : await compressToJpeg(entry.bitmap, quality, scale);
+        const jpgBytes = await blob.arrayBuffer();
+        const img = await outPdf.embedJpg(jpgBytes);
+        const page = outPdf.addPage([img.width, img.height]);
+        page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
+        entry.status = 'ok';
+        totalBytes += blob.size;
+        okCount++;
+      } catch (err) {
+        entry.status = 'error';
+        entry.errorMsg = (err && err.message) ? err.message : '사진을 처리할 수 없습니다.';
+        skipped.push({ name: entry.file.name, reason: entry.errorMsg });
+      }
+      renderFileList();
+      await yieldToUI();
+    }
+
+    updateProgress(total, total);
+
+    isProcessing = false;
+    resetBtn.disabled = false;
+    dropZone.classList.remove('disabled');
+    fileInput.disabled = false;
+    qualitySlider.disabled = false;
+    resolutionSlider.disabled = false;
+    updateMergeButtonState();
+
+    if (okCount === 0) {
+      mergeHint.textContent = '합칠 수 있는 사진이 없습니다. 파일을 확인해주세요.';
+      progressWrap.style.display = 'none';
+      return;
+    }
+
+    mergedResult = outPdf;
+    mergeSummary = { totalFiles: total, okCount: okCount, errorCount: skipped.length, totalBytes: totalBytes };
+
+    renderMergeStats(mergeSummary);
+    renderSkipWarn(skipped);
+    resultArea.style.display = 'block';
+  }
+
+  resetBtn.addEventListener('click', () => {
+    if (isProcessing) return;
+    fileEntries = [];
+    fileKeys = new Set();
+    mergedResult = null;
+    mergeSummary = null;
+    currentMode = null;
+    estimateToken++;
+    qualitySlider.value = 80;
+    qualityValue.textContent = '80%';
+    resolutionSlider.value = 100;
+    resolutionValue.textContent = '100%';
+    pickStatus.textContent = '';
+    renderFileList();
+    updateMergeButtonState();
+    resultArea.style.display = 'none';
+    progressWrap.style.display = 'none';
+    saveSuccessBox.style.display = 'none';
+    fileInput.value = '';
+    applyModeUI();
+  });
+
+  async function saveWorkbook(wb, filename){
+    const finalName = sanitizeExcelFileName(filename);
+    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array', cellStyles: true });
+    const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+    if (window.showSaveFilePicker) {
+      try {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: finalName,
+          types: [{ description: 'Excel 파일', accept: { 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'] } }]
+        });
+        const writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        return { ok: true, cancelled: false, name: handle.name };
+      } catch (err) {
+        if (err && err.name === 'AbortError') return { ok: false, cancelled: true, name: finalName };
+        // fall through to classic download on other errors
+      }
+    }
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = finalName;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    return { ok: true, cancelled: false, name: finalName };
+  }
+
+  async function savePdf(pdfDoc, filename){
+    const finalName = sanitizePdfFileName(filename);
+    const bytes = await pdfDoc.save();
+    const blob = new Blob([bytes], { type: 'application/pdf' });
+
+    if (window.showSaveFilePicker) {
+      try {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: finalName,
+          types: [{ description: 'PDF 파일', accept: { 'application/pdf': ['.pdf'] } }]
+        });
+        const writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        return { ok: true, cancelled: false, name: handle.name };
+      } catch (err) {
+        if (err && err.name === 'AbortError') return { ok: false, cancelled: true, name: finalName };
+        // fall through to classic download on other errors
+      }
+    }
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = finalName;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    return { ok: true, cancelled: false, name: finalName };
+  }
+
+  saveBtn.addEventListener('click', async () => {
+    if (!mergedResult) return;
+    saveBtn.disabled = true;
+    const originalText = saveBtn.textContent;
+    saveBtn.textContent = '저장 중...';
+    let result;
+    try {
+      result = (currentMode === 'pdf' || currentMode === 'image')
+        ? await savePdf(mergedResult, outFileName.value)
+        : await saveWorkbook(mergedResult, outFileName.value);
+    } catch (err) {
+      result = { ok: false, cancelled: false };
+    }
+    saveBtn.disabled = false;
+    saveBtn.textContent = originalText;
+    if (!result || result.cancelled) return;
+    if (result.ok) {
+      const detail = currentMode === 'pdf'
+        ? ('파일 ' + mergeSummary.totalFiles + '개 중 ' + mergeSummary.okCount + '개 성공 · 페이지 ' + mergeSummary.totalPages + '개 병합')
+        : currentMode === 'image'
+          ? ('사진 ' + mergeSummary.totalFiles + '장 중 ' + mergeSummary.okCount + '장 성공 · 약 ' + humanSize(mergeSummary.totalBytes))
+          : ('파일 ' + mergeSummary.totalFiles + '개 중 ' + mergeSummary.okCount + '개 성공 · 시트 ' + mergeSummary.totalSheets + '개 병합');
+      saveSuccessBox.style.display = 'block';
+      saveSuccessBox.innerHTML = '✅ <b>저장 완료!</b> \'' + escapeHtml(result.name) + '\' 파일로 저장되었습니다. (' + detail + ')';
+    } else {
+      saveSuccessBox.style.display = 'block';
+      saveSuccessBox.innerHTML = '⚠️ 저장에 실패했습니다. 다시 시도해주세요.';
+    }
+  });
+
+  document.getElementById('guideToggle').addEventListener('click', () => {
+    document.getElementById('guidePanel').classList.toggle('open');
+  });
+
+  document.getElementById('downloadProgramBtn').addEventListener('click', () => {
+    const blob = new Blob([ORIGINAL_HTML], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '파일_통합_프로그램.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  });
+
+  function applyModeUI(){
+    const m = currentMode ? MODE_INFO[currentMode] : NEUTRAL_INFO;
+    fileInput.accept = m.accept;
+    dropIcon.textContent = m.icon;
+    dropT1.textContent = m.t1;
+    dropT2.textContent = m.t2;
+    step1Desc.textContent = m.desc1;
+    step2Desc.textContent = m.desc2;
+    modeNoteBox.innerHTML = m.noteBox;
+    outFileName.value = currentMode ? MODE_INFO[currentMode].defaultFileName() : '';
+    imageQualityCard.style.display = currentMode === 'image' ? 'block' : 'none';
+    if (currentMode === 'image') scheduleEstimate();
+  }
+
+  // 초기화
+  applyModeUI();
+  saveHint.textContent = window.showSaveFilePicker
+    ? '저장 위치와 파일명을 직접 선택할 수 있어요.'
+    : '이 브라우저는 저장 위치 선택을 지원하지 않아 기본 다운로드 폴더에 저장됩니다. (파일명은 지정 가능)';
+  renderFileList();
+  updateMergeButtonState();
+})();
+</script>
+</body>
+</html>
