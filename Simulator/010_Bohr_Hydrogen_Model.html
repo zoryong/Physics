@@ -2,8 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bohr Model Simulation</title>
     <style>
+        * { box-sizing: border-box; }
+        html, body { max-width:100%; overflow-x:hidden; }
         body {
             font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: #f5f6f8;
@@ -15,6 +18,9 @@
             padding:64px 28px 72px;
         }
         header.page-head .header-inner{max-width:1080px;margin:0 auto;position:relative;}
+        header.page-head .header-top{
+            display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+        }
         header.page-head .eyebrow{
             display:inline-flex;align-items:center;gap:7px;
             font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;
@@ -29,7 +35,7 @@
         header.page-head p{margin:0;color:#C7D4E8;font-size:15.5px;line-height:1.7;}
         .stage{
             display:flex; justify-content:center; align-items:flex-start;
-            padding:20px;
+            padding:20px; width:100%; max-width:100%;
         }
         footer.copyright{margin:0 20px 26px;font-size:11.5px;color:#9AA2B1;text-align:center;}
         footer.copyright .copyright-link{color:#9AA2B1;text-decoration:underline;text-underline-offset:2px;}
@@ -41,15 +47,19 @@
             box-shadow: 0 8px 24px rgba(0,0,0,0.1);
             overflow: hidden;
             border: 1px solid #e0e0e0;
+            max-width:100%;
+            width:fit-content;
         }
         .controls {
             width: 300px;
+            max-width:100%;
             padding: 25px;
             background-color: #f8f9fa;
             border-right: 1px solid #e0e0e0;
             display: flex;
             flex-direction: column;
             gap: 18px;
+            flex-shrink:0;
         }
         .controls h2 {
             margin: 0 0 5px 0;
@@ -190,11 +200,31 @@
             justify-content: center;
             align-items: flex-start;
             background-color: #ffffff;
+            max-width:100%;
+            min-width:0;
         }
         canvas {
             border: 1px solid #e0e0e0;
             background-color: #fafbfc;
             border-radius: 8px;
+            display:block;
+            max-width:100%;
+            height:auto;
+        }
+
+        @media (max-width: 960px) {
+            header.page-head { padding:36px 20px 40px; }
+            .stage { padding:12px; }
+            .container { flex-direction:column; width:100%; max-width:100%; }
+            .controls { width:100%; border-right:none; border-bottom:1px solid #e0e0e0; }
+            .canvas-container { flex:none; width:100%; padding:12px; }
+        }
+        @media (max-width: 480px) {
+            header.page-head { padding:28px 16px 32px; }
+            header.page-head p { font-size:14px; }
+            .stage { padding:10px; }
+            .controls { padding:16px 14px; gap:14px; }
+            .btn { font-size:12px; }
         }
     </style>
 </head>
@@ -261,7 +291,7 @@
 
     <!-- Canvas Area -->
     <div class="canvas-container">
-        <canvas id="simCanvas" width="1180" height="810"></canvas>
+        <canvas id="simCanvas"></canvas>
     </div>
 </div>
 </div>
@@ -317,17 +347,62 @@
 </script>
 <script>
 /* ============================================================
-   Canvas setup
+   Canvas setup (draw in BASE coords, scale to fit viewport)
    ============================================================ */
 const canvas = document.getElementById('simCanvas');
-const W = canvas.width, H = canvas.height;   // logical (CSS-pixel) size
-const DPR = window.devicePixelRatio || 1;
-canvas.width  = Math.round(W * DPR);
-canvas.height = Math.round(H * DPR);
-canvas.style.width  = W + 'px';
-canvas.style.height = H + 'px';
-const ctx    = canvas.getContext('2d');
-ctx.scale(DPR, DPR);
+const ctx = canvas.getContext('2d');
+const BASE_W = 1180, BASE_H = 810;
+let W = BASE_W, H = BASE_H, DPR = 1, viewScale = 1;
+
+function sizeCanvas() {
+    const wrap = canvas.parentElement;
+    const cs = wrap ? getComputedStyle(wrap) : null;
+    const padX = cs ? ((parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0)) : 0;
+    const stacked = window.matchMedia('(max-width: 960px)').matches;
+    let avail;
+    if (stacked) {
+        const wrapW = wrap && wrap.clientWidth ? wrap.clientWidth : window.innerWidth;
+        avail = Math.floor(wrapW - padX);
+    } else {
+        const controlsEl = document.querySelector('.container .controls');
+        const controlsW = controlsEl ? controlsEl.offsetWidth : 300;
+        const stageEl = document.querySelector('.stage');
+        let stagePad = 0;
+        if (stageEl) {
+            const ss = getComputedStyle(stageEl);
+            stagePad = (parseFloat(ss.paddingLeft) || 0) + (parseFloat(ss.paddingRight) || 0);
+        }
+        avail = Math.floor(window.innerWidth - controlsW - stagePad - padX - 8);
+    }
+    avail = Math.max(260, Math.min(BASE_W, avail));
+    viewScale = avail / BASE_W;
+    W = Math.round(BASE_W * viewScale);
+    H = Math.round(BASE_H * viewScale);
+    DPR = window.devicePixelRatio || 1;
+    canvas.width = Math.round(W * DPR);
+    canvas.height = Math.round(H * DPR);
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    // Draw in BASE_W × BASE_H logical space, scaled to the CSS size
+    ctx.setTransform(DPR * viewScale, 0, 0, DPR * viewScale, 0, 0);
+}
+
+function afterResize() {
+    sizeCanvas();
+    if (typeof draw === 'function') draw();
+}
+
+sizeCanvas();
+window.addEventListener('resize', function () {
+    clearTimeout(window.__bohrResizeTimer);
+    window.__bohrResizeTimer = setTimeout(afterResize, 120);
+});
+window.addEventListener('orientationchange', function () {
+    setTimeout(afterResize, 220);
+});
+window.addEventListener('load', function () {
+    requestAnimationFrame(afterResize);
+});
 
 /* ============================================================
    Physics: Bohr energy levels (hydrogen)
@@ -1065,7 +1140,7 @@ function updateTransitionInfo(from, to, wl, info) {
    Main draw
    ============================================================ */
 function draw() {
-    ctx.clearRect(0, 0, W, H);
+    ctx.clearRect(0, 0, BASE_W, BASE_H);
     drawOrbitPanel();
     drawEnergyPanel();
     drawSpectrumPanel();
