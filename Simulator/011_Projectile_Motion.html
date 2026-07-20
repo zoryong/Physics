@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Projectile Motion Simulation</title>
+<style>
+* { box-sizing: border-box; }
+body { font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif; background:#f5f6f8; margin:0; }
+header.page-head { background:linear-gradient(155deg,#152540 0%,#213863 58%,#2B4C7E 100%); color:#fff; padding:64px 28px 72px; }
+header.page-head .header-inner { max-width:1200px; margin:0 auto; }
+header.page-head .header-top { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+header.page-head .eyebrow { display:inline-flex; align-items:center; gap:7px; font-size:12.5px; letter-spacing:.14em; text-transform:uppercase; color:#9FB3D6; font-weight:700; margin-bottom:16px; padding:6px 13px; border:1px solid rgba(159,179,214,.35); border-radius:999px; text-decoration:none; transition:color .15s ease,border-color .15s ease; }
+header.page-head .eyebrow:hover { color:#fff; border-color:rgba(255,255,255,.45); }
+header.page-head h1 { font-size:clamp(20px,3.6vw,28px); font-weight:800; margin:0 0 14px; letter-spacing:-.01em; color:#fff; }
+header.page-head p { margin:0; color:#C7D4E8; font-size:15.5px; line-height:1.7; }
+/* ── Lang mount placeholder ── */
+.stage { display:flex; justify-content:center; align-items:flex-start; padding:20px; }
+footer.copyright { margin:0 20px 26px; font-size:11.5px; color:#9AA2B1; text-align:center; }
+footer.copyright .copyright-link { color:#9AA2B1; text-decoration:underline; text-underline-offset:2px; }
+footer.copyright .copyright-link:hover { color:#0078d4; }
+.container { display:flex; background:#fff; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,.1); overflow:hidden; border:1px solid #e0e0e0; }
+.controls { width:300px; padding:22px 20px; background:#f8f9fa; border-right:1px solid #e0e0e0; display:flex; flex-direction:column; gap:13px; flex-shrink:0; }
+.controls h2 { margin:0 0 2px; font-size:16px; font-weight:700; color:#111; border-bottom:2px solid #0078d4; padding-bottom:7px; line-height:1.4; }
+.section { background:#fff; border:1px solid #d0d7de; border-radius:8px; padding:12px 14px; display:flex; flex-direction:column; gap:9px; }
+.section-title { font-size:13px; font-weight:700; color:#222; display:flex; align-items:center; gap:7px; }
+.dot { display:inline-block; width:10px; height:10px; border-radius:50%; }
+.ctrl { display:flex; flex-direction:column; gap:4px; }
+.ctrl label { font-size:12.5px; font-weight:600; color:#444; display:flex; justify-content:space-between; align-items:center; }
+.ctrl label .val { color:#0078d4; font-weight:700; min-width:54px; text-align:right; }
+.ctrl input[type=range] { width:100%; cursor:pointer; accent-color:#0078d4; }
+.toggle { display:flex; align-items:center; gap:8px; font-size:12.5px; color:#444; cursor:pointer; user-select:none; }
+.toggle input { width:15px; height:15px; cursor:pointer; accent-color:#0078d4; }
+.proj-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+.proj-btn { padding:7px 4px; font-size:11.5px; font-weight:600; border:1.5px solid #c8d0d8; border-radius:7px; background:#fff; color:#444; cursor:pointer; text-align:center; transition:all .15s; line-height:1.3; font-family:inherit; }
+.proj-btn:hover { border-color:#0078d4; color:#0055aa; background:#f0f6fd; }
+.proj-btn.active { background:#0078d4; color:#fff; border-color:#005fa3; }
+.btn-row { display:flex; gap:7px; }
+.btn { flex:1; padding:8px 4px; font-size:13px; font-weight:700; border:1.5px solid #bbb; border-radius:7px; background:#fff; color:#333; cursor:pointer; transition:all .15s; font-family:inherit; }
+.btn:hover { background:#e8f0fe; border-color:#0078d4; color:#0055aa; }
+.btn.primary { background:#0078d4; color:#fff; border-color:#005fa3; }
+.btn.primary:hover { background:#005fa3; }
+.info-box { background:#fff; border:1px solid #d0d7de; border-radius:8px; padding:12px 14px; font-size:12.5px; color:#444; line-height:1.7; }
+.info-box strong { color:#222; font-size:13px; }
+.drag-note { font-size:11.5px; color:#888; margin-top:4px; line-height:1.55; }
+.canvas-wrap { padding:16px; background:#fff; display:flex; justify-content:center; align-items:flex-start; }
+canvas { border-radius:8px; border:1px solid #e0e0e0; display:block; }
+</style>
+</head>
+<body>
+<header class="page-head">
+  <div class="header-inner">
+    <div class="header-top">
+      <a class="eyebrow" href="https://physics.physicsgon.workers.dev/Simulator/" data-i18n="common.eyebrow">Physics Simulator</a>
+      <div class="lang-mount"></div>
+    </div>
+    <h1 data-i18n="ui.title">Projectile Motion</h1>
+    <p data-i18n="ui.lead">Choose a projectile, set the launch angle and speed, and watch it fly. Toggle air resistance to see how drag changes the trajectory.</p>
+  </div>
+</header>
+<div class="stage">
+<div class="container">
+  <div class="controls">
+    <h2 data-i18n="ui.panelHtml" data-i18n-html>Projectile Motion</h2>
+    <div class="section">
+      <div class="section-title"><span class="dot" style="background:#e05a2b"></span><span data-i18n="ui.projTitle">Projectile</span></div>
+      <div class="proj-grid" id="projGrid"></div>
+    </div>
+    <div class="section">
+      <div class="section-title"><span class="dot" style="background:#2b6fe0"></span><span data-i18n="ui.initTitle">Initial Conditions</span></div>
+      <div class="ctrl">
+        <label><span data-i18n="ui.v0">Initial Speed v0</span><span class="val" id="lbl-v0">20.0 m/s</span></label>
+        <input type="range" id="sl-v0" min="0" max="50" step="0.5" value="20">
+      </div>
+      <div class="ctrl">
+        <label><span data-i18n="ui.ang">Launch Angle</span><span class="val" id="lbl-ang">45 deg</span></label>
+        <input type="range" id="sl-ang" min="0" max="90" step="1" value="45">
+      </div>
+      <div class="ctrl">
+        <label><span data-i18n="ui.h">Launch Height h</span><span class="val" id="lbl-h">0.0 m</span></label>
+        <input type="range" id="sl-h" min="0" max="30" step="0.5" value="0">
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title"><span class="dot" style="background:#2ca060"></span><span data-i18n="ui.envTitle">Environment</span></div>
+      <div class="ctrl">
+        <label><span data-i18n="ui.g">Gravity g</span><span class="val" id="lbl-g">9.8 m/s2</span></label>
+        <input type="range" id="sl-g" min="1" max="25" step="0.1" value="9.8">
+      </div>
+      <label class="toggle"><input type="checkbox" id="chk-air"><span data-i18n="ui.airRes">Air Resistance</span></label>
+      <div id="drag-section" style="display:none;">
+        <div class="ctrl">
+          <label><span data-i18n="ui.drag">Drag Coeff. Cd</span><span class="val" id="lbl-drag">0.47</span></label>
+          <input type="range" id="sl-drag" min="0.1" max="1.5" step="0.05" value="0.47">
+        </div>
+        <div class="drag-note">Fd = &frac12;&#961;CdAv&sup2;<br><span data-i18n="ui.dragNote">rho = 1.225 kg/m3 (air)</span></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title"><span data-i18n="ui.displayTitle">Display</span></div>
+      <label class="toggle"><input type="checkbox" id="chk-vel" checked><span data-i18n="ui.velVec">Velocity vector</span></label>
+      <label class="toggle"><input type="checkbox" id="chk-comp"><span data-i18n="ui.compVec">Components (vx / vy)</span></label>
+      <label class="toggle"><input type="checkbox" id="chk-trace" checked><span data-i18n="ui.trace">Keep traces</span></label>
+    </div>
+    <div class="btn-row">
+      <button class="btn primary" onclick="fire()" data-i18n="ui.fire">Fire</button>
+      <button class="btn" onclick="pauseToggle()" data-i18n="ui.pause">Pause</button>
+      <button class="btn" onclick="clearAll()" data-i18n="ui.clear">Clear</button>
+    </div>
+    <div class="info-box" id="readout"><strong>State</strong><br>Set parameters and press Fire.</div>
+  </div>
+  <div class="canvas-wrap"><canvas id="cv"></canvas></div>
+</div>
+</div>
+<footer class="copyright">Copyright &copy; 2026 <a href="mailto:physicsgon@gmail.com" class="copyright-link">physicsgon@gmail.com</a> . All rights reserved.</footer>
+
+<script src="i18n.js"></script>
+<script>
+SimI18n.register({
+  en:{
+    'common.eyebrow':'Physics Simulator','ui.title':'Projectile Motion',
+    'ui.lead':'Choose a projectile, set the launch angle and speed, and watch it fly. Toggle air resistance to see how drag changes the trajectory.',
+    'ui.panelHtml':'Projectile Motion','ui.projTitle':'Projectile',
+    'ui.initTitle':'Initial Conditions','ui.v0':'Initial Speed v\u2080','ui.ang':'Launch Angle \u03b8','ui.h':'Launch Height h',
+    'ui.envTitle':'Environment','ui.g':'Gravity g','ui.airRes':'Air Resistance','ui.drag':'Drag Coeff. C\u2099',
+    'ui.dragNote':'\u03c1 = 1.225 kg/m\u00b3 (air)','ui.displayTitle':'Display',
+    'ui.velVec':'Velocity vector','ui.compVec':'Components (vx / vy)','ui.trace':'Keep traces',
+    'ui.fire':'\u25b6 Fire','ui.pause':'\u23f8 Pause','ui.clear':'\u21ba Clear',
+    'ui.stateTitle':'State','ui.stateReady':'Set parameters and press Fire.',
+    'ui.stateFlight':'In Flight','ui.stateLanded':'Landed',
+    'ui.resPeak':'Peak Height','ui.resTime':'Flight Time','ui.resRange':'Range',
+    'ui.resTitle':'Results','ui.resWaiting':'Results will appear here after launch.'
+  },
+  ko:{
+    'common.eyebrow':'물리학 시뮬레이터','ui.title':'포물체 운동',
+    'ui.lead':'발사체를 선택하고 발사각과 초속을 설정한 뒤 날아가는 경로를 관찰해 보세요. 공기저항을 켜면 항력이 궤적에 미치는 영향을 확인할 수 있어요.',
+    'ui.panelHtml':'포물체 운동','ui.projTitle':'발사체 선택',
+    'ui.initTitle':'초기 조건','ui.v0':'초속 v\u2080','ui.ang':'발사각 \u03b8','ui.h':'발사 높이 h',
+    'ui.envTitle':'환경','ui.g':'중력 가속도 g','ui.airRes':'공기 저항','ui.drag':'항력 계수 C\u2099',
+    'ui.dragNote':'\u03c1 = 1.225 kg/m\u00b3 (공기)','ui.displayTitle':'표시',
+    'ui.velVec':'속도 벡터','ui.compVec':'성분 (vx / vy)','ui.trace':'궤적 유지',
+    'ui.fire':'\u25b6 발사','ui.pause':'\u23f8 일시정지','ui.clear':'\u21ba 초기화',
+    'ui.stateTitle':'상태','ui.stateReady':'파라미터 설정 후 발사를 누르세요.',
+    'ui.stateFlight':'비행 중','ui.stateLanded':'착지',
+    'ui.resPeak':'최고 높이','ui.resTime':'체공 시간','ui.resRange':'수평 이동 거리',
+    'ui.resTitle':'결과','ui.resWaiting':'발사 후 결과가 여기에 표시됩니다.'
+  }
+});
+SimI18n.boot({mount:'.lang-mount'});
+window.addEventListener('sim-langchange',function(){
+  refreshReadout();
+  updateProjBtnLabels();
+  if(typeof draw==='function') draw();
+});
+</script>
+
+<script>
+/* ── Canvas ── */
+var cv=document.getElementById('cv');
+var DPR=window.devicePixelRatio||1;
+var CW=830,CH=620;
+cv.width=Math.round(CW*DPR); cv.height=Math.round(CH*DPR);
+cv.style.width=CW+'px'; cv.style.height=CH+'px';
+var ctx=cv.getContext('2d'); ctx.scale(DPR,DPR);
+var W=CW,H=CH;
+
+var ML=68,MT=28,MR=20;
+var RES_H=88;
+var GND_PAD=30;
+var GND_Y=H-RES_H-GND_PAD;
+var PW=W-ML-MR;
+
+var S=2.5;
+function WX(x){return ML+x*S;}
+function WY(y){return GND_Y-y*S;}
+function autoScale(mx,my){
+  var sx=PW/Math.max(mx,1);
+  var sy=(GND_Y-MT-20)/Math.max(my,1);
+  S=Math.min(sx,sy)*0.88;
+}
+
+/* ── Projectiles ── */
+var PROJ=[
+  {en:'Soccer Ball',ko:'축구공',   em:'&#x26BD;',mass:0.43, r:0.110,Cd:0.47,col:'#2a2a2a'},
+  {en:'Basketball', ko:'농구공',   em:'&#x1F3C0;',mass:0.62, r:0.120,Cd:0.47,col:'#e06820'},
+  {en:'Baseball',   ko:'야구공',   em:'&#x26BE;',mass:0.145,r:0.037,Cd:0.35,col:'#cc2222'},
+  {en:'Volleyball', ko:'배구공',   em:'&#x1F3D0;',mass:0.27, r:0.105,Cd:0.47,col:'#2266cc'},
+  {en:'Bowling',    ko:'볼링공',   em:'&#x1F3B3;',mass:7.26, r:0.108,Cd:0.47,col:'#555588'},
+  {en:'Cannonball', ko:'캐논볼',   em:'&#x1F4A3;',mass:10.0, r:0.085,Cd:0.47,col:'#444444'}
+];
+var projIdx=5;
+var pg=document.getElementById('projGrid');
+PROJ.forEach(function(p,i){
+  var b=document.createElement('button');
+  b.className='proj-btn'+(i===projIdx?' active':'');
+  b.dataset.idx=i;
+  b.onclick=function(){
+    projIdx=i;
+    document.querySelectorAll('.proj-btn').forEach(function(bb,j){bb.classList.toggle('active',j===i);});
+  };
+  pg.appendChild(b);
+});
+function updateProjBtnLabels(){
+  var lang=document.documentElement.lang||'en';
+  document.querySelectorAll('.proj-btn').forEach(function(btn,i){
+    btn.innerHTML=PROJ[i].em+'&nbsp;'+(lang==='ko'?PROJ[i].ko:PROJ[i].en);
+  });
+}
+updateProjBtnLabels();
+
+/* ── Sliders ── */
+var slV0=document.getElementById('sl-v0');
+var slAng=document.getElementById('sl-ang');
+var slH=document.getElementById('sl-h');
+var slG=document.getElementById('sl-g');
+var slDrag=document.getElementById('sl-drag');
+function updateLabels(){
+  document.getElementById('lbl-v0').textContent=(+slV0.value).toFixed(1)+' m/s';
+  document.getElementById('lbl-ang').textContent=Math.round(+slAng.value)+'°';
+  document.getElementById('lbl-h').textContent=(+slH.value).toFixed(1)+' m';
+  document.getElementById('lbl-g').textContent=(+slG.value).toFixed(1)+' m/s²';
+  document.getElementById('lbl-drag').textContent=(+slDrag.value).toFixed(2);
+}
+[slV0,slAng,slH,slG,slDrag].forEach(function(s){
+  s.addEventListener('input',function(){updateLabels();if(!live||live.landed)draw();});
+});
+document.getElementById('chk-air').addEventListener('change',function(){
+  document.getElementById('drag-section').style.display=this.checked?'':'none';
+});
+['chk-vel','chk-comp','chk-trace'].forEach(function(id){
+  document.getElementById(id).addEventListener('change',draw);
+});
+
+/* ── State ── */
+var shots=[],live=null,lastResult=null,paused=false,rafId=null,lastTS=null;
+var PAL=['#e05a2b','#2b6fe0','#2ca060','#cc2222','#9933bb','#c8860a'];
+var AIR_RHO=1.225,STEP=0.002;
+
+function fire(){
+  var v0=+slV0.value,ang=+slAng.value,h0=+slH.value,g=+slG.value;
+  var air=document.getElementById('chk-air').checked;
+  var Cd=+slDrag.value;
+  var p=PROJ[projIdx];
+  var rad=ang*Math.PI/180;
+  var vx0=v0*Math.cos(rad),vy0=v0*Math.sin(rad);
+  var disc=vy0*vy0+2*g*h0;
+  var T=disc>=0?(vy0+Math.sqrt(disc))/g:0;
+  autoScale(Math.max(vx0*T,1)*1.15,Math.max(h0+vy0*vy0/(2*g),1)*1.25);
+  var color=PAL[shots.length%PAL.length];
+  live={x:0,y:h0,vx:vx0,vy:vy0,g:g,air:air,Cd:Cd,
+        mass:p.mass,radius:p.r,projCol:p.col,
+        color:color,trail:[{x:0,y:h0}],
+        t:0,landed:false,peakY:h0,peakX:0,range:0,flightTime:0,
+        angDeg:ang,v0:v0,h0:h0};
+  paused=false;lastTS=null;
+  if(!rafId) rafId=requestAnimationFrame(loop);
+}
+
+function pauseToggle(){
+  if(!live||live.landed)return;
+  paused=!paused;
+  if(!paused){lastTS=null;if(!rafId)rafId=requestAnimationFrame(loop);}
+}
+
+function clearAll(){
+  shots=[];live=null;lastResult=null;paused=false;
+  refreshReadout();draw();
+}
+
+function step(s,dtReal){
+  var dt=Math.min(dtReal,0.05);
+  while(dt>0){
+    var st=Math.min(dt,STEP);
+    var ax=0,ay=-s.g;
+    if(s.air){
+      var sp=Math.sqrt(s.vx*s.vx+s.vy*s.vy);
+      if(sp>0){var A=Math.PI*s.radius*s.radius,fd=0.5*AIR_RHO*s.Cd*A*sp*sp/s.mass;ax-=fd*s.vx/sp;ay-=fd*s.vy/sp;}
+    }
+    var prevY=s.y;
+    s.vx+=ax*st;s.vy+=ay*st;s.x+=s.vx*st;s.y+=s.vy*st;s.t+=st;
+    if(s.y>s.peakY){s.peakY=s.y;s.peakX=s.x;}
+    s.trail.push({x:s.x,y:s.y});
+    /* 착지: y가 0을 지나는 순간 선형 보간으로 정확한 x, t 계산 */
+    if(s.y<=0&&s.t>0.01){
+      if(!s.air&&prevY>0){
+        /* 공기저항 없을 때 해석해로 정밀 보정 */
+        var frac=prevY/(prevY-s.y);   // 0이 되는 비율
+        s.x-=(s.x-s.trail[s.trail.length-2].x)*(1-frac);
+        s.t-=st*(1-frac);
+      }
+      s.y=0;s.landed=true;s.range=s.x;s.flightTime=s.t;break;
+    }
+    dt-=st;
+  }
+}
+/* 공기저항 없을 때: 해석적 최종값으로 덮어씀 */
+function finalizeAnalytic(s){
+  if(s.air) return;
+  var vy0=s.v0*Math.sin(s.angDeg*Math.PI/180);
+  var vx0=s.v0*Math.cos(s.angDeg*Math.PI/180);
+  var disc=vy0*vy0+2*s.g*s.h0;
+  if(disc<0) return;
+  var T=(vy0+Math.sqrt(disc))/s.g;
+  s.flightTime=T;
+  s.range=vx0*T;
+  s.peakY=s.h0+vy0*vy0/(2*s.g);
+  s.peakX=vx0*vy0/s.g;
+}
+
+function loop(ts){
+  if(!live||live.landed||paused){rafId=null;return;}
+  if(lastTS!==null) step(live,Math.min((ts-lastTS)/1000,0.1));
+  lastTS=ts;draw();
+  if(live.landed){
+    finalizeAnalytic(live);   // 공기저항 없을 때 해석적 정확값으로 덮어씀
+    rafId=null;lastResult=live;
+    if(document.getElementById('chk-trace').checked) shots.push(live);
+    var lang=document.documentElement.lang||'en';
+    document.getElementById('readout').innerHTML=
+      '<strong>📊 '+SimI18n.t('ui.stateLanded')+'</strong><br>v₀='+live.v0+' m/s, θ='+live.angDeg+'°, h='+live.h0+' m';
+    draw();
+  } else {
+    rafId=requestAnimationFrame(loop);
+  }
+}
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  /* sky */
+  var sk=ctx.createLinearGradient(0,MT,0,GND_Y);
+  sk.addColorStop(0,'#d6eaff');sk.addColorStop(1,'#eef7ff');
+  ctx.fillStyle=sk;ctx.fillRect(ML,MT,PW,GND_Y-MT);
+  drawGrid();drawAxes();
+  if(document.getElementById('chk-trace').checked)
+    shots.forEach(function(s){drawTrail(s,0.35);drawMark(s);});
+  if(live){
+    drawTrail(live,1);drawBall(live);
+    if(!live.landed){
+      if(document.getElementById('chk-vel').checked) drawVel(live,false);
+      if(document.getElementById('chk-comp').checked) drawVel(live,true);
+      updateReadout(live);
+    }
+    if(live.peakY>live.h0+0.1) drawPeak(live.peakX,live.peakY);
+  }
+  drawCannon();drawResBox();
+}
+
+function drawGrid(){
+  var wW=PW/S,wH=(GND_Y-MT)/S;
+  var raw=wW/8,mag=Math.pow(10,Math.floor(Math.log10(Math.max(raw,0.001))));
+  var step=([1,2,5,10].find(function(n){return n*mag>=raw*0.8;})||10)*mag;
+  ctx.save();ctx.strokeStyle='rgba(100,140,200,0.15)';ctx.lineWidth=1;
+  for(var x=0;x<=wW+step;x+=step){var px=WX(x);if(px<ML||px>W-MR)continue;ctx.beginPath();ctx.moveTo(px,MT);ctx.lineTo(px,GND_Y);ctx.stroke();}
+  for(var y=0;y<=wH+step;y+=step){var py=WY(y);if(py<MT||py>GND_Y)continue;ctx.beginPath();ctx.moveTo(ML,py);ctx.lineTo(W-MR,py);ctx.stroke();}
+  ctx.fillStyle='#7a90aa';ctx.font='10.5px sans-serif';
+  ctx.textAlign='center';ctx.textBaseline='top';
+  for(var x2=0;x2<=wW+step;x2+=step){var px2=WX(x2);if(px2<ML||px2>W-MR)continue;ctx.fillText(x2%1===0?x2:x2.toFixed(1),px2,GND_Y+5);}
+  ctx.textAlign='right';ctx.textBaseline='middle';
+  for(var y2=0;y2<=wH+step;y2+=step){var py2=WY(y2);if(py2<MT||py2>GND_Y)continue;ctx.fillText(y2%1===0?y2:y2.toFixed(1),ML-5,py2);}
+  ctx.restore();
+}
+function drawAxes(){
+  ctx.save();ctx.strokeStyle='#7090b0';ctx.lineWidth=1.8;
+  ctx.beginPath();ctx.moveTo(ML,GND_Y);ctx.lineTo(W-MR,GND_Y);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(ML,MT);ctx.lineTo(ML,GND_Y);ctx.stroke();
+  ctx.fillStyle='#445';ctx.font='bold 12px sans-serif';
+  ctx.textAlign='center';ctx.textBaseline='alphabetic';
+  ctx.fillText('x (m)',ML+PW/2,GND_Y+22);
+  ctx.textAlign='left';ctx.textBaseline='top';
+  ctx.fillText('y (m)',ML+4,MT+4);
+  ctx.restore();
+}
+function drawTrail(s,alpha){
+  if(s.trail.length<2)return;
+  ctx.save();ctx.globalAlpha=alpha;ctx.strokeStyle=s.color;ctx.lineWidth=2.2;ctx.lineJoin='round';
+  ctx.beginPath();
+  s.trail.forEach(function(pt,i){var px=WX(pt.x),py=WY(pt.y);i===0?ctx.moveTo(px,py):ctx.lineTo(px,py);});
+  ctx.stroke();
+  ctx.fillStyle=s.color;
+  for(var i=0;i<s.trail.length;i+=250){ctx.beginPath();ctx.arc(WX(s.trail[i].x),WY(s.trail[i].y),2.5,0,2*Math.PI);ctx.fill();}
+  ctx.restore();
+}
+function drawMark(s){
+  if(!s.landed)return;
+  var px=WX(s.range);
+  ctx.save();ctx.fillStyle=s.color;ctx.strokeStyle='#fff';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(px,GND_Y);ctx.lineTo(px-6,GND_Y-12);ctx.lineTo(px+6,GND_Y-12);ctx.closePath();ctx.fill();ctx.stroke();
+  ctx.restore();
+}
+function drawBall(s){
+  var bx=WX(s.x),by=WY(s.y),r=Math.max(5,s.radius*S*2);
+  ctx.save();
+  var g=ctx.createRadialGradient(bx-r*.3,by-r*.3,r*.1,bx,by,r);
+  g.addColorStop(0,s.projCol+'cc');g.addColorStop(1,s.projCol);
+  ctx.fillStyle=g;ctx.strokeStyle='rgba(0,0,0,0.3)';ctx.lineWidth=1.2;
+  ctx.beginPath();ctx.arc(bx,by,r,0,2*Math.PI);ctx.fill();ctx.stroke();
+  ctx.restore();
+}
+function drawVel(s,comp){
+  var bx=WX(s.x),by=WY(s.y),sc=S*0.3;
+  ctx.save();
+  if(!comp){arrow(bx,by,bx+s.vx*sc,by-s.vy*sc,'#dd2200',2.5,'v');}
+  else{arrow(bx,by,bx+s.vx*sc,by,'#2266cc',1.8,'vx');arrow(bx,by,bx,by-s.vy*sc,'#cc2222',1.8,'vy');}
+  ctx.restore();
+}
+function arrow(x0,y0,x1,y1,col,lw,lbl){
+  var dx=x1-x0,dy=y1-y0,len=Math.hypot(dx,dy);if(len<3)return;
+  var ux=dx/len,uy=dy/len,hw=5,hl=10;
+  ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=lw;
+  ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x1-ux*hl-uy*hw,y1-uy*hl+ux*hw);ctx.lineTo(x1-ux*hl+uy*hw,y1-uy*hl-ux*hw);ctx.closePath();ctx.fill();
+  ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(lbl,x1+ux*12,y1+uy*12);
+}
+function drawPeak(px_w,py_w){
+  var px=WX(px_w),py=WY(py_w);
+  ctx.save();ctx.strokeStyle='#2ca060';ctx.lineWidth=1.2;ctx.setLineDash([4,3]);
+  ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(px,GND_Y);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#2ca060';ctx.beginPath();ctx.arc(px,py,4,0,2*Math.PI);ctx.fill();
+  ctx.fillStyle='#1a7040';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.textBaseline='bottom';
+  ctx.fillText(py_w.toFixed(1)+' m',px,py-6);ctx.restore();
+}
+function drawCannon(){
+  var ang=+slAng.value*Math.PI/180,h0=+slH.value;
+  var bx=WX(0),by=WY(h0);
+  ctx.save();
+  /* ground line */
+  ctx.strokeStyle='#8B7355';ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(ML,GND_Y);ctx.lineTo(W-MR,GND_Y);ctx.stroke();
+  /* pedestal when elevated */
+  if(h0>0.3){
+    ctx.fillStyle='#b09070';ctx.strokeStyle='#8B7355';ctx.lineWidth=1;
+    ctx.fillRect(bx-8,by+18,16,GND_Y-by-18);
+    ctx.strokeRect(bx-8,by+18,16,GND_Y-by-18);
+    ctx.fillStyle='#999';ctx.font='10.5px sans-serif';
+    ctx.textAlign='left';ctx.textBaseline='middle';
+    ctx.fillText('h='+h0.toFixed(1)+'m',bx+12,(by+18+GND_Y)/2);
+  }
+  /* wheel — attached right below the barrel */
+  var wheelY=by+16;
+  ctx.fillStyle='#7a5c3a';ctx.strokeStyle='#5a3c1a';ctx.lineWidth=2;
+  ctx.beginPath();ctx.arc(bx,wheelY,12,0,2*Math.PI);ctx.fill();ctx.stroke();
+  ctx.strokeStyle='#a07848';ctx.lineWidth=1.5;
+  for(var i=0;i<6;i++){
+    var a=i*Math.PI/3;
+    ctx.beginPath();ctx.moveTo(bx,wheelY);
+    ctx.lineTo(bx+Math.cos(a)*10,wheelY+Math.sin(a)*10);ctx.stroke();
+  }
+  /* barrel */
+  ctx.translate(bx,by);ctx.rotate(-ang);
+  ctx.fillStyle='#555';ctx.strokeStyle='#333';ctx.lineWidth=1;
+  ctx.beginPath();ctx.rect(0,-5,32,10);ctx.fill();ctx.stroke();
+  ctx.fillStyle='#333';ctx.beginPath();ctx.arc(32,0,6.5,0,2*Math.PI);ctx.fill();
+  ctx.restore();
+}
+function drawResBox(){
+  var bY=H-RES_H;
+  ctx.fillStyle='#f8f9fa';ctx.fillRect(0,bY,W,RES_H);
+  ctx.strokeStyle='#dde2ea';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,bY);ctx.lineTo(W,bY);ctx.stroke();
+  var R=lastResult||(live&&live.landed?live:null);
+  if(!R){
+    ctx.fillStyle='#bbb';ctx.font='13px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(SimI18n.t('ui.resWaiting'),W/2,bY+RES_H/2);return;
+  }
+  ctx.fillStyle='#555';ctx.font='bold 11.5px sans-serif';ctx.textAlign='left';ctx.textBaseline='top';
+  ctx.fillText('📊 '+SimI18n.t('ui.resTitle'),ML,bY+9);
+  var cols=[
+    {lbl:SimI18n.t('ui.resPeak'), val:R.peakY.toFixed(2),     unit:'m'},
+    {lbl:SimI18n.t('ui.resTime'), val:R.flightTime.toFixed(2), unit:'s'},
+    {lbl:SimI18n.t('ui.resRange'),val:R.range.toFixed(2),      unit:'m'}
+  ];
+  var cW=W/3,midY=bY+RES_H/2+6;
+  cols.forEach(function(col,i){
+    var cx=cW*i+cW/2;
+    ctx.fillStyle='#8a96a8';ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.textBaseline='alphabetic';
+    ctx.fillText(col.lbl.toUpperCase(),cx,midY-12);
+    ctx.fillStyle=R.color||'#111';ctx.font='bold 24px sans-serif';ctx.fillText(col.val,cx,midY+12);
+    ctx.fillStyle='#aaa';ctx.font='12px sans-serif';ctx.fillText(col.unit,cx,midY+27);
+    if(i<2){ctx.strokeStyle='#dde2ea';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(cW*(i+1),bY+8);ctx.lineTo(cW*(i+1),bY+RES_H-8);ctx.stroke();}
+  });
+}
+function updateReadout(s){
+  var sp=Math.sqrt(s.vx*s.vx+s.vy*s.vy);
+  var a=Math.atan2(s.vy,s.vx)*180/Math.PI;
+  document.getElementById('readout').innerHTML=
+    '<strong>📊 '+SimI18n.t('ui.stateFlight')+'</strong><br>'+
+    't='+s.t.toFixed(2)+'s&nbsp; y='+s.y.toFixed(2)+'m<br>'+
+    'vx='+s.vx.toFixed(2)+'&nbsp;vy='+s.vy.toFixed(2)+' m/s<br>'+
+    '|v|='+sp.toFixed(2)+' m/s&nbsp;\u03b8='+a.toFixed(1)+'°';
+}
+function refreshReadout(){
+  document.getElementById('readout').innerHTML=
+    '<strong>📊 '+SimI18n.t('ui.stateTitle')+'</strong><br>'+SimI18n.t('ui.stateReady');
+}
+
+updateLabels();
+draw();
+</script>
+</body>
+</html>
