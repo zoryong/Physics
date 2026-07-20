@@ -216,7 +216,7 @@
     <h1 data-i18n="index.title">Physics Simulator</h1>
     <p data-i18n="index.lead">A collection of interactive simulators built to support the teaching and learning of physics. Adjust the sliders to change the conditions and see how each phenomenon responds, making abstract concepts easier to grasp and explore in the classroom or at home.</p>
     <div class="header-meta">
-      <p class="hm-note" data-i18n="index.meta" data-i18n-html>Currently <b>10 simulators</b> are live. If you find a bug or have an idea for improvement, please <a href="mailto:physicsgon@gmail.com" class="email-mask">email me</a> and I'll take a look.</p>
+      <p class="hm-note" data-i18n="index.meta" data-i18n-html>Currently <b>11 simulators</b> are live. If you find a bug or have an idea for improvement, please <a href="mailto:physicsgon@gmail.com" class="email-mask">email me</a> and I'll take a look.</p>
     </div>
   </div>
 </header>
@@ -225,7 +225,7 @@
 
   <div class="category-tabs" id="categoryTabs">
     <button class="category-tab" data-cat="mechanics" type="button">
-      <span class="cat-icon">⚙️</span> <span data-i18n="cat.mechanics">Mechanics</span> <span class="cat-count" data-i18n="common.comingSoon">Coming soon</span>
+      <span class="cat-icon">⚙️</span> <span data-i18n="cat.mechanics">Mechanics</span> <span class="cat-count">1</span>
     </button>
     <button class="category-tab" data-cat="electrodynamics" type="button">
       <span class="cat-icon">⚡</span> <span data-i18n="cat.electrodynamics">Electrodynamics</span> <span class="cat-count" data-i18n="common.comingSoon">Coming soon</span>
@@ -244,13 +244,15 @@
   <!-- ============ Mechanics ============ -->
   <div class="tool-panel" id="panel-mechanics" data-cat="mechanics">
     <div class="tool-grid">
-      <div class="tool-card is-soon">
+      <a class="tool-card accent-amber" href="011_Projectile_Motion.html">
         <div class="tc-top">
-          <span class="tc-icon">🪀</span>
+          <span class="tc-icon">🚀</span>
+          <span class="tc-tag" data-i18n="cat.mechanics">Mechanics</span>
         </div>
-        <h3 class="tc-title" data-i18n="soon.mech.title">Mechanics simulators coming soon</h3>
-        <p class="tc-desc" data-i18n="soon.mech.desc">Simulators covering momentum, energy, oscillation, and rotational motion will be added here soon.</p>
-      </div>
+        <h3 class="tc-title" data-i18n="card.011.title">Projectile Motion</h3>
+        <p class="tc-desc" data-i18n="card.011.desc">Choose a projectile, set the launch angle and speed, and watch the trajectory. Toggle air resistance to see how drag changes the path.</p>
+        <span class="tc-cta"><span data-i18n="common.open">Open</span> <span class="arrow">→</span></span>
+      </a>
     </div>
   </div>
 
@@ -399,18 +401,18 @@
     en: {
       'index.title': 'Physics Simulator',
       'index.lead': 'A collection of interactive simulators built to support the teaching and learning of physics. Adjust the sliders to change the conditions and see how each phenomenon responds, making abstract concepts easier to grasp and explore in the classroom or at home.',
-      'index.meta': 'Currently <b>10 simulators</b> are live. If you find a bug or have an idea for improvement, please <a href="mailto:physicsgon@gmail.com" class="email-mask">email me</a> and I\'ll take a look.',
+      'index.meta': 'Currently <b>11 simulators</b> are live. If you find a bug or have an idea for improvement, please <a href="mailto:physicsgon@gmail.com" class="email-mask">email me</a> and I\'ll take a look.',
       'cat.mechanics': 'Mechanics',
       'cat.electrodynamics': 'Electrodynamics',
       'cat.thermal': 'Thermal',
       'cat.wave': 'Wave',
       'cat.modern': 'Modern',
-      'soon.mech.title': 'Mechanics simulators coming soon',
-      'soon.mech.desc': 'Simulators covering momentum, energy, oscillation, and rotational motion will be added here soon.',
       'soon.em.title': 'Electrodynamics simulators coming soon',
       'soon.em.desc': 'Simulators covering electric fields, magnetic fields, and circuits will be added here soon.',
       'soon.th.title': 'Thermal simulators coming soon',
       'soon.th.desc': 'Simulators covering gas molecule motion and the laws of thermodynamics will be added here soon.',
+      'card.011.title': 'Projectile Motion',
+      'card.011.desc': 'Choose a projectile, set the launch angle and speed, and watch the trajectory. Toggle air resistance to see how drag changes the path.',
       'card.001.title': 'Convex Lens Ray Tracing',
       'card.001.desc': 'Adjust the focal length, object distance, and object height, and watch three principal rays locate the real or virtual image.',
       'card.002.title': 'Wave Diffraction',
@@ -435,18 +437,18 @@
     ko: {
       'index.title': '물리학 시뮬레이터',
       'index.lead': '물리학 개념의 이해를 돕기 위해 만든 인터랙티브 시뮬레이터 모음입니다. 역학, 전자기학, 열역학, 파동, 현대물리 섹션의 시뮬레이터가 준비되어 있습니다. 추상적인 물리학 개념을 조금 더 쉽게 이해하는 데 도움이 되기를 바랍니다.',
-      'index.meta': '현재 <b>시뮬레이터 10개</b>가 공개되어 있습니다. 오류를 발견하거나 개선 아이디어가 있으면 <a href="mailto:physicsgon@gmail.com" class="email-mask">이메일</a>로 알려 주세요.',
+      'index.meta': '현재 <b>시뮬레이터 11개</b>가 공개되어 있습니다. 오류를 발견하거나 개선 아이디어가 있으면 <a href="mailto:physicsgon@gmail.com" class="email-mask">이메일</a>로 알려 주세요.',
       'cat.mechanics': '역학',
       'cat.electrodynamics': '전자기학',
       'cat.thermal': '열역학',
       'cat.wave': '파동',
       'cat.modern': '현대물리',
-      'soon.mech.title': '역학 시뮬레이터 준비 중',
-      'soon.mech.desc': '운동량, 에너지, 진동, 회전 운동을 다루는 시뮬레이터가 곧 추가됩니다.',
       'soon.em.title': '전자기학 시뮬레이터 준비 중',
       'soon.em.desc': '전기장, 자기장, 회로를 다루는 시뮬레이터가 곧 추가됩니다.',
       'soon.th.title': '열역학 시뮬레이터 준비 중',
       'soon.th.desc': '기체 분자 운동과 열역학 법칙을 다루는 시뮬레이터가 곧 추가됩니다.',
+      'card.011.title': '포물체 운동',
+      'card.011.desc': '발사체를 고르고 발사각·초속을 설정한 뒤 궤적을 관찰합니다. 공기 저항을 켜면 항력이 경로에 미치는 영향을 확인할 수 있습니다.',
       'card.001.title': '볼록 렌즈 광선 추적',
       'card.001.desc': '초점거리, 물체거리, 물체 높이를 조절하며 세 가지 주요 광선이 실상·허상의 위치를 어떻게 결정하는지 살펴봅니다.',
       'card.002.title': '파동의 회절',
