@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>케플러의 법칙 시뮬레이션</title>
+<style>
+* { box-sizing: border-box; }
+html, body { max-width:100%; overflow-x:hidden; }
+body { font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,'Noto Sans KR',sans-serif; background:#f5f6f8; margin:0; }
+
+/* ── Header (same chrome style as the rest of the Simulator site) ── */
+header.page-head { background:linear-gradient(155deg,#0d1730 0%,#152a52 55%,#1c3a6e 100%); color:#fff; padding:56px 28px 64px; }
+header.page-head .header-inner { max-width:1300px; margin:0 auto; }
+header.page-head .eyebrow { display:inline-flex; align-items:center; gap:7px; font-size:12.5px; letter-spacing:.14em; text-transform:uppercase; color:#9FB3D6; font-weight:700; margin-bottom:16px; padding:6px 13px; border:1px solid rgba(159,179,214,.35); border-radius:999px; text-decoration:none; transition:color .15s ease,border-color .15s ease; }
+header.page-head .eyebrow:hover { color:#fff; border-color:rgba(255,255,255,.45); }
+header.page-head h1 { font-size:clamp(20px,3.6vw,28px); font-weight:800; margin:0 0 12px; letter-spacing:-.01em; color:#fff; }
+header.page-head p { margin:0; color:#c9d4ec; font-size:15px; line-height:1.7; max-width:960px; }
+header.page-head p strong { color:#ffd479; font-weight:700; }
+
+.stage { display:flex; justify-content:center; align-items:flex-start; padding:20px; width:100%; max-width:100%; box-sizing:border-box; }
+.level-shell { display:flex; flex-direction:column; align-items:center; width:100%; max-width:1300px; }
+
+/* ── Law tabs ── */
+.level-tabs { display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; justify-content:center; }
+.level-tab { padding:10px 22px; font-size:13.5px; font-weight:700; border:1.5px solid #c8d0d8; border-radius:8px; background:#fff; color:#556; cursor:pointer; transition:all .15s; font-family:inherit; }
+.level-tab:hover { border-color:#3a6fd8; color:#1c4fb8; }
+.level-tab.active { background:#1c4fb8; color:#fff; border-color:#153a8a; }
+
+/* ── Shared toolbar: play/pause, reset, speed ── */
+.toolbar { display:flex; align-items:center; gap:18px; background:#fff; border:1px solid #e0e0e0; border-radius:10px; padding:11px 20px; margin-bottom:14px; flex-wrap:wrap; justify-content:center; box-shadow:0 4px 14px rgba(0,0,0,.05); width:100%; max-width:1264px; }
+.toolbar .btn { padding:8px 18px; font-size:13px; }
+.speed-control { display:flex; align-items:center; gap:9px; font-size:13px; font-weight:700; color:#444; }
+.speed-control input[type=range] { width:150px; accent-color:#1c4fb8; cursor:pointer; }
+.speed-control .val { color:#1c4fb8; font-weight:800; min-width:44px; }
+.toolbar-sep { width:1px; height:22px; background:#e0e0e0; }
+
+/* ── Panels (controls + canvas), same skeleton as other Simulator pages ── */
+.container { display:flex; background:#fff; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,.1); overflow:hidden; border:1px solid #e0e0e0; max-width:100%; width:100%; }
+.law-panel { display:none; }
+.law-panel.active { display:flex; }
+
+.controls { width:310px; max-width:100%; padding:22px 20px; background:#f8f9fa; border-right:1px solid #e0e0e0; display:flex; flex-direction:column; gap:13px; flex-shrink:0; }
+.controls h2 { margin:0 0 2px; font-size:15.5px; font-weight:700; color:#111; border-bottom:2px solid #1c4fb8; padding-bottom:7px; line-height:1.4; }
+.section { background:#fff; border:1px solid #d0d7de; border-radius:8px; padding:12px 14px; display:flex; flex-direction:column; gap:9px; }
+.section-title { font-size:13px; font-weight:700; color:#222; display:flex; align-items:center; gap:7px; }
+.dot { display:inline-block; width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.ctrl { display:flex; flex-direction:column; gap:4px; }
+.ctrl label { font-size:12.5px; font-weight:600; color:#444; display:flex; justify-content:space-between; align-items:center; }
+.ctrl label .val { color:#1c4fb8; font-weight:700; min-width:56px; text-align:right; }
+.ctrl input[type=range] { width:100%; cursor:pointer; accent-color:#1c4fb8; }
+.toggle { display:flex; align-items:center; gap:8px; font-size:12.5px; color:#444; cursor:pointer; user-select:none; }
+.toggle input { width:15px; height:15px; cursor:pointer; accent-color:#1c4fb8; flex-shrink:0; }
+.btn { padding:8px 4px; font-size:13px; font-weight:700; border:1.5px solid #bbb; border-radius:7px; background:#fff; color:#333; cursor:pointer; transition:all .15s; font-family:inherit; }
+.btn:hover { background:#eaf0fd; border-color:#1c4fb8; color:#123a91; }
+.btn.primary { background:#1c4fb8; color:#fff; border-color:#153a8a; }
+.btn.primary:hover { background:#153a8a; }
+.info-box { background:#fff; border:1px solid #d0d7de; border-radius:8px; padding:12px 14px; font-size:12.5px; color:#444; line-height:1.85; }
+.info-box strong { color:#222; font-size:13px; }
+.info-box .num { color:#1c4fb8; font-weight:700; }
+.info-box .hl { display:inline-block; margin-top:4px; padding:3px 9px; border-radius:6px; background:#fff4dd; color:#8a5a00; font-weight:700; font-size:12px; }
+
+.planet-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+.planet-btn { display:flex; flex-direction:column; align-items:center; gap:6px; padding:13px 6px 10px; border:1.5px solid #e2e6ec; border-radius:12px; background:linear-gradient(180deg,#ffffff,#f6f7fb); color:#3a4250; cursor:pointer; transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease,background .16s ease; font-family:inherit; line-height:1.3; box-shadow:0 1px 2px rgba(20,30,60,.05); }
+.planet-swatch { width:27px; height:27px; border-radius:50%; flex-shrink:0; box-shadow:inset -4px -4px 6px rgba(0,0,0,.3), inset 2px 2px 3px rgba(255,255,255,.25), 0 1px 3px rgba(20,30,60,.18); transition:box-shadow .16s ease; }
+.planet-label { font-size:13px; font-weight:700; }
+.planet-au { font-size:10.5px; font-weight:600; color:#9098a8; }
+.planet-btn:hover { border-color:#b98fd0; transform:translateY(-2px); box-shadow:0 6px 14px rgba(107,60,140,.16); }
+.planet-btn.active { background:linear-gradient(165deg,#a366bd,#7d3c98); border-color:#5f2f7a; color:#fff; box-shadow:0 6px 16px rgba(107,60,140,.4); transform:translateY(-1px); }
+.planet-btn.active .planet-au { color:#f2e0f9; }
+.planet-btn.active .planet-swatch { box-shadow:inset -4px -4px 6px rgba(0,0,0,.35), inset 2px 2px 3px rgba(255,255,255,.3), 0 0 0 2.5px rgba(255,255,255,.55), 0 2px 8px rgba(0,0,0,.3); }
+
+.canvas-wrap { padding:16px; background:#0c1224; display:flex; justify-content:center; align-items:flex-start; max-width:100%; min-width:0; flex:1; }
+canvas { border-radius:8px; border:1px solid #1e2a4a; display:block; max-width:100%; touch-action:none; }
+
+footer.copyright { margin:0 20px 26px; font-size:11.5px; color:#9AA2B1; text-align:center; }
+footer.copyright .copyright-link { color:#9AA2B1; text-decoration:underline; text-underline-offset:2px; }
+footer.copyright .copyright-link:hover { color:#1c4fb8; }
+
+@media (max-width: 960px) {
+  header.page-head { padding:34px 18px 38px; }
+  .stage { padding:12px; }
+  .toolbar { padding:10px 14px; gap:10px; }
+  .container { flex-direction:column; width:100%; max-width:100%; }
+  .controls { width:100%; border-right:none; border-bottom:1px solid #e0e0e0; }
+  .canvas-wrap { flex:none; width:100%; padding:12px; }
+}
+@media (max-width: 480px) {
+  header.page-head { padding:26px 14px 30px; }
+  header.page-head p { font-size:13.5px; }
+  .stage { padding:8px; }
+  .controls { padding:16px 14px; }
+  .speed-control input[type=range] { width:100px; }
+}
+</style>
+</head>
+<body>
+
+<header class="page-head">
+  <div class="header-inner">
+    <div class="header-top">
+      <a class="eyebrow" href="https://physics.physicsgon.workers.dev/Simulator/" data-i18n="common.eyebrow">Physics Simulator</a>
+      <div class="lang-mount"></div>
+    </div>
+    <h1 data-i18n="ui.title">케플러의 법칙 — 행성의 궤도 운동</h1>
+    <p id="lawDesc"><strong>제1법칙(타원 궤도 법칙)</strong> — 모든 행성은 태양을 하나의 초점으로 하는 타원 궤도를 그리며 공전한다.</p>
+  </div>
+</header>
+
+<div class="stage">
+<div class="level-shell">
+
+  <div class="level-tabs">
+    <button class="level-tab active" id="tabLaw1" data-law="1" type="button" data-i18n="ui.tab1">제1법칙 · 타원 궤도</button>
+    <button class="level-tab" id="tabLaw2" data-law="2" type="button" data-i18n="ui.tab2">제2법칙 · 면적 속도</button>
+    <button class="level-tab" id="tabLaw3" data-law="3" type="button" data-i18n="ui.tab3">제3법칙 · 조화 법칙</button>
+  </div>
+
+  <div class="toolbar">
+    <button class="btn primary" id="btnPlay" type="button">⏸ 일시정지</button>
+    <button class="btn" id="btnReset" type="button" data-i18n="ui.reset">↺ 초기화</button>
+    <div class="toolbar-sep"></div>
+    <div class="speed-control">
+      <label data-i18n="ui.speed">시간 배속</label>
+      <input type="range" id="slSpeed" min="0.25" max="10" step="0.25" value="1">
+      <span class="val" id="lblSpeed">1.00x</span>
+    </div>
+  </div>
+
+  <!-- ══════════════ 제1법칙: 타원 궤도 ══════════════ -->
+  <div class="container law-panel active" data-law="1">
+    <div class="controls">
+      <h2 data-i18n="ui.h2law1">제1법칙 — 타원 궤도 법칙</h2>
+      <div class="section">
+        <div class="section-title"><span class="dot" style="background:#1c4fb8"></span><span data-i18n="ui.orbitShape">궤도 모양 (직접 조절)</span></div>
+        <div class="ctrl">
+          <label><span data-i18n="ui.eccentricity">이심률</span> <i>e</i> <span class="val" id="lbl-e">0.35</span></label>
+          <input type="range" id="sl-e" min="0" max="0.9" step="0.01" value="0.35">
+        </div>
+        <div class="ctrl">
+          <label><span data-i18n="ui.semiMajor">장반경</span> <i>a</i> (AU) <span class="val" id="lbl-a1">1.50</span></label>
+          <input type="range" id="sl-a1" min="0" max="1000" step="1" value="325">
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-title"><span class="dot" style="background:#1c4fb8"></span><span data-i18n="ui.planetPick">행성 선택 (실제 데이터)</span></div>
+        <div class="planet-grid" id="planetGrid1">
+          <button class="planet-btn" data-planet="0" type="button"><span class="planet-swatch" style="background:radial-gradient(circle at 32% 28%,#b8b0a8,#6e6660 75%)"></span><span class="planet-label" data-i18n="planet.mercury">수성</span><span class="planet-au">0.39 AU</span></button>
+          <button class="planet-btn" data-planet="1" type="button"><span class="planet-swatch" style="background:radial-gradient(circle at 32% 28%,#f5dfa8,#c9a355 75%)"></span><span class="planet-label" data-i18n="planet.venus">금성</span><span class="planet-au">0.72 AU</span></button>
+          <button class="planet-btn" data-planet="2" type="button"><span class="planet-swatch" style="background:radial-gradient(circle at 32% 28%,#6ec6ff,#1f4f8f 75%)"></span><span class="planet-label" data-i18n="planet.earth">지구</span><span class="planet-au">1.00 AU</span></button>
+          <button class="planet-btn" data-planet="3" type="button"><span class="planet-swatch" style="background:radial-gradient(circle at 32% 28%,#e8825a,#9c3b1a 75%)"></span><span class="planet-label" data-i18n="planet.mars">화성</span><span class="planet-au">1.52 AU</span></button>
+          <button class="planet-btn" data-planet="4" type="button"><span class="planet-swatch" style="background:radial-gradient(circle at 32% 28%,#e8c9a0,#a8703a 75%)"></span><span class="planet-label" data-i18n="planet.jupiter">목성</span><span class="planet-au">5.20 AU</span></button>
+          <button class="planet-btn" data-planet="5" type="button"><span class="planet-swatch" style="background:radial-gradient(circle at 32% 28%,#f0dfb0,#b89550 75%)"></span><span class="planet-label" data-i18n="planet.saturn">토성</span><span class="planet-au">9.54 AU</span></button>
+          <button class="planet-btn" data-planet="6" type="button"><span class="planet-swatch" style="background:radial-gradient(circle at 32% 28%,#b8ecf0,#4fa8b0 75%)"></span><span class="planet-label" data-i18n="planet.uranus">천왕성</span><span class="planet-au">19.2 AU</span></button>
+          <button class="planet-btn" data-planet="7" type="button"><span class="planet-swatch" style="background:radial-gradient(circle at 32% 28%,#6a8fe8,#2438a0 75%)"></span><span class="planet-label" data-i18n="planet.neptune">해왕성</span><span class="planet-au">30.1 AU</span></button>
+        </div>
+      </div>
+      <div class="info-box" id="info1">
+        <strong data-i18n="ui.liveStats">📊 실시간 수치</strong><br>
+        <span data-i18n="ui.curDist">현재 거리 (r):</span> <span class="num" id="r-now">-</span> AU<br>
+        <span data-i18n="ui.periDist">근일점 거리:</span> <span class="num" id="peri-dist">-</span> AU<br>
+        <span data-i18n="ui.apoDist">원일점 거리:</span> <span class="num" id="apo-dist">-</span> AU<br>
+        <span data-i18n="ui.orbSpeed">공전 속도:</span> <span class="num" id="speed-now">-</span> <span data-i18n="unit.auYear">AU/\uB144</span> (<span id="speed-kms">-</span> km/s)<br>
+        <span class="hl" id="status1">－</span>
+      </div>
+    </div>
+    <div class="canvas-wrap"><canvas id="cv1"></canvas></div>
+  </div>
+
+  <!-- ══════════════ 제2법칙: 면적 속도 일정 ══════════════ -->
+  <div class="container law-panel" data-law="2">
+    <div class="controls">
+      <h2 data-i18n="ui.h2law2">제2법칙 — 면적 속도 일정 법칙</h2>
+      <div class="section">
+        <div class="section-title"><span class="dot" style="background:#e0813a"></span><span data-i18n="ui.displayOpts">표시 옵션</span></div>
+        <label class="toggle"><input type="checkbox" id="chk-vel2" checked><span style="color:#2ca060;font-weight:700;" data-i18n="ui.velVec">속도 벡터 표시</span></label>
+        <label class="toggle"><input type="checkbox" id="chk-acc2" checked><span style="color:#c8388f;font-weight:700;" data-i18n="ui.accVec">가속도 벡터 표시</span></label>
+        <label class="toggle"><input type="checkbox" id="chk-sweep2" checked><span style="color:#e0813a;font-weight:700;" data-i18n="ui.sweepAnim">면적 애니메이션 On/Off</span></label>
+      </div>
+      <div class="info-box" id="info2">
+        <strong data-i18n="ui.sweptTitle">📊 쓸고 간 면적 (같은 시간 간격)</strong><br>
+        <span data-i18n="ui.prevArea">이전 구간 면적:</span> <span class="num" id="area-prev">-</span> AU²<br>
+        <span data-i18n="ui.curArea">현재 구간 면적:</span> <span class="num" id="area-cur">-</span> AU²<br>
+        <span data-i18n="ui.areaRatio">면적 비율 (현재/이전):</span> <span class="num" id="area-ratio">-</span><br>
+        <span class="hl" id="status2">－</span>
+      </div>
+    </div>
+    <div class="canvas-wrap"><canvas id="cv2law"></canvas></div>
+  </div>
+
+  <!-- ══════════════ 제3법칙: 조화 법칙 ══════════════ -->
+  <div class="container law-panel" data-law="3">
+    <div class="controls">
+      <h2 data-i18n="ui.h2law3">제3법칙 — 조화 법칙</h2>
+      <div class="section">
+        <div class="section-title"><span class="dot" style="background:#9b59b6"></span><span data-i18n="ui.mercuryMars">수성 ~ 화성</span></div>
+        <div class="planet-grid">
+          <button class="planet-btn" data-planet="0" type="button"><span class="planet-swatch" style="background:radial-gradient(circle at 32% 28%,#b8b0a8,#6e6660 75%)"></span><span class="planet-label" data-i18n="planet.mercury">수성</span><span class="planet-au">0.39 AU</span></button>
+          <button class="planet-btn" data-planet="1" type="button"><span class="planet-swatch" style="background:radial-gradient(circle at 32% 28%,#f5dfa8,#c9a355 75%)"></span><span class="planet-label" data-i18n="planet.venus">금성</span><span class="planet-au">0.72 AU</span></button>
+          <button class="planet-btn" data-planet="2" type="button"><span class="planet-swatch" style="background:radial-gradient(circle at 32% 28%,#6ec6ff,#1f4f8f 75%)"></span><span class="planet-label" data-i18n="planet.earth">지구</span><span class="planet-au">1.00 AU</span></button>
+          <button class="planet-btn" data-planet="3" type="button"><span class="planet-swatch" style="background:radial-gradient(circle at 32% 28%,#e8825a,#9c3b1a 75%)"></span><span class="planet-label" data-i18n="planet.mars">화성</span><span class="planet-au">1.52 AU</span></button>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-title"><span class="dot" style="background:#5a8fd6"></span><span data-i18n="ui.jupiterNeptune">목성 ~ 해왕성</span></div>
+        <div class="planet-grid">
+          <button class="planet-btn" data-planet="4" type="button"><span class="planet-swatch" style="background:radial-gradient(circle at 32% 28%,#e8c9a0,#a8703a 75%)"></span><span class="planet-label" data-i18n="planet.jupiter">목성</span><span class="planet-au">5.20 AU</span></button>
+          <button class="planet-btn" data-planet="5" type="button"><span class="planet-swatch" style="background:radial-gradient(circle at 32% 28%,#f0dfb0,#b89550 75%)"></span><span class="planet-label" data-i18n="planet.saturn">토성</span><span class="planet-au">9.54 AU</span></button>
+          <button class="planet-btn" data-planet="6" type="button"><span class="planet-swatch" style="background:radial-gradient(circle at 32% 28%,#b8ecf0,#4fa8b0 75%)"></span><span class="planet-label" data-i18n="planet.uranus">천왕성</span><span class="planet-au">19.2 AU</span></button>
+          <button class="planet-btn" data-planet="7" type="button"><span class="planet-swatch" style="background:radial-gradient(circle at 32% 28%,#6a8fe8,#2438a0 75%)"></span><span class="planet-label" data-i18n="planet.neptune">해왕성</span><span class="planet-au">30.1 AU</span></button>
+        </div>
+      </div>
+      <div class="info-box" id="info3">
+        <strong data-i18n="ui.liveCalc">📊 실시간 계산</strong><br>
+        <span data-i18n="ui.semiMajorA">장반경 a:</span> <span class="num" id="a3-disp">-</span> AU<br>
+        <span data-i18n="ui.period">공전 주기 T:</span> <span class="num" id="T-val">-</span> <span data-i18n="unit.year">\uB144</span> (<span id="T-days">-</span><span data-i18n="unit.days">\uC77C</span>)<br>
+        T² : <span class="num" id="T2-val">-</span> <span data-i18n="unit.year2">\uB144²</span><br>
+        a³ : <span class="num" id="a3-val">-</span> AU³<br>
+        T² / a³ : <span class="num" id="ratio-val">-</span> <span class="hl" data-i18n="ui.alwaysConst">항상 일정!</span>
+      </div>
+      <button class="btn" id="btnClearScatter" type="button" data-i18n="ui.clearSelect">✕ 선택 해제</button>
+    </div>
+    <div class="canvas-wrap"><canvas id="cv3law"></canvas></div>
+  </div>
+
+</div>
+</div>
+
+<footer class="copyright">Copyright &copy; 2026 <a href="mailto:physicsgon@gmail.com" class="copyright-link">physicsgon@gmail.com</a> . All rights reserved.</footer>
+
+<script>
+/* ── i18n.js inlined so this file runs standalone offline (no external dependency) ── */
+(function () {
+  var STORAGE_KEY = 'physics-sim-lang';
+
+  function detectLang() {
+    try {
+      var saved = localStorage.getItem(STORAGE_KEY);
+      if (saved === 'ko' || saved === 'en') return saved;
+    } catch (e) {}
+    var nav = (navigator.language || 'en').toLowerCase();
+    return nav.indexOf('ko') === 0 ? 'ko' : 'en';
+  }
+
+  var style = document.createElement('style');
+  style.textContent = [
+    '.lang-mount{position:relative;z-index:2;flex:0 0 auto;}',
+    '.lang-switch{display:inline-flex;align-items:center;gap:0;border:1px solid rgba(159,179,214,.45);border-radius:999px;overflow:hidden;background:rgba(21,37,64,.25);position:relative;z-index:2;-webkit-user-select:none;user-select:none;}',
+    '.lang-switch .lang-btn{-webkit-appearance:none;appearance:none;border:0;background:transparent;color:#9FB3D6;font:700 12px/1 "Noto Sans KR",-apple-system,BlinkMacSystemFont,sans-serif;letter-spacing:.04em;padding:10px 14px;min-height:36px;cursor:pointer;transition:background .15s ease,color .15s ease;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}',
+    '.lang-switch .lang-btn:hover{color:#fff;}',
+    '.lang-switch .lang-btn.active{background:rgba(255,255,255,.14);color:#fff;}',
+    'header .eyebrow-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;position:relative;z-index:2;}',
+    'header.page-head .header-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;position:relative;z-index:2;}',
+    'header.page-head .header-top .eyebrow{margin-bottom:0;}'
+  ].join('');
+  document.head.appendChild(style);
+
+  window.SimI18n = {
+    lang: detectLang(),
+    messages: { en: {}, ko: {} },
+
+    register: function (dict) {
+      if (!dict) return this;
+      ['en', 'ko'].forEach(function (lang) {
+        if (!dict[lang]) return;
+        Object.keys(dict[lang]).forEach(function (key) {
+          SimI18n.messages[lang][key] = dict[lang][key];
+        });
+      });
+      return this;
+    },
+
+    t: function (key) {
+      var pack = this.messages[this.lang] || {};
+      if (pack[key] != null) return pack[key];
+      if (this.messages.en[key] != null) return this.messages.en[key];
+      return key;
+    },
+
+    apply: function () {
+      var self = this;
+      document.documentElement.lang = this.lang === 'ko' ? 'ko' : 'en';
+
+      document.querySelectorAll('[data-i18n]').forEach(function (el) {
+        var key = el.getAttribute('data-i18n');
+        var val = self.t(key);
+        if (el.hasAttribute('data-i18n-html')) el.innerHTML = val;
+        else el.textContent = val;
+      });
+
+      document.querySelectorAll('[data-i18n-attr]').forEach(function (el) {
+        var spec = el.getAttribute('data-i18n-attr');
+        if (!spec) return;
+        spec.split(';').forEach(function (part) {
+          var bits = part.split(':');
+          if (bits.length < 2) return;
+          var attr = bits[0].trim();
+          var key = bits[1].trim();
+          el.setAttribute(attr, self.t(key));
+        });
+      });
+
+      document.querySelectorAll('.lang-btn').forEach(function (btn) {
+        btn.classList.toggle('active', btn.getAttribute('data-lang') === self.lang);
+        btn.setAttribute('aria-pressed', btn.getAttribute('data-lang') === self.lang ? 'true' : 'false');
+      });
+
+      window.dispatchEvent(new CustomEvent('sim-langchange', { detail: { lang: self.lang } }));
+    },
+
+    setLang: function (lang) {
+      if (lang !== 'ko' && lang !== 'en') return;
+      this.lang = lang;
+      try { localStorage.setItem(STORAGE_KEY, lang); } catch (e) {}
+      this.apply();
+    },
+
+    createSwitch: function () {
+      var wrap = document.createElement('div');
+      wrap.className = 'lang-switch';
+      wrap.setAttribute('role', 'group');
+      wrap.setAttribute('aria-label', 'Language');
+
+      [['ko', '한글'], ['en', 'EN']].forEach(function (pair) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'lang-btn' + (SimI18n.lang === pair[0] ? ' active' : '');
+        btn.setAttribute('data-lang', pair[0]);
+        btn.setAttribute('aria-pressed', SimI18n.lang === pair[0] ? 'true' : 'false');
+        btn.textContent = pair[1];
+        btn.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          SimI18n.setLang(pair[0]);
+        });
+        wrap.appendChild(btn);
+      });
+      return wrap;
+    },
+
+    mount: function (selector) {
+      var host = typeof selector === 'string' ? document.querySelector(selector) : selector;
+      if (!host) return null;
+      if (host.querySelector('.lang-switch')) return host.querySelector('.lang-switch');
+      var sw = this.createSwitch();
+      host.appendChild(sw);
+      return sw;
+    },
+
+    boot: function (opts) {
+      opts = opts || {};
+      if (opts.messages) this.register(opts.messages);
+      var mountTo = opts.mount || '.lang-mount';
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function () {
+          SimI18n.mount(mountTo);
+          SimI18n.apply();
+        });
+      } else {
+        this.mount(mountTo);
+        this.apply();
+      }
+    }
+  };
+
+  // Common strings shared across Simulator pages
+  window.SimI18n.register({
+    en: {
+      'common.eyebrow': 'Physics Simulator',
+      'common.open': 'Open',
+      'common.comingSoon': 'Coming soon'
+    },
+    ko: {
+      'common.eyebrow': '물리학 시뮬레이터',
+      'common.open': '열기',
+      'common.comingSoon': '준비 중'
+    }
+  });
+})();
+</script>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   케플러 시뮬레이션 한/영 UI 문자열 등록
+   ══════════════════════════════════════════════════════ */
+SimI18n.register({
+  en: {
+    'ui.title': "Kepler's Laws — Planetary Orbital Motion",
+    'ui.desc1': "<strong>Law 1 (Ellipse Law)</strong> — Every planet moves in an ellipse with the Sun at one focus.",
+    'ui.desc2': "<strong>Law 2 (Equal-Area Law)</strong> — The line joining the Sun and a planet sweeps out equal areas in equal times.",
+    'ui.desc3': "<strong>Law 3 (Harmonic Law)</strong> — The square of the orbital period is proportional to the cube of the semi-major axis (T\u00b2 \u221d a\u00b3).",
+    'ui.tab1': 'Law 1 \u00b7 Elliptical Orbit',
+    'ui.tab2': 'Law 2 \u00b7 Equal Areas',
+    'ui.tab3': 'Law 3 \u00b7 Harmonic Law',
+    'ui.pause': '\u23f8 Pause',
+    'ui.play': '\u25b6 Play',
+    'ui.reset': '\u21ba Reset',
+    'ui.speed': 'Time speed',
+    'ui.h2law1': 'Law 1 \u2014 Ellipse Law',
+    'ui.orbitShape': 'Orbit Shape (manual)',
+    'ui.eccentricity': 'Eccentricity',
+    'ui.semiMajor': 'Semi-major axis',
+    'ui.planetPick': 'Pick a planet (real data)',
+    'ui.liveStats': '\ud83d\udcca Live values',
+    'ui.curDist': 'Current distance (r):',
+    'ui.periDist': 'Perihelion distance:',
+    'ui.apoDist': 'Aphelion distance:',
+    'ui.orbSpeed': 'Orbital speed:',
+    'ui.h2law2': 'Law 2 \u2014 Equal-Area Law',
+    'ui.displayOpts': 'Display options',
+    'ui.velVec': 'Show velocity vector',
+    'ui.accVec': 'Show acceleration vector',
+    'ui.sweepAnim': 'Area animation On/Off',
+    'ui.sweptTitle': '\ud83d\udcca Area swept (equal time intervals)',
+    'ui.prevArea': 'Previous interval area:',
+    'ui.curArea': 'Current interval area:',
+    'ui.areaRatio': 'Ratio (current/previous):',
+    'ui.h2law3': 'Law 3 \u2014 Harmonic Law',
+    'ui.mercuryMars': 'Mercury \u2013 Mars',
+    'ui.jupiterNeptune': 'Jupiter \u2013 Neptune',
+    'ui.liveCalc': '\ud83d\udcca Live calculation',
+    'ui.semiMajorA': 'Semi-major axis a:',
+    'ui.period': 'Orbital period T:',
+    'ui.alwaysConst': 'always constant!',
+    'ui.clearSelect': '\u2715 Clear selection',
+    'ui.measuring': '(measuring\u2026)',
+    'ui.fastPeri': '\ud83d\ude80 Near perihelion \u2014 moving fast!',
+    'ui.slowApo': '\ud83d\udc22 Near aphelion \u2014 moving slowly',
+    'ui.avgSpeed': '\u27a1 Moving at average speed',
+    'ui.fastSweep': '\ud83d\ude80 Near perihelion \u2014 sweeping fast!',
+    'ui.slowSweep': '\ud83d\udc22 Near aphelion \u2014 slow but wide',
+    'ui.equalArea': '\u27a1 Equal time = equal area',
+    'ui.perihelion': 'Perihelion',
+    'ui.aphelion': 'Aphelion',
+    'ui.hidden': 'Graph hidden',
+    'unit.auYear': 'AU/yr', 'unit.year': 'yr', 'unit.days': ' days', 'unit.year2': 'yr\u00b2',
+    'ui.axisT2': 'T\u00b2 (yr\u00b2)', 'ui.axisA3': 'a\u00b3 (AU\u00b3) \u2192',
+    'planet.mercury': 'Mercury', 'planet.venus': 'Venus', 'planet.earth': 'Earth', 'planet.mars': 'Mars',
+    'planet.jupiter': 'Jupiter', 'planet.saturn': 'Saturn', 'planet.uranus': 'Uranus', 'planet.neptune': 'Neptune'
+  },
+  ko: {
+    'ui.title': '\ucf00\ud50c\ub7ec\uc758 \ubc95\uce59 \u2014 \ud589\uc131\uc758 \uada4\ub3c4 \uc6b4\ub3d9',
+    'ui.desc1': '<strong>\uc81c1\ubc95\uce59(\ud0c0\uc6d0 \uada4\ub3c4 \ubc95\uce59)</strong> \u2014 \ubaa8\ub4e0 \ud589\uc131\uc740 \ud0dc\uc591\uc744 \ud558\ub098\uc758 \ucd08\uc810\uc73c\ub85c \ud558\ub294 \ud0c0\uc6d0 \uada4\ub3c4\ub97c \uadf8\ub9ac\uba70 \uacf5\uc804\ud55c\ub2e4.',
+    'ui.desc2': '<strong>\uc81c2\ubc95\uce59(\uba74\uc801 \uc18d\ub3c4 \uc77c\uc815 \ubc95\uce59)</strong> \u2014 \ud0dc\uc591\uacfc \ud589\uc131\uc744 \uc787\ub294 \uc120\ubd84\uc740 \uac19\uc740 \uc2dc\uac04 \ub3d9\uc548 \ud56d\uc0c1 \uac19\uc740 \uba74\uc801\uc744 \uc4f8\uace0 \uc9c0\ub098\uac04\ub2e4.',
+    'ui.desc3': '<strong>\uc81c3\ubc95\uce59(\uc870\ud654 \ubc95\uce59)</strong> \u2014 \uacf5\uc804 \uc8fc\uae30\uc758 \uc81c\uacf1\uc740 \uada4\ub3c4 \uc7a5\ubc18\uacbd\uc758 \uc138\uc81c\uacf1\uc5d0 \ube44\ub840\ud55c\ub2e4 (T\u00b2 \u221d a\u00b3).',
+    'ui.tab1': '\uc81c1\ubc95\uce59 \u00b7 \ud0c0\uc6d0 \uada4\ub3c4',
+    'ui.tab2': '\uc81c2\ubc95\uce59 \u00b7 \uba74\uc801 \uc18d\ub3c4',
+    'ui.tab3': '\uc81c3\ubc95\uce59 \u00b7 \uc870\ud654 \ubc95\uce59',
+    'ui.pause': '\u23f8 \uc77c\uc2dc\uc815\uc9c0',
+    'ui.play': '\u25b6 \uc7ac\uc0dd',
+    'ui.reset': '\u21ba \ucd08\uae30\ud654',
+    'ui.speed': '\uc2dc\uac04 \ubc30\uc18d',
+    'ui.h2law1': '\uc81c1\ubc95\uce59 \u2014 \ud0c0\uc6d0 \uada4\ub3c4 \ubc95\uce59',
+    'ui.orbitShape': '\uada4\ub3c4 \ubaa8\uc591 (\uc9c1\uc811 \uc870\uc808)',
+    'ui.eccentricity': '\uc774\uc2ec\ub960',
+    'ui.semiMajor': '\uc7a5\ubc18\uacbd',
+    'ui.planetPick': '\ud589\uc131 \uc120\ud0dd (\uc2e4\uc81c \ub370\uc774\ud130)',
+    'ui.liveStats': '\ud83d\udcca \uc2e4\uc2dc\uac04 \uc218\uce58',
+    'ui.curDist': '\ud604\uc7ac \uac70\ub9ac (r):',
+    'ui.periDist': '\uadfc\uc77c\uc810 \uac70\ub9ac:',
+    'ui.apoDist': '\uc6d0\uc77c\uc810 \uac70\ub9ac:',
+    'ui.orbSpeed': '\uacf5\uc804 \uc18d\ub3c4:',
+    'ui.h2law2': '\uc81c2\ubc95\uce59 \u2014 \uba74\uc801 \uc18d\ub3c4 \uc77c\uc815 \ubc95\uce59',
+    'ui.displayOpts': '\ud45c\uc2dc \uc635\uc158',
+    'ui.velVec': '\uc18d\ub3c4 \ubca1\ud130 \ud45c\uc2dc',
+    'ui.accVec': '\uac00\uc18d\ub3c4 \ubca1\ud130 \ud45c\uc2dc',
+    'ui.sweepAnim': '\uba74\uc801 \uc560\ub2c8\uba54\uc774\uc158 On/Off',
+    'ui.sweptTitle': '\ud83d\udcca \uc4f8\uace0 \uac04 \uba74\uc801 (\uac19\uc740 \uc2dc\uac04 \uac04\uaca9)',
+    'ui.prevArea': '\uc774\uc804 \uad6c\uac04 \uba74\uc801:',
+    'ui.curArea': '\ud604\uc7ac \uad6c\uac04 \uba74\uc801:',
+    'ui.areaRatio': '\uba74\uc801 \ube44\uc728 (\ud604\uc7ac/\uc774\uc804):',
+    'ui.h2law3': '\uc81c3\ubc95\uce59 \u2014 \uc870\ud654 \ubc95\uce59',
+    'ui.mercuryMars': '\uc218\uc131 ~ \ud654\uc131',
+    'ui.jupiterNeptune': '\ubaa9\uc131 ~ \ud574\uc655\uc131',
+    'ui.liveCalc': '\ud83d\udcca \uc2e4\uc2dc\uac04 \uacc4\uc0b0',
+    'ui.semiMajorA': '\uc7a5\ubc18\uacbd a:',
+    'ui.period': '\uacf5\uc804 \uc8fc\uae30 T:',
+    'ui.alwaysConst': '\ud56d\uc0c1 \uc77c\uc815!',
+    'ui.clearSelect': '\u2715 \uc120\ud0dd \ud574\uc81c',
+    'ui.measuring': '(\uce21\uc815 \uc911)',
+    'ui.fastPeri': '\ud83d\ude80 \uadfc\uc77c\uc810 \ubd80\uadfc \u2014 \ube60\ub974\uac8c \uc774\ub3d9 \uc911!',
+    'ui.slowApo': '\ud83d\udc22 \uc6d0\uc77c\uc810 \ubd80\uadfc \u2014 \ub290\ub9ac\uac8c \uc774\ub3d9 \uc911',
+    'ui.avgSpeed': '\u27a1 \ud3c9\uade0 \uc18d\ub3c4\ub85c \uc774\ub3d9 \uc911',
+    'ui.fastSweep': '\ud83d\ude80 \uadfc\uc77c\uc810 \uadfc\ucc98 \u2014 \ube60\ub974\uac8c \ud729\uc4f8\uc5b4\uc694!',
+    'ui.slowSweep': '\ud83d\udc22 \uc6d0\uc77c\uc810 \uadfc\ucc98 \u2014 \ub290\ub9ac\uc9c0\ub9cc \ud3ed\uc774 \ub113\uc5b4\uc694',
+    'ui.equalArea': '\u27a1 \uac19\uc740 \uc2dc\uac04 = \uac19\uc740 \uba74\uc801',
+    'ui.perihelion': '\uadfc\uc77c\uc810',
+    'ui.aphelion': '\uc6d0\uc77c\uc810',
+    'ui.hidden': '\uadf8\ub798\ud504 \uc228\uae40',
+    'unit.auYear': 'AU/\ub144', 'unit.year': '\ub144', 'unit.days': '\uc77c', 'unit.year2': '\ub144\u00b2',
+    'ui.axisT2': 'T\u00b2 (\ub144\u00b2)', 'ui.axisA3': 'a\u00b3 (AU\u00b3) \u2192',
+    'planet.mercury': '\uc218\uc131',
+    'planet.venus': '\uae08\uc131',
+    'planet.earth': '\uc9c0\uad6c',
+    'planet.mars': '\ud654\uc131',
+    'planet.jupiter': '\ubaa9\uc131',
+    'planet.saturn': '\ud1a0\uc131',
+    'planet.uranus': '\ucc9c\uc655\uc131',
+    'planet.neptune': '\ud574\uc655\uc131'
+  }
+});
+SimI18n.boot({mount:'.lang-mount'});
+window.addEventListener('sim-langchange', function(){
+  if(typeof updatePlayLabel==='function') updatePlayLabel();
+  if(typeof updateLawDesc==='function') updateLawDesc();
+  if(typeof draw1==='function') draw1();
+  if(typeof draw2law==='function') draw2law();
+  if(typeof draw3law==='function') draw3law();
+});
+</script>
+
+<script>
+/* ════════════════════════════════════════════════════════════════
+   케플러의 법칙 시뮬레이션 — 물리 엔진 + 렌더링
+   --------------------------------------------------------------
+   좌표계 정의:
+     - "궤도 평면" 좌표 (x_orb, y_orb) : 태양(초점)이 원점(0,0).
+       근일점이 +x 방향에 오도록 궤도를 고정한다.
+     - 이심 근점각(E, eccentric anomaly)을 매개변수로 사용:
+         x_orb = a (cosE - e)
+         y_orb = b sinE                 (b = a*sqrt(1-e^2))
+         r     = a (1 - e cosE)
+     - 케플러 방정식:  M = E - e sinE   (M: 평균 근점각, 시간에 비례)
+       뉴턴-랩슨(Newton-Raphson) 법으로 E를 수치적으로 구한다.
+     - 단위계를 GM = 4π² (AU³/년²) 로 잡으면, a=1AU일 때 T=1년이 되어
+       케플러 제3법칙이  T(년) = a(AU)^1.5  라는 아주 단순한 식이 된다.
+   ════════════════════════════════════════════════════════════════ */
+
+const GM = 4 * Math.PI * Math.PI; // AU^3 / year^2  (a=1AU -> T=1yr)
+
+/* ── 전역(공유) 궤도 상태: 세 탭이 모두 "같은 행성"을 보고 있다 ── */
+let a = 1.5;      // 장반경 (AU)
+let e = 0.35;     // 이심률
+let simTime = 0;  // 누적 시뮬레이션 시간 (년)
+let running = true;
+let speedMult = 1; // 시간 배속
+
+/* 제2법칙 탭에서 사용하는 "면적 스윕" 구간 추적용 상태 */
+let sweepStartTime = 0, sweepStartE = 0;
+let curSweepE2 = 0, prevSweepE1 = 0, prevSweepE2 = 0;
+let areaA = null, areaB = null; // 가장 최근에 "완료된" 두 구간의 면적(오래된 것, 최신 것)
+
+/* 제3법칙 탭에서는 슬라이더 대신 실제 행성 데이터(PLANETS, 아래 정의)를 사용한다 */
+
+/* ── 케플러 방정식 수치해 (뉴턴-랩슨, 8회 반복으로 충분히 수렴) ── */
+function solveKepler(M, ecc){
+  let E = M; // 초기값
+  for(let i=0;i<8;i++){
+    const f  = E - ecc*Math.sin(E) - M;
+    const fp = 1 - ecc*Math.cos(E);
+    E -= f/fp;
+  }
+  return E;
+}
+
+/* 주어진 a, e, 시각 t(년) 에서의 궤도 상태(위치·속도·가속도)를 계산 */
+function computeOrbit(aVal, eVal, t){
+  const T = Math.pow(aVal, 1.5);      // 케플러 제3법칙: T = a^1.5 (년)
+  const n = 2*Math.PI / T;            // 평균 운동 (rad/년)
+  const Mraw = n * t;
+  let M = Mraw % (2*Math.PI); if(M < 0) M += 2*Math.PI;
+  const E = solveKepler(M, eVal);
+  const b = aVal * Math.sqrt(1 - eVal*eVal);
+  const r = aVal * (1 - eVal*Math.cos(E));
+  const x = aVal * (Math.cos(E) - eVal);
+  const y = b * Math.sin(E);
+  const Edot = n / (1 - eVal*Math.cos(E));      // dE/dt
+  const vx = -aVal * Math.sin(E) * Edot;
+  const vy =  b * Math.cos(E) * Edot;
+  const speed = Math.hypot(vx, vy);
+  const ax = -GM * x / (r*r*r);
+  const ay = -GM * y / (r*r*r);
+  const accelMag = GM / (r*r);
+  return {T, n, M, Mraw, E, b, r, x, y, vx, vy, speed, ax, ay, accelMag};
+}
+
+/* 이심 근점각 E1→E2 사이에서 반지름 벡터가 쓸고 간 면적
+   (표준 결과: Area(0→E) = (a b / 2)(E - e sinE) ) */
+function sweptArea(aVal, eVal, E1, E2){
+  const bVal = aVal*Math.sqrt(1-eVal*eVal);
+  const f = (E)=> E - eVal*Math.sin(E);
+  return (aVal*bVal/2) * (f(E2) - f(E1));
+}
+
+/* ════════════════════════════════════════════════════════════════
+   캔버스 공통 유틸 (별 배경, 화살표, 둥근 사각형, 태양/행성 아이콘)
+   ════════════════════════════════════════════════════════════════ */
+function roundRectPath(c,x,y,w,h,r){
+  c.beginPath();
+  c.moveTo(x+r,y);
+  c.arcTo(x+w,y,x+w,y+h,r);
+  c.arcTo(x+w,y+h,x,y+h,r);
+  c.arcTo(x,y+h,x,y,r);
+  c.arcTo(x,y,x+w,y,r);
+  c.closePath();
+}
+function arrow(c,x0,y0,x1,y1,col,lw,lbl){
+  const dx=x1-x0, dy=y1-y0, len=Math.hypot(dx,dy); if(len<3) return;
+  const ux=dx/len, uy=dy/len, hw=5, hl=10;
+  c.save();
+  c.strokeStyle=col; c.fillStyle=col; c.lineWidth=lw;
+  c.beginPath(); c.moveTo(x0,y0); c.lineTo(x1,y1); c.stroke();
+  c.beginPath();
+  c.moveTo(x1,y1);
+  c.lineTo(x1-ux*hl-uy*hw, y1-uy*hl+ux*hw);
+  c.lineTo(x1-ux*hl+uy*hw, y1-uy*hl-ux*hw);
+  c.closePath(); c.fill();
+  if(lbl){
+    c.font='bold 11px sans-serif'; c.textAlign='center'; c.textBaseline='middle';
+    c.fillText(lbl, x1+ux*13, y1+uy*13);
+  }
+  c.restore();
+}
+function makeStars(n){
+  const arr=[];
+  for(let i=0;i<n;i++) arr.push({fx:Math.random(), fy:Math.random(), r:Math.random()*1.3+0.3, a:Math.random()*0.5+0.35});
+  return arr;
+}
+function drawStars(c,W,H,stars){
+  c.save();
+  stars.forEach(function(s){
+    c.globalAlpha=s.a; c.fillStyle='#ffffff';
+    c.beginPath(); c.arc(s.fx*W, s.fy*H, s.r, 0, 2*Math.PI); c.fill();
+  });
+  c.restore();
+}
+function drawSun(c,x,y,r){
+  c.save();
+  const glow=c.createRadialGradient(x,y,0,x,y,r*2.2);
+  glow.addColorStop(0,'rgba(255,220,120,0.55)'); glow.addColorStop(1,'rgba(255,180,40,0)');
+  c.fillStyle=glow;
+  c.beginPath(); c.arc(x,y,r*2.2,0,2*Math.PI); c.fill();
+  const g2=c.createRadialGradient(x-r*0.3,y-r*0.3,r*0.1,x,y,r);
+  g2.addColorStop(0,'#fff6d0'); g2.addColorStop(1,'#ffb400');
+  c.fillStyle=g2;
+  c.beginPath(); c.arc(x,y,r,0,2*Math.PI); c.fill();
+  c.strokeStyle='#e08e00'; c.lineWidth=1.2; c.stroke();
+  c.restore();
+}
+function drawPlanet(c,x,y,r){
+  c.save();
+  const grad=c.createRadialGradient(x-r*0.3,y-r*0.3,r*0.15,x,y,r);
+  grad.addColorStop(0,'#a9e2ff'); grad.addColorStop(1,'#2b6fe0');
+  c.fillStyle=grad;
+  c.beginPath(); c.arc(x,y,r,0,2*Math.PI); c.fill();
+  c.strokeStyle='#eaf7ff'; c.lineWidth=1; c.stroke();
+  c.restore();
+}
+function drawEllipsePath(c,fx,fy,pxPerAU,aVal,eVal){
+  const bVal=aVal*Math.sqrt(1-eVal*eVal);
+  c.save();
+  c.strokeStyle='rgba(160,190,255,0.55)'; c.lineWidth=1.5;
+  c.beginPath();
+  for(let i=0;i<=120;i++){
+    const E=i/120*2*Math.PI;
+    const x=aVal*(Math.cos(E)-eVal), y=bVal*Math.sin(E);
+    const px=fx+x*pxPerAU, py=fy-y*pxPerAU;
+    i===0?c.moveTo(px,py):c.lineTo(px,py);
+  }
+  c.closePath(); c.stroke();
+  c.restore();
+}
+function drawPeriApo(c,fx,fy,pxPerAU,aVal,eVal){
+  const perX=fx+aVal*(1-eVal)*pxPerAU, perY=fy;
+  const apoX=fx-aVal*(1+eVal)*pxPerAU, apoY=fy;
+  c.save();
+  c.fillStyle='#ff6a6a';
+  c.beginPath(); c.arc(perX,perY,4,0,2*Math.PI); c.fill();
+  c.fillStyle='#6ad8ff';
+  c.beginPath(); c.arc(apoX,apoY,4,0,2*Math.PI); c.fill();
+  c.font='bold 11px sans-serif'; c.textAlign='center'; c.textBaseline='bottom';
+  c.fillStyle='#ff9a9a'; c.fillText(SimI18n.t('ui.perihelion'), perX, perY-8);
+  c.fillStyle='#9ae6ff'; c.fillText(SimI18n.t('ui.aphelion'), apoX, apoY-8);
+  c.restore();
+}
+function drawWedge(c,fx,fy,pxPerAU,aVal,eVal,E1,E2,fillColor){
+  const bVal=aVal*Math.sqrt(1-eVal*eVal);
+  c.save();
+  c.fillStyle=fillColor;
+  c.beginPath();
+  c.moveTo(fx,fy);
+  const steps=24;
+  for(let i=0;i<=steps;i++){
+    const E=E1+(E2-E1)*i/steps;
+    const x=aVal*(Math.cos(E)-eVal), y=bVal*Math.sin(E);
+    c.lineTo(fx+x*pxPerAU, fy-y*pxPerAU);
+  }
+  c.closePath(); c.fill();
+  c.restore();
+}
+
+const stars1=makeStars(80), stars2=makeStars(80), stars3=makeStars(55);
+
+/* ════════════════════════════════════════════════════════════════
+   캔버스 리사이즈 공통 팩토리 — 모바일(≤960px)에서는 컨트롤 패널이
+   위로 쌓이므로, 그 두 경우에 맞는 가용 폭을 계산해 캔버스 크기를 정한다.
+   ════════════════════════════════════════════════════════════════ */
+function makeCanvasSizer(cv, panelSelector, getBaseWH, onResize){
+  return function(){
+    const wrap=cv.parentElement;
+    const cs=wrap?getComputedStyle(wrap):null;
+    const padX=cs?((parseFloat(cs.paddingLeft)||0)+(parseFloat(cs.paddingRight)||0)):0;
+    const stacked=window.matchMedia('(max-width: 960px)').matches;
+    const baseWH=getBaseWH(stacked);
+    const baseW=baseWH[0], baseH=baseWH[1];
+    let avail;
+    if(stacked){
+      const wrapW=wrap&&wrap.clientWidth?wrap.clientWidth:window.innerWidth;
+      avail=Math.floor(wrapW-padX);
+    }else{
+      const controlsEl=document.querySelector(panelSelector+' .controls');
+      const controlsW=controlsEl?controlsEl.offsetWidth:310;
+      const stageEl=document.querySelector('.stage');
+      let stagePad=0;
+      if(stageEl){ const ss=getComputedStyle(stageEl); stagePad=(parseFloat(ss.paddingLeft)||0)+(parseFloat(ss.paddingRight)||0); }
+      avail=Math.floor(window.innerWidth-controlsW-stagePad-padX-8);
+    }
+    avail=Math.max(260,Math.min(baseW,avail));
+    const CW=avail, CH=Math.round(baseH*(CW/baseW));
+    const DPR=window.devicePixelRatio||1;
+    cv.width=Math.round(CW*DPR); cv.height=Math.round(CH*DPR);
+    cv.style.width=CW+'px'; cv.style.height=CH+'px';
+    const ctx=cv.getContext('2d');
+    ctx.setTransform(1,0,0,1,0,0); ctx.scale(DPR,DPR);
+    onResize(CW,CH,CW/baseW);
+  };
+}
+
+/* ── 탭1: 타원 궤도 ── */
+const cv1=document.getElementById('cv1'), ctx1=cv1.getContext('2d');
+let W1=800,H1=800,S1c=1,FX1=0,FY1=0,pxPerAU1=100;
+function computeGeometry1(){
+  const cx=W1/2, cy=H1/2, halfMin=Math.min(W1,H1)/2;
+  pxPerAU1=0.80*halfMin/a;
+  FX1=cx+a*e*pxPerAU1; FY1=cy;
+}
+const sizeCanvas1=makeCanvasSizer(cv1, '.law-panel[data-law="1"]', function(){ return [800,800]; }, function(CW,CH,S){
+  W1=CW; H1=CH; S1c=S; computeGeometry1();
+});
+function draw1(){
+  ctx1.clearRect(0,0,W1,H1);
+  drawStars(ctx1,W1,H1,stars1);
+  const st=computeOrbit(a,e,simTime);
+  drawEllipsePath(ctx1,FX1,FY1,pxPerAU1,a,e);
+  drawSun(ctx1,FX1,FY1,Math.max(10,10*S1c));
+  drawPeriApo(ctx1,FX1,FY1,pxPerAU1,a,e);
+  const px=FX1+st.x*pxPerAU1, py=FY1-st.y*pxPerAU1;
+  ctx1.save(); ctx1.strokeStyle='rgba(220,230,255,0.4)'; ctx1.setLineDash([4,3]); ctx1.lineWidth=1.3;
+  ctx1.beginPath(); ctx1.moveTo(FX1,FY1); ctx1.lineTo(px,py); ctx1.stroke(); ctx1.restore();
+  drawPlanet(ctx1,px,py,Math.max(7,7*S1c));
+  updateInfo1(st);
+}
+function updateInfo1(st){
+  document.getElementById('r-now').textContent=st.r.toFixed(3);
+  document.getElementById('peri-dist').textContent=(a*(1-e)).toFixed(3);
+  document.getElementById('apo-dist').textContent=(a*(1+e)).toFixed(3);
+  document.getElementById('speed-now').textContent=st.speed.toFixed(3);
+  document.getElementById('speed-kms').textContent=(st.speed*4.74).toFixed(2);
+  const refSpeed=Math.sqrt(GM/a); // 반지름 a인 원궤도 속도를 "평균" 기준으로 사용
+  let statusText;
+  if(st.speed>refSpeed*1.15) statusText=SimI18n.t('ui.fastPeri');
+  else if(st.speed<refSpeed*0.87) statusText=SimI18n.t('ui.slowApo');
+  else statusText=SimI18n.t('ui.avgSpeed');
+  document.getElementById('status1').textContent=statusText;
+}
+
+/* ── 탭2: 면적 속도 일정 ── */
+const cv2law=document.getElementById('cv2law'), ctx2law=cv2law.getContext('2d');
+let W2=800,H2=800,S2c=1,FX2=0,FY2=0,pxPerAU2=100,vecScaleV=1,vecScaleA=1;
+function computeGeometry2law(){
+  const cx=W2/2, cy=H2/2, halfMin=Math.min(W2,H2)/2;
+  pxPerAU2=0.80*halfMin/a;
+  FX2=cx+a*e*pxPerAU2; FY2=cy;
+  const rMin=a*(1-e);
+  const speedMax=Math.sqrt(Math.max(1e-6,GM*(2/rMin-1/a)));
+  const accelMax=GM/(rMin*rMin);
+  const desiredMaxArrowPx=0.32*a*pxPerAU2;
+  vecScaleV=desiredMaxArrowPx/speedMax;
+  vecScaleA=desiredMaxArrowPx/accelMax;
+}
+const sizeCanvas2law=makeCanvasSizer(cv2law, '.law-panel[data-law="2"]', function(){ return [800,800]; }, function(CW,CH,S){
+  W2=CW; H2=CH; S2c=S; computeGeometry2law();
+});
+function resetSweep(){
+  const st=computeOrbit(a,e,simTime);
+  sweepStartTime=simTime; sweepStartE=st.E; curSweepE2=st.E;
+  prevSweepE1=st.E; prevSweepE2=st.E;
+  areaA=null; areaB=null;
+}
+function updateSweepTracking(){
+  const T=Math.pow(a,1.5);
+  const sweepDuration=T/16; // 한 바퀴를 16등분한 시간 간격마다 비교
+  const st=computeOrbit(a,e,simTime);
+  const elapsed=simTime-sweepStartTime;
+  if(elapsed>=sweepDuration){
+    // 방금 막 완료된 구간의 면적을 확정한다 (areaA<-이전 areaB, areaB<-새로 완료된 값)
+    let E2final=st.E; if(E2final<sweepStartE) E2final+=2*Math.PI;
+    const finished=sweptArea(a,e,sweepStartE,E2final);
+    prevSweepE1=sweepStartE; prevSweepE2=E2final;
+    areaA=areaB; areaB=finished;
+    sweepStartTime=simTime; sweepStartE=st.E; curSweepE2=st.E;
+  } else {
+    let E2=st.E;
+    if(E2<sweepStartE) E2+=2*Math.PI; // 0->2π 경계를 넘어갈 때 보정
+    curSweepE2=E2;
+  }
+}
+function draw2law(){
+  ctx2law.clearRect(0,0,W2,H2);
+  drawStars(ctx2law,W2,H2,stars2);
+  const st=computeOrbit(a,e,simTime);
+  drawEllipsePath(ctx2law,FX2,FY2,pxPerAU2,a,e);
+  if(document.getElementById('chk-sweep2').checked){
+    if(areaB!==null) drawWedge(ctx2law,FX2,FY2,pxPerAU2,a,e,prevSweepE1,prevSweepE2,'rgba(224,129,58,0.38)');
+    drawWedge(ctx2law,FX2,FY2,pxPerAU2,a,e,sweepStartE,curSweepE2,'rgba(58,150,224,0.4)');
+  }
+  drawSun(ctx2law,FX2,FY2,Math.max(10,10*S2c));
+  drawPeriApo(ctx2law,FX2,FY2,pxPerAU2,a,e);
+  const px=FX2+st.x*pxPerAU2, py=FY2-st.y*pxPerAU2;
+  if(document.getElementById('chk-vel2').checked){
+    arrow(ctx2law,px,py,px+st.vx*vecScaleV,py-st.vy*vecScaleV,'#2ca060',2.4,'v');
+  }
+  if(document.getElementById('chk-acc2').checked){
+    arrow(ctx2law,px,py,px+st.ax*vecScaleA,py-st.ay*vecScaleA,'#c8388f',2.4,'a');
+  }
+  drawPlanet(ctx2law,px,py,Math.max(7,7*S2c));
+  updateInfo2(st);
+}
+function updateInfo2(st){
+  document.getElementById('area-prev').textContent=areaA!==null?areaA.toFixed(4):SimI18n.t('ui.measuring');
+  document.getElementById('area-cur').textContent=areaB!==null?areaB.toFixed(4):SimI18n.t('ui.measuring');
+  document.getElementById('area-ratio').textContent=(areaA&&areaB)?(areaB/areaA).toFixed(3):'-';
+  const rMid=(a*(1-e)+a*(1+e))/2;
+  let statusText;
+  if(st.r<rMid*0.85) statusText=SimI18n.t('ui.fastSweep');
+  else if(st.r>rMid*1.15) statusText=SimI18n.t('ui.slowSweep');
+  else statusText=SimI18n.t('ui.equalArea');
+  document.getElementById('status2').textContent=statusText;
+}
+
+/* ── 탭3: 조화 법칙 (미니 궤도 + T²-a³ 산점도) ── */
+const cv3law=document.getElementById('cv3law'), ctx3law=cv3law.getContext('2d');
+let W3=1100,H3=650,S3c=1;
+let miniFX3=0,miniFY3=0,miniPxPerAU3=50;
+let scatX0=0,scatY0=0,scatW3=0,scatH3=0;
+let isStacked3=false;
+function computeGeometry3law(){
+  if(isStacked3){
+    S3c=W3/700;
+    const padOuter=14*S3c, midGap=14*S3c;
+    const topH=W3*0.60;
+    const leftCX=W3/2, leftCY=padOuter+topH/2;
+    const halfMin=Math.min(W3,topH)/2;
+    miniPxPerAU3=0.75*halfMin/a;
+    miniFX3=leftCX+a*e*miniPxPerAU3; miniFY3=leftCY;
+    scatX0=padOuter; scatY0=padOuter+topH+midGap;
+    scatW3=W3-2*padOuter; scatH3=H3-scatY0-padOuter;
+  } else {
+    S3c=W3/1100;
+    const padOuter=16*S3c, midGap=18*S3c;
+    const leftW=W3*0.48; // 미니 궤도 영역을 넓게 (그래프는 4개 점만 찍으면 되므로 작아도 충분)
+    const rightW=W3-leftW-padOuter*2-midGap;
+    const areaY0=padOuter, areaH=H3-2*padOuter;
+    const leftCX=padOuter+leftW/2, leftCY=areaY0+areaH/2;
+    const halfMin=Math.min(leftW,areaH)/2;
+    miniPxPerAU3=0.78*halfMin/a;
+    miniFX3=leftCX+a*e*miniPxPerAU3; miniFY3=leftCY;
+    scatX0=padOuter+leftW+midGap; scatY0=areaY0; scatW3=rightW; scatH3=Math.min(areaH, rightW*0.9);
+  }
+}
+const sizeCanvas3law=makeCanvasSizer(cv3law, '.law-panel[data-law="3"]', function(stacked){
+  isStacked3=stacked;
+  return stacked? [700,1080] : [1100,650];
+}, function(CW,CH,S){
+  W3=CW; H3=CH; computeGeometry3law();
+});
+function drawMiniOrbit3(){
+  const st=computeOrbit(a,e,simTime);
+  drawEllipsePath(ctx3law,miniFX3,miniFY3,miniPxPerAU3,a,e);
+  drawSun(ctx3law,miniFX3,miniFY3,Math.max(7,7*S3c));
+  const px=miniFX3+st.x*miniPxPerAU3, py=miniFY3-st.y*miniPxPerAU3;
+  drawPlanet(ctx3law,px,py,Math.max(5,5*S3c));
+}
+function drawScatter(){
+  const c=ctx3law;
+  c.save();
+  roundRectPath(c,scatX0,scatY0,scatW3,scatH3,8*S3c);
+  c.fillStyle='#111a33'; c.fill();
+  c.strokeStyle='#2a3a66'; c.lineWidth=1; c.stroke();
+
+  const plotX0=scatX0+38*S3c, plotY0=scatY0+30*S3c;
+  const plotX1=scatX0+scatW3-16*S3c, plotY1=scatY0+scatH3-36*S3c;
+  const plotW=plotX1-plotX0, plotH=plotY1-plotY0;
+
+  /* 내행성(수성~화성)과 외행성(목성~해왕성)은 a의 규모가 너무 달라서(0.4 vs 30 AU)
+     한 그래프에 선형으로 같이 그리면 안쪽 네 개가 원점에 뭉개져 버린다.
+     그래서 지금 선택된 행성이 속한 그룹만 그 그룹의 범위로 그린다. */
+  const group=currentPlanetGroup();
+  const groupPlanets=PLANETS.filter(function(p){ return p.group===group; });
+  const maxA=Math.max.apply(null, groupPlanets.map(function(p){return p.a;}));
+  const maxVal=Math.pow(maxA,3)*1.18;
+  function xToPx(v){ return plotX0+(v/maxVal)*plotW; }
+  function yToPx(v){ return plotY1-(v/maxVal)*plotH; }
+
+  c.strokeStyle='#3a4a7a'; c.lineWidth=1.2;
+  c.beginPath(); c.moveTo(plotX0,plotY1); c.lineTo(plotX1,plotY1); c.stroke();
+  c.beginPath(); c.moveTo(plotX0,plotY1); c.lineTo(plotX0,plotY0); c.stroke();
+
+  c.strokeStyle='rgba(155,89,182,0.75)'; c.lineWidth=1.6; c.setLineDash([5,4]);
+  c.beginPath(); c.moveTo(xToPx(0),yToPx(0)); c.lineTo(xToPx(maxVal),yToPx(maxVal)); c.stroke();
+  c.setLineDash([]);
+
+  function plotPoint(p, isSel){
+    const pa3=Math.pow(p.a,3), pT2=Math.pow(p.a,3); // 이 단위계에서는 T² = a³
+    const px=xToPx(pa3), py=yToPx(pT2);
+    if(px<plotX0-2||px>plotX1+2) return; // 축 범위를 벗어나면 그리지 않음
+    c.fillStyle = isSel? '#ffd35c' : 'rgba(170,184,224,0.55)';
+    c.beginPath(); c.arc(px,py, isSel? 7*S3c : 4*S3c, 0, 2*Math.PI); c.fill();
+    c.strokeStyle = isSel? '#8a5a00' : 'rgba(60,74,110,0.8)'; c.lineWidth=1.2; c.stroke();
+    c.font=(isSel?'bold ':'')+Math.max(9,10*S3c)+'px sans-serif';
+    c.fillStyle = isSel? '#ffe9a8' : 'rgba(170,184,224,0.7)';
+    c.textAlign='center'; c.textBaseline='bottom';
+    c.fillText(SimI18n.t(p.nameKey), px, py-9*S3c);
+  }
+  /* 이 그룹에 속한 행성들의 (a³, T²) 는 실제 천문 데이터로 고정되어 있다 —
+     사용자가 슬라이더로 "만들어내는" 값이 아니라 이미 존재하는 사실을 확인하는
+     것이므로 항상 표시한다. */
+  groupPlanets.forEach(function(p,i){
+    const idx=PLANETS.indexOf(p);
+    plotPoint(p, idx===selectedPlanetIdx);
+  });
+  /* 지구(1AU=1년)는 항상 기준점 — 외행성 그래프에서는 원점 근처에 작게 찍혀서
+     "목성·토성이 지구보다 얼마나 먼 궤도인지" 감을 잡게 해 준다. */
+  if(group==='outer'){
+    const earth=PLANETS[2];
+    plotPoint(earth, false);
+  }
+
+  c.fillStyle='#aab8e0'; c.font='bold '+Math.max(10,12*S3c)+'px sans-serif';
+  c.textAlign='left'; c.textBaseline='alphabetic';
+  c.fillText(SimI18n.t('ui.axisT2'), scatX0+8*S3c, scatY0+20*S3c);
+  c.textAlign='right';
+  c.fillStyle='rgba(155,89,182,0.9)'; c.font=Math.max(9,10*S3c)+'px sans-serif';
+  c.fillText(group==='outer'?SimI18n.t('ui.jupiterNeptune'):SimI18n.t('ui.mercuryMars'), scatX0+scatW3-12*S3c, scatY0+20*S3c);
+  c.textAlign='right';
+  c.fillText(SimI18n.t('ui.axisA3'), plotX1, plotY1+22*S3c);
+  c.restore();
+}
+function draw3law(){
+  ctx3law.clearRect(0,0,W3,H3);
+  drawStars(ctx3law,W3,H3,stars3);
+  drawMiniOrbit3();
+  drawScatter();
+  updateInfo3();
+}
+function updateInfo3(){
+  const T=Math.pow(a,1.5), T2=T*T, a3=Math.pow(a,3);
+  document.getElementById('a3-disp').textContent=a.toFixed(3);
+  document.getElementById('T-val').textContent=T.toFixed(3);
+  document.getElementById('T-days').textContent=Math.round(T*365.25);
+  document.getElementById('T2-val').textContent=T2.toFixed(3);
+  document.getElementById('a3-val').textContent=a3.toFixed(3);
+  document.getElementById('ratio-val').textContent=(T2/a3).toFixed(4);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   공유 애니메이션 루프 — 세 탭 모두 "같은 행성"의 simTime을 공유한다.
+   ════════════════════════════════════════════════════════════════ */
+let activeLaw=1;
+const YEARS_PER_SEC=0.15; // 1배속 기준, 실제 1초당 흐르는 시뮬레이션 시간(년)
+let lastTS=null;
+
+function afterResizeActive(){
+  if(activeLaw===1){ sizeCanvas1(); draw1(); }
+  else if(activeLaw===2){ sizeCanvas2law(); draw2law(); }
+  else { sizeCanvas3law(); draw3law(); }
+}
+function loop(ts){
+  if(lastTS!==null){
+    const dt=Math.min((ts-lastTS)/1000,0.1);
+    if(running) simTime+=dt*speedMult*YEARS_PER_SEC;
+  }
+  lastTS=ts;
+  if(activeLaw===2) updateSweepTracking();
+  if(activeLaw===1) draw1();
+  else if(activeLaw===2) draw2law();
+  else draw3law();
+  requestAnimationFrame(loop);
+}
+
+/* ── 컨트롤 UI 연결 ── */
+const slE=document.getElementById('sl-e'), lblE=document.getElementById('lbl-e');
+const slA1=document.getElementById('sl-a1'), lblA1=document.getElementById('lbl-a1');
+
+/* 태양계 실제 데이터 (장반경 a: AU, 이심률 e) — 케플러 3법칙 검증용 */
+const PLANETS=[
+  {name:'수성', nameKey:'planet.mercury', a:0.387,  e:0.206, group:'inner'},
+  {name:'금성', nameKey:'planet.venus',   a:0.723,  e:0.007, group:'inner'},
+  {name:'지구', nameKey:'planet.earth',   a:1.000,  e:0.017, group:'inner'},
+  {name:'화성', nameKey:'planet.mars',    a:1.524,  e:0.093, group:'inner'},
+  {name:'목성', nameKey:'planet.jupiter', a:5.203,  e:0.049, group:'outer'},
+  {name:'토성', nameKey:'planet.saturn',  a:9.537,  e:0.054, group:'outer'},
+  {name:'천왕성', nameKey:'planet.uranus', a:19.191, e:0.047, group:'outer'},
+  {name:'해왕성', nameKey:'planet.neptune', a:30.069, e:0.009, group:'outer'}
+];
+let selectedPlanetIdx=null;
+function currentPlanetGroup(){
+  return selectedPlanetIdx!==null ? PLANETS[selectedPlanetIdx].group : 'inner';
+}
+
+/* 중요: a 또는 e가 바뀌면 "지금 활성화된 캔버스"뿐 아니라 세 캔버스 모두의
+   픽셀 스케일(FX,FY,pxPerAU 등)을 즉시 다시 계산해야 한다. 그렇지 않으면
+   리사이즈 이벤트가 없는 한 이전 a값 기준의 스케일로 그려져 궤도 크기가
+   실제보다 크거나 작게 겹쳐 보이는 문제가 생긴다. */
+function refreshAllGeometry(){
+  computeGeometry1();
+  computeGeometry2law();
+  computeGeometry3law();
+}
+/* 장반경 슬라이더는 0.35AU(수성 부근)~31AU(해왕성 부근)까지 다뤄야 하는데,
+   선형 슬라이더로는 안쪽 행성들 사이의 미세 조정이 거의 불가능해진다.
+   그래서 슬라이더의 원시값(0~1000)은 로그 스케일로 두고, 실제 a값으로 변환한다. */
+const LOG_A_MIN=Math.log10(0.35), LOG_A_MAX=Math.log10(31);
+function sliderRawToA(raw){ return Math.pow(10, LOG_A_MIN + (raw/1000)*(LOG_A_MAX-LOG_A_MIN)); }
+function aToSliderRaw(aVal){ return Math.round(1000*(Math.log10(aVal)-LOG_A_MIN)/(LOG_A_MAX-LOG_A_MIN)); }
+
+function setE(v){
+  e=Math.max(0,Math.min(0.9,v));
+  slE.value=e; lblE.textContent=e.toFixed(2);
+  refreshAllGeometry();
+}
+function setA(v){
+  a=Math.max(0.35,Math.min(31,v));
+  slA1.value=aToSliderRaw(a);
+  lblA1.textContent=a.toFixed(2);
+  refreshAllGeometry();
+}
+slE.addEventListener('input', function(){ setE(+slE.value); selectedPlanetIdx=null; updatePlanetButtons(); });
+slA1.addEventListener('input', function(){ setA(sliderRawToA(+slA1.value)); selectedPlanetIdx=null; updatePlanetButtons(); });
+
+function updatePlanetButtons(){
+  document.querySelectorAll('.planet-btn').forEach(function(btn){
+    btn.classList.toggle('active', +btn.getAttribute('data-planet')===selectedPlanetIdx);
+  });
+}
+function selectPlanet(idx){
+  selectedPlanetIdx=idx;
+  const p=PLANETS[idx];
+  setA(p.a); setE(p.e);
+  updatePlanetButtons();
+}
+document.querySelectorAll('.planet-btn').forEach(function(btn){
+  btn.addEventListener('click', function(){ selectPlanet(+btn.getAttribute('data-planet')); });
+});
+document.getElementById('btnClearScatter').addEventListener('click', function(){
+  selectedPlanetIdx=null; updatePlanetButtons();
+});
+
+/* 탭 전환 */
+function updateLawDesc(){
+  const keys={1:'ui.desc1', 2:'ui.desc2', 3:'ui.desc3'};
+  document.getElementById('lawDesc').innerHTML=SimI18n.t(keys[activeLaw]);
+}
+document.querySelectorAll('.level-tab').forEach(function(tabBtn){
+  tabBtn.addEventListener('click', function(){
+    const n=+tabBtn.getAttribute('data-law');
+    if(n===activeLaw) return;
+    activeLaw=n;
+    document.querySelectorAll('.level-tab').forEach(function(t){ t.classList.toggle('active', t===tabBtn); });
+    document.querySelectorAll('.law-panel').forEach(function(p){ p.classList.toggle('active', +p.getAttribute('data-law')===n); });
+    if(n===2) resetSweep();
+    afterResizeActive();
+    updateLawDesc();
+  });
+});
+
+/* 재생 / 일시정지 */
+const btnPlay=document.getElementById('btnPlay');
+function updatePlayLabel(){ btnPlay.textContent = running? SimI18n.t('ui.pause') : SimI18n.t('ui.play'); }
+btnPlay.addEventListener('click', function(){ running=!running; updatePlayLabel(); });
+
+/* 시간 배속 */
+const slSpeed=document.getElementById('slSpeed'), lblSpeed=document.getElementById('lblSpeed');
+slSpeed.addEventListener('input', function(){
+  speedMult=+slSpeed.value;
+  lblSpeed.textContent=speedMult.toFixed(2)+'x';
+});
+
+/* 초기화 */
+document.getElementById('btnReset').addEventListener('click', function(){
+  setA(1.5); setE(0.35);
+  simTime=0;
+  speedMult=1; slSpeed.value=1; lblSpeed.textContent='1.00x';
+  running=true; updatePlayLabel();
+  selectedPlanetIdx=null; updatePlanetButtons();
+  resetSweep();
+  afterResizeActive();
+});
+
+/* 리사이즈 대응 */
+window.addEventListener('resize', function(){
+  clearTimeout(window.__keplerResizeTimer);
+  window.__keplerResizeTimer=setTimeout(afterResizeActive,120);
+});
+window.addEventListener('orientationchange', function(){ setTimeout(afterResizeActive,220); });
+window.addEventListener('load', function(){ requestAnimationFrame(afterResizeActive); });
+
+/* ── 초기 구동 ── */
+setE(e); setA(a);
+updatePlanetButtons();
+lblSpeed.textContent=speedMult.toFixed(2)+'x';
+updatePlayLabel();
+resetSweep();
+sizeCanvas1();
+draw1();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
