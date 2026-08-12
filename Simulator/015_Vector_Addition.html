@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vector Addition Simulation</title>
+<style>
+* { box-sizing: border-box; }
+html, body { max-width:100%; overflow-x:hidden; }
+body { font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif; background:#f5f6f8; margin:0; }
+header.page-head { background:linear-gradient(155deg,#152540 0%,#213863 58%,#2B4C7E 100%); color:#fff; padding:64px 28px 72px; }
+header.page-head .header-inner { max-width:1200px; margin:0 auto; }
+header.page-head .header-top { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+header.page-head .eyebrow { display:inline-flex; align-items:center; gap:7px; font-size:12.5px; letter-spacing:.14em; text-transform:uppercase; color:#9FB3D6; font-weight:700; margin-bottom:16px; padding:6px 13px; border:1px solid rgba(159,179,214,.35); border-radius:999px; text-decoration:none; transition:color .15s ease,border-color .15s ease; }
+header.page-head .eyebrow:hover { color:#fff; border-color:rgba(255,255,255,.45); }
+header.page-head h1 { font-size:clamp(20px,3.6vw,28px); font-weight:800; margin:0 0 14px; letter-spacing:-.01em; color:#fff; }
+header.page-head p { margin:0; color:#C7D4E8; font-size:15.5px; line-height:1.7; }
+.stage { display:flex; justify-content:center; align-items:flex-start; padding:20px; width:100%; max-width:100%; box-sizing:border-box; }
+footer.copyright { margin:0 20px 26px; font-size:11.5px; color:#9AA2B1; text-align:center; }
+footer.copyright .copyright-link { color:#9AA2B1; text-decoration:underline; text-underline-offset:2px; }
+footer.copyright .copyright-link:hover { color:#0078d4; }
+.container { display:flex; background:#fff; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,.1); overflow:hidden; border:1px solid #e0e0e0; max-width:100%; width:fit-content; }
+.controls { width:300px; max-width:100%; padding:22px 20px; background:#f8f9fa; border-right:1px solid #e0e0e0; display:flex; flex-direction:column; gap:13px; flex-shrink:0; }
+.controls h2 { margin:0 0 2px; font-size:16px; font-weight:700; color:#111; border-bottom:2px solid #0078d4; padding-bottom:7px; line-height:1.4; }
+.section { background:#fff; border:1px solid #d0d7de; border-radius:8px; padding:12px 14px; display:flex; flex-direction:column; gap:9px; }
+.section-title { font-size:13px; font-weight:700; color:#222; display:flex; align-items:center; gap:7px; }
+.dot { display:inline-block; width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.vecsym { position:relative; display:inline-block; padding-top:.32em; }
+.vecsym::after { content:'\2192'; position:absolute; top:.08em; left:50%; transform:translateX(-50%) scaleX(1.3); font-size:.58em; line-height:1; }
+.ctrl { display:flex; flex-direction:column; gap:4px; }
+.ctrl label { font-size:12.5px; font-weight:600; color:#444; display:flex; justify-content:space-between; align-items:center; }
+.toggle { display:flex; align-items:center; gap:8px; font-size:12.5px; color:#444; cursor:pointer; user-select:none; }
+.toggle input { width:15px; height:15px; cursor:pointer; accent-color:#0078d4; flex-shrink:0; }
+.num-pair-label { display:flex; gap:6px; }
+.num-pair-label span { flex:1; font-size:10.5px; color:#8a96a8; text-align:center; font-weight:700; letter-spacing:.02em; }
+.num-pair { display:flex; gap:6px; }
+.num-pair input { width:100%; min-width:0; padding:6px 4px; border:1.5px solid #c8d0d8; border-radius:6px; font-size:13px; font-family:inherit; text-align:center; color:#222; background:#fff; }
+.num-pair input:focus { outline:none; border-color:#0078d4; box-shadow:0 0 0 2px rgba(0,120,212,.15); }
+.vec-readout { font-family:'Consolas','Menlo',monospace; font-size:11.5px; color:#333; background:#f3f5f8; border:1px solid #e2e6eb; border-radius:6px; padding:6px 8px; line-height:1.6; white-space:pre-line; }
+.comp-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; }
+.proj-btn { padding:7px 4px; font-size:11.5px; font-weight:600; border:1.5px solid #c8d0d8; border-radius:7px; background:#fff; color:#444; cursor:pointer; text-align:center; transition:all .15s; line-height:1.3; font-family:inherit; }
+.proj-btn:hover { border-color:#0078d4; color:#0055aa; background:#f0f6fd; }
+.proj-btn.active { background:#0078d4; color:#fff; border-color:#005fa3; }
+.btn-row { display:flex; gap:7px; }
+.btn { flex:1; padding:8px 4px; font-size:13px; font-weight:700; border:1.5px solid #bbb; border-radius:7px; background:#fff; color:#333; cursor:pointer; transition:all .15s; font-family:inherit; }
+.btn:hover { background:#e8f0fe; border-color:#0078d4; color:#0055aa; }
+.info-box { background:#fff; border:1px solid #d0d7de; border-radius:8px; padding:12px 14px; font-size:12.5px; color:#444; line-height:1.7; }
+.info-box strong { color:#222; font-size:13px; }
+.drag-note { font-size:11.5px; color:#888; margin:0; line-height:1.55; }
+.canvas-wrap { padding:16px; background:#fff; display:flex; justify-content:center; align-items:flex-start; max-width:100%; min-width:0; }
+canvas { border-radius:8px; border:1px solid #e0e0e0; display:block; max-width:100%; touch-action:none; }
+
+@media (max-width: 960px) {
+  header.page-head { padding:36px 20px 40px; }
+  .stage { padding:12px; }
+  .container { flex-direction:column; width:100%; max-width:100%; }
+  .controls { width:100%; border-right:none; border-bottom:1px solid #e0e0e0; }
+  .canvas-wrap { flex:none; width:100%; padding:12px; }
+  .btn-row { flex-wrap:wrap; }
+  .btn { flex:1 1 calc(50% - 4px); }
+}
+@media (max-width: 480px) {
+  header.page-head { padding:28px 16px 32px; }
+  header.page-head p { font-size:14px; }
+  .stage { padding:10px; }
+  .controls { padding:16px 14px; }
+  .btn { font-size:12px; }
+  .comp-grid { grid-template-columns:1fr 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<header class="page-head">
+  <div class="header-inner">
+    <div class="header-top">
+      <a class="eyebrow" href="https://physics.physicsgon.workers.dev/Simulator/" data-i18n="common.eyebrow">Physics Simulator</a>
+      <div class="lang-mount"></div>
+    </div>
+    <h1 data-i18n="ui.title">Vector Addition</h1>
+    <p data-i18n="ui.lead">Set each vector's starting point and (x, y) components directly — every value snaps to the integer grid. Drag the square (tail) or circle (tip) handles on the graph, or type the numbers, and see the resultant shown with both the triangle and parallelogram methods.</p>
+  </div>
+</header>
+<div class="stage">
+<div class="container">
+  <div class="controls">
+    <h2 data-i18n="ui.panelHtml">Vector Addition</h2>
+    <p class="drag-note" data-i18n="ui.dragHint" data-i18n-html>Tip: drag the square (tail) or circle (tip) handles of <span class="vecsym">A</span> and <span class="vecsym">B</span> directly on the graph — every position snaps to the integer grid.</p>
+
+    <div class="section">
+      <div class="section-title"><span class="dot" style="background:#dd2200"></span><span data-i18n="ui.vecA" data-i18n-html>Vector <span class="vecsym">A</span></span></div>
+      <div class="ctrl">
+        <label><span data-i18n="ui.tailLabel">Tail</span></label>
+        <div class="num-pair-label"><span>A<sub>x0</sub></span><span>A<sub>y0</sub></span></div>
+        <div class="num-pair">
+          <input type="number" id="in-ax0" value="0" step="1" min="0" max="10">
+          <input type="number" id="in-ay0" value="0" step="1" min="0" max="10">
+        </div>
+      </div>
+      <div class="ctrl">
+        <label><span data-i18n="ui.compLabel">Component</span></label>
+        <div class="num-pair-label"><span>A<sub>x</sub></span><span>A<sub>y</sub></span></div>
+        <div class="num-pair">
+          <input type="number" id="in-adx" value="6" step="1" min="0" max="10">
+          <input type="number" id="in-ady" value="3" step="1" min="0" max="10">
+        </div>
+      </div>
+      <div class="vec-readout" id="readout-a">A</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><span class="dot" style="background:#2266cc"></span><span data-i18n="ui.vecB" data-i18n-html>Vector <span class="vecsym">B</span></span></div>
+      <div class="ctrl">
+        <label><span data-i18n="ui.tailLabel">Tail</span></label>
+        <div class="num-pair-label"><span>B<sub>x0</sub></span><span>B<sub>y0</sub></span></div>
+        <div class="num-pair">
+          <input type="number" id="in-bx0" value="0" step="1" min="0" max="10">
+          <input type="number" id="in-by0" value="0" step="1" min="0" max="10">
+        </div>
+      </div>
+      <div class="ctrl">
+        <label><span data-i18n="ui.compLabel">Component</span></label>
+        <div class="num-pair-label"><span>B<sub>x</sub></span><span>B<sub>y</sub></span></div>
+        <div class="num-pair">
+          <input type="number" id="in-bdx" value="3" step="1" min="0" max="10">
+          <input type="number" id="in-bdy" value="7" step="1" min="0" max="10">
+        </div>
+      </div>
+      <div class="vec-readout" id="readout-b">B</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><span class="dot" style="background:#2ca060"></span><span data-i18n="ui.sumTitle" data-i18n-html>Resultant <span class="vecsym">S</span></span></div>
+      <label class="toggle"><input type="checkbox" id="chk-sum" checked><span data-i18n="ui.showSum" data-i18n-html>Show sum <span class="vecsym">S</span> = <span class="vecsym">A</span> + <span class="vecsym">B</span></span></label>
+      <label class="toggle"><input type="checkbox" id="chk-triangle" checked><span data-i18n="ui.showTriangle">Show triangle method</span></label>
+      <label class="toggle"><input type="checkbox" id="chk-parallel"><span data-i18n="ui.showParallelogram">Show parallelogram method</span></label>
+      <div class="vec-readout" id="readout-s">S</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title" data-i18n="ui.dispTitle">Display</div>
+      <div class="ctrl">
+        <label><span data-i18n="ui.compStyle">Component style</span></label>
+        <div class="comp-grid" id="compGrid"></div>
+      </div>
+      <label class="toggle"><input type="checkbox" id="chk-angle"><span data-i18n="ui.showAngleArcs">Angle arcs</span></label>
+      <label class="toggle"><input type="checkbox" id="chk-grid" checked><span data-i18n="ui.showGrid">Grid</span></label>
+      <label class="toggle"><input type="checkbox" id="chk-values" checked><span data-i18n="ui.showValues">Values</span></label>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" onclick="randomize()" data-i18n="ui.randomize">🎲 Randomize</button>
+      <button class="btn" onclick="resetAll()" data-i18n="ui.reset">↺ Reset</button>
+    </div>
+
+    <div class="info-box" id="readout"><strong>a + b = s</strong><br>...</div>
+  </div>
+  <div class="canvas-wrap"><canvas id="cv"></canvas></div>
+</div>
+</div>
+<footer class="copyright">Copyright &copy; 2026 <a href="mailto:physicsgon@gmail.com" class="copyright-link">physicsgon@gmail.com</a> . All rights reserved.</footer>
+
+<script>
+/* Inlined from i18n.js — page is self-contained without external JS */
+/* Shared KO/EN language switcher for Physics Simulator pages */
+(function () {
+  var STORAGE_KEY = 'physics-sim-lang';
+
+  function detectLang() {
+    try {
+      var saved = localStorage.getItem(STORAGE_KEY);
+      if (saved === 'ko' || saved === 'en') return saved;
+    } catch (e) {}
+    var nav = (navigator.language || 'en').toLowerCase();
+    return nav.indexOf('ko') === 0 ? 'ko' : 'en';
+  }
+
+  var style = document.createElement('style');
+  style.textContent = [
+    '.lang-mount{position:relative;z-index:2;flex:0 0 auto;}',
+    '.lang-switch{display:inline-flex;align-items:center;gap:0;border:1px solid rgba(159,179,214,.45);border-radius:999px;overflow:hidden;background:rgba(21,37,64,.25);position:relative;z-index:2;-webkit-user-select:none;user-select:none;}',
+    '.lang-switch .lang-btn{-webkit-appearance:none;appearance:none;border:0;background:transparent;color:#9FB3D6;font:700 12px/1 "Noto Sans KR",-apple-system,BlinkMacSystemFont,sans-serif;letter-spacing:.04em;padding:10px 14px;min-height:36px;cursor:pointer;transition:background .15s ease,color .15s ease;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}',
+    '.lang-switch .lang-btn:hover{color:#fff;}',
+    '.lang-switch .lang-btn.active{background:rgba(255,255,255,.14);color:#fff;}',
+    'header .eyebrow-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;position:relative;z-index:2;}',
+    'header.page-head .header-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;position:relative;z-index:2;}',
+    'header.page-head .header-top .eyebrow{margin-bottom:0;}'
+  ].join('');
+  document.head.appendChild(style);
+
+  window.SimI18n = {
+    lang: detectLang(),
+    messages: { en: {}, ko: {} },
+
+    register: function (dict) {
+      if (!dict) return this;
+      ['en', 'ko'].forEach(function (lang) {
+        if (!dict[lang]) return;
+        Object.keys(dict[lang]).forEach(function (key) {
+          SimI18n.messages[lang][key] = dict[lang][key];
+        });
+      });
+      return this;
+    },
+
+    t: function (key) {
+      var pack = this.messages[this.lang] || {};
+      if (pack[key] != null) return pack[key];
+      if (this.messages.en[key] != null) return this.messages.en[key];
+      return key;
+    },
+
+    apply: function () {
+      var self = this;
+      document.documentElement.lang = this.lang === 'ko' ? 'ko' : 'en';
+
+      document.querySelectorAll('[data-i18n]').forEach(function (el) {
+        var key = el.getAttribute('data-i18n');
+        var val = self.t(key);
+        if (el.hasAttribute('data-i18n-html')) el.innerHTML = val;
+        else el.textContent = val;
+      });
+
+      document.querySelectorAll('[data-i18n-attr]').forEach(function (el) {
+        var spec = el.getAttribute('data-i18n-attr');
+        if (!spec) return;
+        spec.split(';').forEach(function (part) {
+          var bits = part.split(':');
+          if (bits.length < 2) return;
+          var attr = bits[0].trim();
+          var key = bits[1].trim();
+          el.setAttribute(attr, self.t(key));
+        });
+      });
+
+      document.querySelectorAll('.lang-btn').forEach(function (btn) {
+        btn.classList.toggle('active', btn.getAttribute('data-lang') === self.lang);
+        btn.setAttribute('aria-pressed', btn.getAttribute('data-lang') === self.lang ? 'true' : 'false');
+      });
+
+      window.dispatchEvent(new CustomEvent('sim-langchange', { detail: { lang: self.lang } }));
+    },
+
+    setLang: function (lang) {
+      if (lang !== 'ko' && lang !== 'en') return;
+      this.lang = lang;
+      try { localStorage.setItem(STORAGE_KEY, lang); } catch (e) {}
+      this.apply();
+    },
+
+    createSwitch: function () {
+      var wrap = document.createElement('div');
+      wrap.className = 'lang-switch';
+      wrap.setAttribute('role', 'group');
+      wrap.setAttribute('aria-label', 'Language');
+
+      [['ko', '한글'], ['en', 'EN']].forEach(function (pair) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'lang-btn' + (SimI18n.lang === pair[0] ? ' active' : '');
+        btn.setAttribute('data-lang', pair[0]);
+        btn.setAttribute('aria-pressed', SimI18n.lang === pair[0] ? 'true' : 'false');
+        btn.textContent = pair[1];
+        btn.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          SimI18n.setLang(pair[0]);
+        });
+        wrap.appendChild(btn);
+      });
+      return wrap;
+    },
+
+    mount: function (selector) {
+      var host = typeof selector === 'string' ? document.querySelector(selector) : selector;
+      if (!host) return null;
+      if (host.querySelector('.lang-switch')) return host.querySelector('.lang-switch');
+      var sw = this.createSwitch();
+      host.appendChild(sw);
+      return sw;
+    },
+
+    boot: function (opts) {
+      opts = opts || {};
+      if (opts.messages) this.register(opts.messages);
+      var mountTo = opts.mount || '.lang-mount';
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function () {
+          SimI18n.mount(mountTo);
+          SimI18n.apply();
+        });
+      } else {
+        this.mount(mountTo);
+        this.apply();
+      }
+    }
+  };
+
+  // Common strings shared across Simulator pages
+  window.SimI18n.register({
+    en: {
+      'common.eyebrow': 'Physics Simulator',
+      'common.open': 'Open',
+      'common.comingSoon': 'Coming soon'
+    },
+    ko: {
+      'common.eyebrow': '물리학 시뮬레이터',
+      'common.open': '열기',
+      'common.comingSoon': '준비 중'
+    }
+  });
+})();
+</script>
+<script>
+SimI18n.register({
+  en:{
+    'ui.title':'Vector Addition',
+    'ui.lead':'Set each vector\u2019s starting point and (x, y) components directly \u2014 every value snaps to the integer grid. Drag the square (tail) or circle (tip) handles on the graph, or type the numbers, and see the resultant shown with both the triangle and parallelogram methods.',
+    'ui.panelHtml':'Vector Addition',
+    'ui.dragHint':'Tip: drag the square (tail) or circle (tip) handles of <span class="vecsym">A</span> and <span class="vecsym">B</span> directly on the graph \u2014 every position snaps to the integer grid.',
+    'ui.vecA':'Vector <span class="vecsym">A</span>','ui.vecB':'Vector <span class="vecsym">B</span>',
+    'ui.tailLabel':'Tail','ui.compLabel':'Component',
+    'ui.sumTitle':'Resultant <span class="vecsym">S</span>','ui.showSum':'Show sum <span class="vecsym">S</span> = <span class="vecsym">A</span> + <span class="vecsym">B</span>',
+    'ui.showTriangle':'Show triangle method',
+    'ui.showParallelogram':'Show parallelogram method',
+    'ui.dispTitle':'Display','ui.compStyle':'Component style',
+    'ui.compHidden':'Hidden','ui.compTriangle':'Triangle','ui.compOnAxis':'Rectangle',
+    'ui.showAngleArcs':'Angle arcs','ui.showGrid':'Grid','ui.showValues':'Values',
+    'ui.randomize':'\ud83c\udfb2 Randomize','ui.reset':'\u21ba Reset',
+    'ui.eqTitle':'<span class="vecsym">A</span> + <span class="vecsym">B</span> = <span class="vecsym">S</span>',
+    'ui.resMag':'Magnitude |S|','ui.resAngle':'Angle \u03b8','ui.resComp':'Components (Sx, Sy)',
+    'ui.resWaiting':'Turn on "Show sum" to see the resultant vector.'
+  },
+  ko:{
+    'ui.title':'벡터의 합성',
+    'ui.lead':'각 벡터의 시작점과 (x, y) 성분을 직접 입력해 보세요. 모든 값은 항상 정수 격자에 맞춰집니다. 그래프 위의 사각형(시작점)이나 원(끝점) 핸들을 드래그하거나 숫자를 직접 입력하면, 두 벡터가 합쳐지는 과정을 삼각형법과 평행사변형법으로 확인할 수 있습니다.',
+    'ui.panelHtml':'벡터의 합성',
+    'ui.dragHint':'팁: 그래프 위에서 <span class="vecsym">A</span>, <span class="vecsym">B</span>의 사각형(시작점)·원(끝점) 핸들을 직접 드래그할 수 있어요. 위치는 항상 정수 격자에 맞춰집니다.',
+    'ui.vecA':'벡터 <span class="vecsym">A</span>','ui.vecB':'벡터 <span class="vecsym">B</span>',
+    'ui.tailLabel':'시작점','ui.compLabel':'성분',
+    'ui.sumTitle':'합벡터 <span class="vecsym">S</span>','ui.showSum':'합벡터 <span class="vecsym">S</span> = <span class="vecsym">A</span> + <span class="vecsym">B</span> 표시',
+    'ui.showTriangle':'삼각형법 표시',
+    'ui.showParallelogram':'평행사변형법 표시',
+    'ui.dispTitle':'표시 옵션','ui.compStyle':'성분 표시 방식',
+    'ui.compHidden':'숨김','ui.compTriangle':'삼각형','ui.compOnAxis':'직사각형',
+    'ui.showAngleArcs':'각도 호','ui.showGrid':'격자','ui.showValues':'값 표시',
+    'ui.randomize':'\ud83c\udfb2 무작위','ui.reset':'\u21ba 초기화',
+    'ui.eqTitle':'<span class="vecsym">A</span> + <span class="vecsym">B</span> = <span class="vecsym">S</span>',
+    'ui.resMag':'크기 |S|','ui.resAngle':'각도 \u03b8','ui.resComp':'성분 (Sx, Sy)',
+    'ui.resWaiting':'"합벡터 표시"를 켜면 결과가 여기에 나타납니다.'
+  }
+});
+SimI18n.boot({mount:'.lang-mount'});
+window.addEventListener('sim-langchange',function(){
+  updateCompBtnLabels();
+  updateReadout();
+  if(typeof draw==='function') draw();
+});
+</script>
+
+<script>
+/* ── Canvas ── */
+var cv=document.getElementById('cv');
+var ctx=cv.getContext('2d');
+var DPR=1;
+var CW=830,CH=620;
+var W=CW,H=CH;
+var ML=52,MT=24,MR=24;
+var RES_H=80;
+var BASE_W=740,BASE_H=740;
+
+var curScale=30,curOriginX=0,curOriginY=0;
+function WX(x){return curOriginX+x*curScale;}
+function WY(y){return curOriginY-y*curScale;}
+function WXY(x,y){return {x:WX(x),y:WY(y)};}
+function pxToWorld(px,py){return {x:(px-curOriginX)/curScale, y:(curOriginY-py)/curScale};}
+
+function sizeCanvas(){
+  var wrap=cv.parentElement;
+  var cs=wrap?getComputedStyle(wrap):null;
+  var padX=cs?((parseFloat(cs.paddingLeft)||0)+(parseFloat(cs.paddingRight)||0)):0;
+  var stacked=window.matchMedia('(max-width: 960px)').matches;
+  var avail;
+  if(stacked){
+    var wrapW=wrap&&wrap.clientWidth?wrap.clientWidth:window.innerWidth;
+    avail=Math.floor(wrapW-padX);
+  }else{
+    var controlsEl=document.querySelector('.container .controls');
+    var controlsW=controlsEl?controlsEl.offsetWidth:300;
+    var stageEl=document.querySelector('.stage');
+    var stagePad=0;
+    if(stageEl){
+      var ss=getComputedStyle(stageEl);
+      stagePad=(parseFloat(ss.paddingLeft)||0)+(parseFloat(ss.paddingRight)||0);
+    }
+    avail=Math.floor(window.innerWidth-controlsW-stagePad-padX-8);
+  }
+  avail=Math.max(260,Math.min(BASE_W,avail));
+  CW=avail;
+  CH=Math.round(BASE_H*(CW/BASE_W));
+  if(CW<420) CH=Math.max(CH,Math.round(CW*0.92));
+  DPR=window.devicePixelRatio||1;
+  cv.width=Math.round(CW*DPR);
+  cv.height=Math.round(CH*DPR);
+  cv.style.width=CW+'px';
+  cv.style.height=CH+'px';
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.scale(DPR,DPR);
+  W=CW; H=CH;
+  ML=CW<360?36:(CW<480?42:52);
+  MR=CW<360?16:(CW<480?20:24);
+  MT=CW<480?18:24;
+  RES_H=CW<360?64:(CW<480?70:80);
+}
+function afterResize(){ sizeCanvas(); draw(); }
+sizeCanvas();
+window.addEventListener('resize',function(){
+  clearTimeout(window.__vaResizeTimer);
+  window.__vaResizeTimer=setTimeout(afterResize,120);
+});
+window.addEventListener('orientationchange',function(){ setTimeout(afterResize,220); });
+window.addEventListener('load',function(){ requestAnimationFrame(afterResize); });
+
+/* ── Colors ── */
+var COL={a:'#dd2200', b:'#2266cc', s:'#2ca060'};
+/* Vector-arrow display names: capital letter + U+20D7 combining right arrow above */
+var VLETTER={a:'A', b:'B', s:'S'};
+
+/* ── Controls ── */
+var inAx0=document.getElementById('in-ax0'), inAy0=document.getElementById('in-ay0');
+var inAdx=document.getElementById('in-adx'), inAdy=document.getElementById('in-ady');
+var inBx0=document.getElementById('in-bx0'), inBy0=document.getElementById('in-by0');
+var inBdx=document.getElementById('in-bdx'), inBdy=document.getElementById('in-bdy');
+var ALL_INPUTS=[inAx0,inAy0,inAdx,inAdy,inBx0,inBy0,inBdx,inBdy];
+
+var chkSum=document.getElementById('chk-sum');
+var chkTriangle=document.getElementById('chk-triangle');
+var chkParallel=document.getElementById('chk-parallel');
+var chkAngle=document.getElementById('chk-angle'), chkGrid=document.getElementById('chk-grid'), chkValues=document.getElementById('chk-values');
+
+var COMP_STYLES=[
+  {id:'hidden', key:'ui.compHidden'},
+  {id:'triangle', key:'ui.compTriangle'},
+  {id:'onaxis', key:'ui.compOnAxis'}
+];
+var compStyle='hidden';
+var compGridEl=document.getElementById('compGrid');
+COMP_STYLES.forEach(function(cs,i){
+  var b=document.createElement('button');
+  b.type='button';
+  b.className='proj-btn'+(cs.id===compStyle?' active':'');
+  b.dataset.id=cs.id;
+  b.onclick=function(){
+    compStyle=cs.id;
+    document.querySelectorAll('#compGrid .proj-btn').forEach(function(bb){bb.classList.toggle('active',bb.dataset.id===compStyle);});
+    draw();
+  };
+  compGridEl.appendChild(b);
+});
+function updateCompBtnLabels(){
+  document.querySelectorAll('#compGrid .proj-btn').forEach(function(btn,i){
+    btn.textContent=SimI18n.t(COMP_STYLES[i].key);
+  });
+}
+updateCompBtnLabels();
+
+function numOf(el){ var v=parseFloat(el.value); return isNaN(v)?0:v; }
+function clampInt(v,min,max){ v=Math.round(v); if(v<min)v=min; if(v>max)v=max; return v; }
+
+function getA(){ return {x0:numOf(inAx0), y0:numOf(inAy0), dx:numOf(inAdx), dy:numOf(inAdy)}; }
+function getB(){ return {x0:numOf(inBx0), y0:numOf(inBy0), dx:numOf(inBdx), dy:numOf(inBdy)}; }
+function tipOf(v){ return {x:v.x0+v.dx, y:v.y0+v.dy}; }
+
+function fmt(n){ return (n<0?'':'')+n.toFixed(1); }
+function fmtInt(n){ return String(Math.round(n)); }
+
+function vecSymHtml(letter){ return '<span class="vecsym">'+letter+'</span>'; }
+function vecReadoutText(letter,v){
+  var sym=vecSymHtml(letter);
+  var tip=tipOf(v);
+  var mag=Math.hypot(v.dx,v.dy);
+  var ang=Math.atan2(v.dy,v.dx)*180/Math.PI; if(ang<0) ang+=360;
+  return sym+': ('+fmtInt(v.x0)+', '+fmtInt(v.y0)+') \u2192 ('+fmtInt(tip.x)+', '+fmtInt(tip.y)+')<br>'+
+    '('+fmtInt(v.dx)+', '+fmtInt(v.dy)+')  |'+sym+'|='+mag.toFixed(2)+'  \u03b8='+ang.toFixed(1)+'\u00b0';
+}
+function updateLabels(){
+  var A=getA(), B=getB();
+  document.getElementById('readout-a').innerHTML=vecReadoutText('A',A);
+  document.getElementById('readout-b').innerHTML=vecReadoutText('B',B);
+  var S={x0:A.x0, y0:A.y0, dx:A.dx+B.dx, dy:A.dy+B.dy};
+  document.getElementById('readout-s').innerHTML=vecReadoutText('S',S);
+}
+function updateReadout(){
+  var A=getA(), B=getB();
+  var sdx=A.dx+B.dx, sdy=A.dy+B.dy;
+  var mag=Math.hypot(sdx,sdy);
+  var ang=Math.atan2(sdy,sdx)*180/Math.PI; if(ang<0) ang+=360;
+  document.getElementById('readout').innerHTML=
+    '<strong>'+SimI18n.t('ui.eqTitle')+'</strong><br>'+
+    '(A<sub>x</sub>, A<sub>y</sub>) + (B<sub>x</sub>, B<sub>y</sub>) = (S<sub>x</sub>, S<sub>y</sub>)<br>'+
+    '('+fmtInt(A.dx)+', '+fmtInt(A.dy)+') + ('+fmtInt(B.dx)+', '+fmtInt(B.dy)+') = ('+fmtInt(sdx)+', '+fmtInt(sdy)+')<br>'+
+    SimI18n.t('ui.resMag')+' = '+mag.toFixed(2)+'&nbsp;&nbsp;'+SimI18n.t('ui.resAngle')+' = '+ang.toFixed(1)+'°';
+}
+ALL_INPUTS.forEach(function(el){
+  el.addEventListener('input',function(){ updateLabels(); updateReadout(); draw(); });
+  el.addEventListener('change',function(){
+    el.value=clampInt(numOf(el), parseFloat(el.min), parseFloat(el.max));
+    updateLabels(); updateReadout(); draw();
+  });
+});
+[chkSum,chkTriangle,chkParallel,chkAngle,chkGrid,chkValues].forEach(function(c){
+  c.addEventListener('change',draw);
+});
+
+function resetAll(){
+  inAx0.value=0; inAy0.value=0; inAdx.value=6; inAdy.value=3;
+  inBx0.value=0; inBy0.value=0; inBdx.value=3; inBdy.value=7;
+  chkSum.checked=true; chkTriangle.checked=true; chkParallel.checked=false;
+  chkAngle.checked=false; chkGrid.checked=true; chkValues.checked=true;
+  compStyle='hidden';
+  document.querySelectorAll('#compGrid .proj-btn').forEach(function(bb){bb.classList.toggle('active',bb.dataset.id===compStyle);});
+  updateLabels(); updateReadout(); draw();
+}
+function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+function randomize(){
+  inAx0.value=randInt(0,10); inAy0.value=randInt(0,10);
+  inAdx.value=randInt(0,10); inAdy.value=randInt(0,10);
+  inBx0.value=randInt(0,10); inBy0.value=randInt(0,10);
+  inBdx.value=randInt(0,10); inBdy.value=randInt(0,10);
+  updateLabels(); updateReadout(); draw();
+}
+
+/* ── Drag interaction ── */
+var dragTarget=null; /* 'a-tail' | 'a-tip' | 'b-tail' | 'b-tip' */
+var aTailPx={x:0,y:0}, aTipPx={x:0,y:0}, bTailPx={x:0,y:0}, bTipPx={x:0,y:0};
+function getCanvasPos(evt){
+  var rect=cv.getBoundingClientRect();
+  var t=(evt.touches&&evt.touches[0])?evt.touches[0]:evt;
+  return { x:(t.clientX-rect.left)*(CW/rect.width), y:(t.clientY-rect.top)*(CH/rect.height) };
+}
+function hitTest(pos){
+  var pts=[
+    {id:'a-tail', p:aTailPx}, {id:'a-tip', p:aTipPx},
+    {id:'b-tail', p:bTailPx}, {id:'b-tip', p:bTipPx}
+  ];
+  var best=null, bestD=22;
+  pts.forEach(function(o){
+    var d=Math.hypot(pos.x-o.p.x,pos.y-o.p.y);
+    if(d<bestD){ bestD=d; best=o.id; }
+  });
+  return best;
+}
+function onDown(evt){
+  var pos=getCanvasPos(evt);
+  var hit=hitTest(pos);
+  if(hit){ dragTarget=hit; cv.style.cursor='grabbing'; evt.preventDefault(); }
+}
+function onMove(evt){
+  var pos=getCanvasPos(evt);
+  if(!dragTarget){
+    cv.style.cursor=hitTest(pos)?'grab':'default';
+    return;
+  }
+  evt.preventDefault();
+  var w=pxToWorld(pos.x,pos.y);
+  if(dragTarget==='a-tail'){
+    inAx0.value=clampInt(w.x,0,10); inAy0.value=clampInt(w.y,0,10);
+  }else if(dragTarget==='a-tip'){
+    var A=getA();
+    inAdx.value=clampInt(w.x-A.x0,0,10); inAdy.value=clampInt(w.y-A.y0,0,10);
+  }else if(dragTarget==='b-tail'){
+    inBx0.value=clampInt(w.x,0,10); inBy0.value=clampInt(w.y,0,10);
+  }else if(dragTarget==='b-tip'){
+    var B=getB();
+    inBdx.value=clampInt(w.x-B.x0,0,10); inBdy.value=clampInt(w.y-B.y0,0,10);
+  }
+  updateLabels(); updateReadout(); draw();
+}
+function onUp(){ if(dragTarget){ dragTarget=null; cv.style.cursor='default'; } }
+cv.addEventListener('mousedown',onDown);
+window.addEventListener('mousemove',onMove);
+window.addEventListener('mouseup',onUp);
+cv.addEventListener('touchstart',onDown,{passive:false});
+window.addEventListener('touchmove',onMove,{passive:false});
+window.addEventListener('touchend',onUp);
+
+/* ── Drawing helpers ── */
+function roundRectPath(x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+function niceStep(scale){
+  var raw=42/scale;
+  var pow=Math.pow(10,Math.max(0,Math.floor(Math.log10(raw))));
+  var norm=raw/pow;
+  var step;
+  if(norm<1.5) step=1*pow; else if(norm<3.5) step=2*pow; else if(norm<7.5) step=5*pow; else step=10*pow;
+  return Math.max(1,Math.round(step));
+}
+var WORLD_MAX=20;
+function computeTransform(){
+  var plotTop=MT, plotBottom=H-RES_H-8, plotLeft=ML, plotRight=W-MR;
+  var availW=plotRight-plotLeft, availH=plotBottom-plotTop;
+  var scale=Math.min(availW/WORLD_MAX, availH/WORLD_MAX)*0.94;
+  scale=Math.max(scale,4);
+  var boxPx=WORLD_MAX*scale;
+  var offX=(availW-boxPx)/2, offY=(availH-boxPx)/2;
+  curScale=scale;
+  curOriginX=plotLeft+offX;
+  curOriginY=plotTop+offY+boxPx;
+  return {plotTop:plotTop,plotBottom:plotBottom,plotLeft:plotLeft,plotRight:plotRight};
+}
+function drawGrid(bounds){
+  var step=niceStep(curScale);
+  var x0px=WX(0), xEndPx=WX(WORLD_MAX), y0px=WY(0), yEndPx=WY(WORLD_MAX);
+  ctx.save();
+  ctx.strokeStyle='#e6e9ee'; ctx.lineWidth=1;
+  ctx.beginPath();
+  for(var x=0; x<=WORLD_MAX+1e-9; x+=step){
+    var px=WX(x); ctx.moveTo(px,yEndPx); ctx.lineTo(px,y0px);
+  }
+  for(var y=0; y<=WORLD_MAX+1e-9; y+=step){
+    var py=WY(y); ctx.moveTo(x0px,py); ctx.lineTo(xEndPx,py);
+  }
+  ctx.stroke();
+  ctx.restore();
+  return step;
+}
+function drawAxes(bounds,step){
+  ctx.save();
+  ctx.strokeStyle='#93a2b8'; ctx.fillStyle='#93a2b8'; ctx.lineWidth=1.6;
+  var x0=WX(0), y0=WY(0), xEnd=WX(WORLD_MAX), yEnd=WY(WORLD_MAX);
+  ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(xEnd+12,y0); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x0,yEnd-12); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(xEnd+12,y0); ctx.lineTo(xEnd+4,y0-4); ctx.lineTo(xEnd+4,y0+4); ctx.closePath(); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(x0,yEnd-12); ctx.lineTo(x0-4,yEnd-4); ctx.lineTo(x0+4,yEnd-4); ctx.closePath(); ctx.fill();
+  ctx.font='bold 12px sans-serif'; ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+  ctx.fillText('x',xEnd-4,y0-8);
+  ctx.fillText('y',x0+8,yEnd-4);
+  if(step){
+    ctx.font='10.5px sans-serif'; ctx.fillStyle='#9aa6b8';
+    ctx.textAlign='center'; ctx.textBaseline='top';
+    for(var x=0; x<=WORLD_MAX+1e-9; x+=step){
+      if(x===0) continue;
+      ctx.fillText(fmtInt(x),WX(x),y0+4);
+    }
+    ctx.textAlign='right'; ctx.textBaseline='middle';
+    for(var y=0; y<=WORLD_MAX+1e-9; y+=step){
+      if(y===0) continue;
+      ctx.fillText(fmtInt(y),x0-4,WY(y));
+    }
+  }
+  ctx.restore();
+}
+
+function arrowHead(x1,y1,ux,uy,col,hl){
+  var hw=hl*0.42;
+  ctx.fillStyle=col;
+  ctx.beginPath();
+  ctx.moveTo(x1,y1);
+  ctx.lineTo(x1-ux*hl-uy*hw,y1-uy*hl+ux*hw);
+  ctx.lineTo(x1-ux*hl+uy*hw,y1-uy*hl-ux*hw);
+  ctx.closePath(); ctx.fill();
+}
+function drawVectorArrow(x0,y0,x1w,y1w,col,lw){
+  var p0=WXY(x0,y0), p1=WXY(x1w,y1w);
+  var dx=p1.x-p0.x, dy=p1.y-p0.y, len=Math.hypot(dx,dy);
+  if(len<2) return;
+  var ux=dx/len, uy=dy/len, hl=Math.min(13,4+lw*3);
+  ctx.save();
+  ctx.strokeStyle=col; ctx.fillStyle=col; ctx.lineWidth=lw; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(p0.x,p0.y); ctx.lineTo(p1.x-ux*hl*0.6,p1.y-uy*hl*0.6); ctx.stroke();
+  arrowHead(p1.x,p1.y,ux,uy,col,hl);
+  ctx.restore();
+}
+function drawDashed(x0,y0,x1,y1,col,alpha){
+  ctx.save();
+  ctx.globalAlpha=alpha==null?1:alpha;
+  ctx.strokeStyle=col; ctx.lineWidth=1.4; ctx.setLineDash([5,4]);
+  ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1,y1); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.restore();
+}
+function chipLabel(px,py,text,col){
+  ctx.save();
+  ctx.font='bold 11px sans-serif';
+  var w=ctx.measureText(text).width+10;
+  roundRectPath(px-w/2,py-9,w,18,5);
+  ctx.fillStyle='#ffffff'; ctx.fill();
+  ctx.strokeStyle=col; ctx.lineWidth=1.2; ctx.stroke();
+  ctx.fillStyle='#333'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(text,px,py+1);
+  ctx.restore();
+}
+function drawComponents(tailX,tailY,dx,dy,col){
+  var o=WXY(tailX,tailY), tip=WXY(tailX+dx,tailY+dy), foot=WXY(tailX+dx,tailY), footY=WXY(tailX,tailY+dy);
+  if(compStyle==='triangle'){
+    drawDashed(o.x,o.y,foot.x,foot.y,col,0.65);
+    drawDashed(foot.x,foot.y,tip.x,tip.y,col,0.65);
+    if(chkValues.checked){
+      chipLabel((o.x+foot.x)/2,foot.y+(dy>=0?13:-13),fmtInt(dx),col);
+      chipLabel(foot.x+(dx>=0?15:-15),(foot.y+tip.y)/2,fmtInt(dy),col);
+    }
+  }else if(compStyle==='onaxis'){
+    drawDashed(tip.x,tip.y,foot.x,foot.y,col,0.4);
+    drawDashed(tip.x,tip.y,footY.x,footY.y,col,0.4);
+    ctx.save();
+    ctx.strokeStyle=col; ctx.globalAlpha=0.85; ctx.lineWidth=2.2;
+    ctx.beginPath(); ctx.moveTo(o.x,o.y); ctx.lineTo(foot.x,foot.y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(o.x,o.y); ctx.lineTo(footY.x,footY.y); ctx.stroke();
+    ctx.restore();
+    if(chkValues.checked){
+      chipLabel((o.x+foot.x)/2,foot.y+(dy>=0?13:-13),fmtInt(dx),col);
+      chipLabel(footY.x+(dx>=0?15:-15),(o.y+footY.y)/2,fmtInt(dy),col);
+    }
+  }
+}
+function drawTriangleConstruction(P,A,B,sTip){
+  var aTipPxL=WXY(P.x+A.dx,P.y+A.dy), sTipPxL=WXY(sTip.x,sTip.y);
+  drawDashed(aTipPxL.x,aTipPxL.y,sTipPxL.x,sTipPxL.y,COL.b,0.6);
+}
+function drawParallelogramConstruction(P,A,B,sTip){
+  var pPx=WXY(P.x,P.y);
+  var aTipPxL=WXY(P.x+A.dx,P.y+A.dy);
+  var paraCornerPx=WXY(P.x+B.dx,P.y+B.dy);
+  var sTipPxL=WXY(sTip.x,sTip.y);
+  drawDashed(pPx.x,pPx.y,paraCornerPx.x,paraCornerPx.y,COL.b,0.5);
+  drawDashed(aTipPxL.x,aTipPxL.y,sTipPxL.x,sTipPxL.y,COL.b,0.5);
+  drawDashed(paraCornerPx.x,paraCornerPx.y,sTipPxL.x,sTipPxL.y,COL.a,0.5);
+}
+function drawAngleArc(tailX,tailY,dx,dy,col){
+  var mag=Math.hypot(dx,dy);
+  if(mag<0.05) return;
+  var thetaDeg=Math.atan2(dy,dx)*180/Math.PI;
+  var thetaRad=thetaDeg*Math.PI/180;
+  var o=WXY(tailX,tailY);
+  var vlenPx=Math.hypot(WX(tailX+dx)-o.x,WY(tailY+dy)-o.y);
+  var r=Math.max(16,Math.min(34,vlenPx*0.38));
+  ctx.save();
+  ctx.strokeStyle=col; ctx.globalAlpha=0.8; ctx.lineWidth=1.4;
+  ctx.beginPath();
+  ctx.arc(o.x,o.y,r,0,-thetaRad,thetaRad>0);
+  ctx.stroke();
+  ctx.restore();
+  var dispDeg=thetaDeg<0?thetaDeg+360:thetaDeg;
+  var midRad=thetaRad/2;
+  var lx=o.x+Math.cos(midRad)*(r+14), ly=o.y-Math.sin(midRad)*(r+14);
+  ctx.save();
+  ctx.font='bold 11px sans-serif'; ctx.fillStyle=col; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(dispDeg.toFixed(0)+'°',lx,ly);
+  ctx.restore();
+}
+function drawTipHandle(x,y,col){
+  var p=WXY(x,y);
+  ctx.save();
+  ctx.fillStyle='#fff'; ctx.strokeStyle=col; ctx.lineWidth=2.4;
+  ctx.beginPath(); ctx.arc(p.x,p.y,6.5,0,2*Math.PI); ctx.fill(); ctx.stroke();
+  ctx.restore();
+  return p;
+}
+function drawTailHandle(x,y,col){
+  var p=WXY(x,y);
+  ctx.save();
+  ctx.fillStyle='#fff'; ctx.strokeStyle=col; ctx.lineWidth=2.2;
+  var s=6.5;
+  ctx.beginPath(); ctx.rect(p.x-s,p.y-s,s*2,s*2); ctx.fill(); ctx.stroke();
+  ctx.restore();
+  return p;
+}
+function drawVecGlyph(x,y,letter,col,fontSize){
+  ctx.save();
+  ctx.font='bold '+fontSize+'px sans-serif'; ctx.fillStyle=col; ctx.textAlign='center'; ctx.textBaseline='alphabetic';
+  var w=Math.max(ctx.measureText(letter).width,fontSize*0.55);
+  ctx.fillText(letter,x,y);
+  var aw=w*0.92, ay=y-fontSize*1.02;
+  var ax0=x-aw/2, ax1=x+aw/2;
+  var hl=fontSize*0.24, hw=fontSize*0.17;
+  ctx.strokeStyle=col; ctx.fillStyle=col; ctx.lineWidth=Math.max(1.2,fontSize*0.09); ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(ax0,ay); ctx.lineTo(ax1-hl*0.5,ay); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(ax1,ay);
+  ctx.lineTo(ax1-hl,ay-hw);
+  ctx.lineTo(ax1-hl,ay+hw);
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+function drawVectorNameLabel(tailX,tailY,dx,dy,col,letter){
+  var p0=WXY(tailX,tailY), p1=WXY(tailX+dx,tailY+dy);
+  var mag=Math.hypot(dx,dy);
+  if(mag<0.05) return;
+  var t=0.56;
+  var mx=p0.x+(p1.x-p0.x)*t, my=p0.y+(p1.y-p0.y)*t;
+  var ux=(p1.x-p0.x), uy=(p1.y-p0.y); var len=Math.hypot(ux,uy)||1; ux/=len; uy/=len;
+  var px=-uy, py=ux; if(py>0){ px=-px; py=-py; } /* keep label on the upper side */
+  var offset=15;
+  drawVecGlyph(mx+px*offset, my+py*offset, letter, col, 14);
+}
+function drawResultBar(){
+  var bY=H-RES_H;
+  ctx.save();
+  ctx.fillStyle='#f8f9fa'; ctx.fillRect(0,bY,W,RES_H);
+  ctx.strokeStyle='#dde2ea'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(0,bY); ctx.lineTo(W,bY); ctx.stroke();
+  if(!chkSum.checked){
+    ctx.fillStyle='#bbb'; ctx.font='13px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(SimI18n.t('ui.resWaiting'),W/2,bY+RES_H/2);
+    ctx.restore(); return;
+  }
+  var A=getA(), B=getB();
+  var sdx=A.dx+B.dx, sdy=A.dy+B.dy;
+  var mag=Math.hypot(sdx,sdy);
+  var ang=Math.atan2(sdy,sdx)*180/Math.PI; if(ang<0) ang+=360;
+  var titleSz=CW<360?9.5:11; var valSz=CW<360?14:(CW<480?18:22);
+  var cols=[
+    {lbl:SimI18n.t('ui.resMag'), val:mag.toFixed(2)},
+    {lbl:SimI18n.t('ui.resAngle'), val:ang.toFixed(1)+'°'},
+    {lbl:SimI18n.t('ui.resComp'), val:'('+fmtInt(sdx)+', '+fmtInt(sdy)+')'}
+  ];
+  var cW=W/3, midY=bY+RES_H/2+4;
+  cols.forEach(function(col,i){
+    var cx=cW*i+cW/2;
+    ctx.fillStyle='#8a96a8'; ctx.font='bold '+titleSz+'px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='alphabetic';
+    ctx.fillText(col.lbl.toUpperCase(),cx,midY-12);
+    ctx.fillStyle=COL.s; ctx.font='bold '+valSz+'px sans-serif';
+    ctx.fillText(col.val,cx,midY+13);
+    if(i<2){ ctx.strokeStyle='#dde2ea'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(cW*(i+1),bY+8); ctx.lineTo(cW*(i+1),bY+RES_H-8); ctx.stroke(); }
+  });
+  ctx.restore();
+}
+
+function draw(){
+  var bounds=computeTransform();
+  ctx.clearRect(0,0,W,H);
+  var step=null;
+  if(chkGrid.checked) step=drawGrid(bounds);
+  drawAxes(bounds,step);
+
+  var A=getA(), B=getB();
+  var aTip=tipOf(A), bTip=tipOf(B);
+  var P={x:A.x0,y:A.y0};
+  var sTip={x:P.x+A.dx+B.dx, y:P.y+A.dy+B.dy};
+  var showSum=chkSum.checked;
+
+  if(compStyle!=='hidden'){
+    drawComponents(A.x0,A.y0,A.dx,A.dy,COL.a);
+    drawComponents(B.x0,B.y0,B.dx,B.dy,COL.b);
+    if(showSum) drawComponents(P.x,P.y,A.dx+B.dx,A.dy+B.dy,COL.s);
+  }
+  if(showSum && chkParallel.checked) drawParallelogramConstruction(P,A,B,sTip);
+  if(showSum && chkTriangle.checked) drawTriangleConstruction(P,A,B,sTip);
+
+  if(showSum) drawVectorArrow(P.x,P.y,sTip.x,sTip.y,COL.s,3.4);
+  drawVectorArrow(B.x0,B.y0,bTip.x,bTip.y,COL.b,2.8);
+  drawVectorArrow(A.x0,A.y0,aTip.x,aTip.y,COL.a,2.8);
+
+  if(chkAngle.checked){
+    drawAngleArc(A.x0,A.y0,A.dx,A.dy,COL.a);
+    drawAngleArc(B.x0,B.y0,B.dx,B.dy,COL.b);
+    if(showSum) drawAngleArc(P.x,P.y,A.dx+B.dx,A.dy+B.dy,COL.s);
+  }
+
+  aTailPx=drawTailHandle(A.x0,A.y0,COL.a);
+  aTipPx=drawTipHandle(aTip.x,aTip.y,COL.a);
+  bTailPx=drawTailHandle(B.x0,B.y0,COL.b);
+  bTipPx=drawTipHandle(bTip.x,bTip.y,COL.b);
+
+  if(chkValues.checked){
+    drawVectorNameLabel(A.x0,A.y0,A.dx,A.dy,COL.a,VLETTER.a);
+    drawVectorNameLabel(B.x0,B.y0,B.dx,B.dy,COL.b,VLETTER.b);
+    if(showSum) drawVectorNameLabel(P.x,P.y,A.dx+B.dx,A.dy+B.dy,COL.s,VLETTER.s);
+  }
+
+  drawResultBar();
+}
+
+updateLabels();
+updateReadout();
+draw();
+</script>
+</body>
+</html>
