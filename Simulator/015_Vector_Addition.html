@@ -25,8 +25,12 @@ footer.copyright .copyright-link:hover { color:#0078d4; }
 .section { background:#fff; border:1px solid #d0d7de; border-radius:8px; padding:12px 14px; display:flex; flex-direction:column; gap:9px; }
 .section-title { font-size:13px; font-weight:700; color:#222; display:flex; align-items:center; gap:7px; }
 .dot { display:inline-block; width:10px; height:10px; border-radius:50%; flex-shrink:0; }
-.vecsym { position:relative; display:inline-block; padding-top:.32em; }
-.vecsym::after { content:'\2192'; position:absolute; top:.08em; left:50%; transform:translateX(-50%) scaleX(1.3); font-size:.58em; line-height:1; }
+math { font-size:1em; }
+.drag-note math, .toggle math { vertical-align:-0.05em; }
+.section-title math { vertical-align:-0.08em; }
+.num-pair-label math { font-size:1em; }
+.vec-readout math { font-size:1em; }
+.info-box math { font-size:1.05em; vertical-align:-0.08em; }
 .ctrl { display:flex; flex-direction:column; gap:4px; }
 .ctrl label { font-size:12.5px; font-weight:600; color:#444; display:flex; justify-content:space-between; align-items:center; }
 .toggle { display:flex; align-items:center; gap:8px; font-size:12.5px; color:#444; cursor:pointer; user-select:none; }
@@ -84,13 +88,13 @@ canvas { border-radius:8px; border:1px solid #e0e0e0; display:block; max-width:1
 <div class="container">
   <div class="controls">
     <h2 data-i18n="ui.panelHtml">Vector Addition</h2>
-    <p class="drag-note" data-i18n="ui.dragHint" data-i18n-html>Tip: drag the square (tail) or circle (tip) handles of <span class="vecsym">A</span> and <span class="vecsym">B</span> directly on the graph — every position snaps to the integer grid.</p>
+    <p class="drag-note" data-i18n="ui.dragHint" data-i18n-html>Tip: drag the square (tail) or circle (tip) handles of <math><mover><mi>A</mi><mo>&#8594;</mo></mover></math> and <math><mover><mi>B</mi><mo>&#8594;</mo></mover></math> directly on the graph — every position snaps to the integer grid.</p>
 
     <div class="section">
-      <div class="section-title"><span class="dot" style="background:#dd2200"></span><span data-i18n="ui.vecA" data-i18n-html>Vector <span class="vecsym">A</span></span></div>
+      <div class="section-title"><span class="dot" style="background:#dd2200"></span><span data-i18n="ui.vecA" data-i18n-html>Vector <math><mover><mi>A</mi><mo>&#8594;</mo></mover></math></span></div>
       <div class="ctrl">
         <label><span data-i18n="ui.tailLabel">Tail</span></label>
-        <div class="num-pair-label"><span>A<sub>x0</sub></span><span>A<sub>y0</sub></span></div>
+        <div class="num-pair-label"><span><math><msub><mi>A</mi><mi>x0</mi></msub></math></span><span><math><msub><mi>A</mi><mi>y0</mi></msub></math></span></div>
         <div class="num-pair">
           <input type="number" id="in-ax0" value="0" step="1" min="0" max="10">
           <input type="number" id="in-ay0" value="0" step="1" min="0" max="10">
@@ -98,7 +102,7 @@ canvas { border-radius:8px; border:1px solid #e0e0e0; display:block; max-width:1
       </div>
       <div class="ctrl">
         <label><span data-i18n="ui.compLabel">Component</span></label>
-        <div class="num-pair-label"><span>A<sub>x</sub></span><span>A<sub>y</sub></span></div>
+        <div class="num-pair-label"><span><math><msub><mi>A</mi><mi>x</mi></msub></math></span><span><math><msub><mi>A</mi><mi>y</mi></msub></math></span></div>
         <div class="num-pair">
           <input type="number" id="in-adx" value="6" step="1" min="0" max="10">
           <input type="number" id="in-ady" value="3" step="1" min="0" max="10">
@@ -108,10 +112,10 @@ canvas { border-radius:8px; border:1px solid #e0e0e0; display:block; max-width:1
     </div>
 
     <div class="section">
-      <div class="section-title"><span class="dot" style="background:#2266cc"></span><span data-i18n="ui.vecB" data-i18n-html>Vector <span class="vecsym">B</span></span></div>
+      <div class="section-title"><span class="dot" style="background:#2266cc"></span><span data-i18n="ui.vecB" data-i18n-html>Vector <math><mover><mi>B</mi><mo>&#8594;</mo></mover></math></span></div>
       <div class="ctrl">
         <label><span data-i18n="ui.tailLabel">Tail</span></label>
-        <div class="num-pair-label"><span>B<sub>x0</sub></span><span>B<sub>y0</sub></span></div>
+        <div class="num-pair-label"><span><math><msub><mi>B</mi><mi>x0</mi></msub></math></span><span><math><msub><mi>B</mi><mi>y0</mi></msub></math></span></div>
         <div class="num-pair">
           <input type="number" id="in-bx0" value="0" step="1" min="0" max="10">
           <input type="number" id="in-by0" value="0" step="1" min="0" max="10">
@@ -119,7 +123,7 @@ canvas { border-radius:8px; border:1px solid #e0e0e0; display:block; max-width:1
       </div>
       <div class="ctrl">
         <label><span data-i18n="ui.compLabel">Component</span></label>
-        <div class="num-pair-label"><span>B<sub>x</sub></span><span>B<sub>y</sub></span></div>
+        <div class="num-pair-label"><span><math><msub><mi>B</mi><mi>x</mi></msub></math></span><span><math><msub><mi>B</mi><mi>y</mi></msub></math></span></div>
         <div class="num-pair">
           <input type="number" id="in-bdx" value="3" step="1" min="0" max="10">
           <input type="number" id="in-bdy" value="7" step="1" min="0" max="10">
@@ -129,8 +133,8 @@ canvas { border-radius:8px; border:1px solid #e0e0e0; display:block; max-width:1
     </div>
 
     <div class="section">
-      <div class="section-title"><span class="dot" style="background:#2ca060"></span><span data-i18n="ui.sumTitle" data-i18n-html>Resultant <span class="vecsym">S</span></span></div>
-      <label class="toggle"><input type="checkbox" id="chk-sum" checked><span data-i18n="ui.showSum" data-i18n-html>Show sum <span class="vecsym">S</span> = <span class="vecsym">A</span> + <span class="vecsym">B</span></span></label>
+      <div class="section-title"><span class="dot" style="background:#2ca060"></span><span data-i18n="ui.sumTitle" data-i18n-html>Resultant <math><mover><mi>S</mi><mo>&#8594;</mo></mover></math></span></div>
+      <label class="toggle"><input type="checkbox" id="chk-sum" checked><span data-i18n="ui.showSum" data-i18n-html>Show sum <math><mover><mi>S</mi><mo>&#8594;</mo></mover><mo>=</mo><mover><mi>A</mi><mo>&#8594;</mo></mover><mo>+</mo><mover><mi>B</mi><mo>&#8594;</mo></mover></math></span></label>
       <label class="toggle"><input type="checkbox" id="chk-triangle" checked><span data-i18n="ui.showTriangle">Show triangle method</span></label>
       <label class="toggle"><input type="checkbox" id="chk-parallel"><span data-i18n="ui.showParallelogram">Show parallelogram method</span></label>
       <div class="vec-readout" id="readout-s">S</div>
@@ -311,41 +315,46 @@ canvas { border-radius:8px; border:1px solid #e0e0e0; display:block; max-width:1
 })();
 </script>
 <script>
+var MM_A='<math><mover><mi>A</mi><mo>\u2192</mo></mover></math>';
+var MM_B='<math><mover><mi>B</mi><mo>\u2192</mo></mover></math>';
+var MM_S='<math><mover><mi>S</mi><mo>\u2192</mo></mover></math>';
+var MM_SUM_EQ='<math><mover><mi>S</mi><mo>\u2192</mo></mover><mo>=</mo><mover><mi>A</mi><mo>\u2192</mo></mover><mo>+</mo><mover><mi>B</mi><mo>\u2192</mo></mover></math>';
+var MM_EQ_TITLE='<math><mover><mi mathvariant="bold">A</mi><mo>\u2192</mo></mover><mo>+</mo><mover><mi mathvariant="bold">B</mi><mo>\u2192</mo></mover><mo>=</mo><mover><mi mathvariant="bold">S</mi><mo>\u2192</mo></mover></math>';
 SimI18n.register({
   en:{
     'ui.title':'Vector Addition',
     'ui.lead':'Set each vector\u2019s starting point and (x, y) components directly \u2014 every value snaps to the integer grid. Drag the square (tail) or circle (tip) handles on the graph, or type the numbers, and see the resultant shown with both the triangle and parallelogram methods.',
     'ui.panelHtml':'Vector Addition',
-    'ui.dragHint':'Tip: drag the square (tail) or circle (tip) handles of <span class="vecsym">A</span> and <span class="vecsym">B</span> directly on the graph \u2014 every position snaps to the integer grid.',
-    'ui.vecA':'Vector <span class="vecsym">A</span>','ui.vecB':'Vector <span class="vecsym">B</span>',
+    'ui.dragHint':'Tip: drag the square (tail) or circle (tip) handles of '+MM_A+' and '+MM_B+' directly on the graph \u2014 every position snaps to the integer grid.',
+    'ui.vecA':'Vector '+MM_A,'ui.vecB':'Vector '+MM_B,
     'ui.tailLabel':'Tail','ui.compLabel':'Component',
-    'ui.sumTitle':'Resultant <span class="vecsym">S</span>','ui.showSum':'Show sum <span class="vecsym">S</span> = <span class="vecsym">A</span> + <span class="vecsym">B</span>',
+    'ui.sumTitle':'Resultant '+MM_S,'ui.showSum':'Show sum '+MM_SUM_EQ,
     'ui.showTriangle':'Show triangle method',
     'ui.showParallelogram':'Show parallelogram method',
     'ui.dispTitle':'Display','ui.compStyle':'Component style',
     'ui.compHidden':'Hidden','ui.compTriangle':'Triangle','ui.compOnAxis':'Rectangle',
     'ui.showAngleArcs':'Angle arcs','ui.showGrid':'Grid','ui.showValues':'Values',
     'ui.randomize':'\ud83c\udfb2 Randomize','ui.reset':'\u21ba Reset',
-    'ui.eqTitle':'<span class="vecsym">A</span> + <span class="vecsym">B</span> = <span class="vecsym">S</span>',
-    'ui.resMag':'Magnitude |S|','ui.resAngle':'Angle \u03b8','ui.resComp':'Components (Sx, Sy)',
+    'ui.eqTitle':MM_EQ_TITLE,
+    'ui.resMag':'Magnitude |S|','ui.resMagWord':'Magnitude','ui.resAngle':'Angle \u03b8','ui.resCompWord':'Components',
     'ui.resWaiting':'Turn on "Show sum" to see the resultant vector.'
   },
   ko:{
     'ui.title':'벡터의 합성',
     'ui.lead':'각 벡터의 시작점과 (x, y) 성분을 직접 입력해 보세요. 모든 값은 항상 정수 격자에 맞춰집니다. 그래프 위의 사각형(시작점)이나 원(끝점) 핸들을 드래그하거나 숫자를 직접 입력하면, 두 벡터가 합쳐지는 과정을 삼각형법과 평행사변형법으로 확인할 수 있습니다.',
     'ui.panelHtml':'벡터의 합성',
-    'ui.dragHint':'팁: 그래프 위에서 <span class="vecsym">A</span>, <span class="vecsym">B</span>의 사각형(시작점)·원(끝점) 핸들을 직접 드래그할 수 있어요. 위치는 항상 정수 격자에 맞춰집니다.',
-    'ui.vecA':'벡터 <span class="vecsym">A</span>','ui.vecB':'벡터 <span class="vecsym">B</span>',
+    'ui.dragHint':'팁: 그래프 위에서 '+MM_A+', '+MM_B+'의 사각형(시작점)·원(끝점) 핸들을 직접 드래그할 수 있어요. 위치는 항상 정수 격자에 맞춰집니다.',
+    'ui.vecA':'벡터 '+MM_A,'ui.vecB':'벡터 '+MM_B,
     'ui.tailLabel':'시작점','ui.compLabel':'성분',
-    'ui.sumTitle':'합벡터 <span class="vecsym">S</span>','ui.showSum':'합벡터 <span class="vecsym">S</span> = <span class="vecsym">A</span> + <span class="vecsym">B</span> 표시',
+    'ui.sumTitle':'합벡터 '+MM_S,'ui.showSum':'합벡터 '+MM_SUM_EQ+' 표시',
     'ui.showTriangle':'삼각형법 표시',
     'ui.showParallelogram':'평행사변형법 표시',
     'ui.dispTitle':'표시 옵션','ui.compStyle':'성분 표시 방식',
     'ui.compHidden':'숨김','ui.compTriangle':'삼각형','ui.compOnAxis':'직사각형',
     'ui.showAngleArcs':'각도 호','ui.showGrid':'격자','ui.showValues':'값 표시',
     'ui.randomize':'\ud83c\udfb2 무작위','ui.reset':'\u21ba 초기화',
-    'ui.eqTitle':'<span class="vecsym">A</span> + <span class="vecsym">B</span> = <span class="vecsym">S</span>',
-    'ui.resMag':'크기 |S|','ui.resAngle':'각도 \u03b8','ui.resComp':'성분 (Sx, Sy)',
+    'ui.eqTitle':MM_EQ_TITLE,
+    'ui.resMag':'크기 |S|','ui.resMagWord':'크기','ui.resAngle':'각도 \u03b8','ui.resCompWord':'성분',
     'ui.resWaiting':'"합벡터 표시"를 켜면 결과가 여기에 나타납니다.'
   }
 });
@@ -353,6 +362,7 @@ SimI18n.boot({mount:'.lang-mount'});
 window.addEventListener('sim-langchange',function(){
   updateCompBtnLabels();
   updateReadout();
+  if(typeof preloadResLabelImages==='function') preloadResLabelImages();
   if(typeof draw==='function') draw();
 });
 </script>
@@ -473,14 +483,15 @@ function tipOf(v){ return {x:v.x0+v.dx, y:v.y0+v.dy}; }
 function fmt(n){ return (n<0?'':'')+n.toFixed(1); }
 function fmtInt(n){ return String(Math.round(n)); }
 
-function vecSymHtml(letter){ return '<span class="vecsym">'+letter+'</span>'; }
+function vecMathML(letter){ return '<math><mover><mi>'+letter+'</mi><mo>\u2192</mo></mover></math>'; }
+function vecAbsMathML(letter){ return '<math><mo stretchy="false">|</mo><mover><mi>'+letter+'</mi><mo>\u2192</mo></mover><mo stretchy="false">|</mo></math>'; }
 function vecReadoutText(letter,v){
-  var sym=vecSymHtml(letter);
+  var sym=vecMathML(letter);
   var tip=tipOf(v);
   var mag=Math.hypot(v.dx,v.dy);
   var ang=Math.atan2(v.dy,v.dx)*180/Math.PI; if(ang<0) ang+=360;
   return sym+': ('+fmtInt(v.x0)+', '+fmtInt(v.y0)+') \u2192 ('+fmtInt(tip.x)+', '+fmtInt(tip.y)+')<br>'+
-    '('+fmtInt(v.dx)+', '+fmtInt(v.dy)+')  |'+sym+'|='+mag.toFixed(2)+'  \u03b8='+ang.toFixed(1)+'\u00b0';
+    '('+fmtInt(v.dx)+', '+fmtInt(v.dy)+')  '+vecAbsMathML(letter)+'='+mag.toFixed(2)+'  \u03b8='+ang.toFixed(1)+'\u00b0';
 }
 function updateLabels(){
   var A=getA(), B=getB();
@@ -489,6 +500,7 @@ function updateLabels(){
   var S={x0:A.x0, y0:A.y0, dx:A.dx+B.dx, dy:A.dy+B.dy};
   document.getElementById('readout-s').innerHTML=vecReadoutText('S',S);
 }
+var MM_COMP_EQ='<math><mo>(</mo><msub><mi>A</mi><mi>x</mi></msub><mo>,</mo><msub><mi>A</mi><mi>y</mi></msub><mo>)</mo><mo>+</mo><mo>(</mo><msub><mi>B</mi><mi>x</mi></msub><mo>,</mo><msub><mi>B</mi><mi>y</mi></msub><mo>)</mo><mo>=</mo><mo>(</mo><msub><mi>S</mi><mi>x</mi></msub><mo>,</mo><msub><mi>S</mi><mi>y</mi></msub><mo>)</mo></math>';
 function updateReadout(){
   var A=getA(), B=getB();
   var sdx=A.dx+B.dx, sdy=A.dy+B.dy;
@@ -496,9 +508,9 @@ function updateReadout(){
   var ang=Math.atan2(sdy,sdx)*180/Math.PI; if(ang<0) ang+=360;
   document.getElementById('readout').innerHTML=
     '<strong>'+SimI18n.t('ui.eqTitle')+'</strong><br>'+
-    '(A<sub>x</sub>, A<sub>y</sub>) + (B<sub>x</sub>, B<sub>y</sub>) = (S<sub>x</sub>, S<sub>y</sub>)<br>'+
+    MM_COMP_EQ+'<br>'+
     '('+fmtInt(A.dx)+', '+fmtInt(A.dy)+') + ('+fmtInt(B.dx)+', '+fmtInt(B.dy)+') = ('+fmtInt(sdx)+', '+fmtInt(sdy)+')<br>'+
-    SimI18n.t('ui.resMag')+' = '+mag.toFixed(2)+'&nbsp;&nbsp;'+SimI18n.t('ui.resAngle')+' = '+ang.toFixed(1)+'°';
+    SimI18n.t('ui.resMagWord')+' '+vecAbsMathML('S')+' = '+mag.toFixed(2)+'&nbsp;&nbsp;'+SimI18n.t('ui.resAngle')+' = '+ang.toFixed(1)+'°';
 }
 ALL_INPUTS.forEach(function(el){
   el.addEventListener('input',function(){ updateLabels(); updateReadout(); draw(); });
@@ -773,24 +785,37 @@ function drawTailHandle(x,y,col){
   ctx.restore();
   return p;
 }
-function drawVecGlyph(x,y,letter,col,fontSize){
-  ctx.save();
-  ctx.font='bold '+fontSize+'px sans-serif'; ctx.fillStyle=col; ctx.textAlign='center'; ctx.textBaseline='alphabetic';
-  var w=Math.max(ctx.measureText(letter).width,fontSize*0.55);
-  ctx.fillText(letter,x,y);
-  var aw=w*0.92, ay=y-fontSize*1.02;
-  var ax0=x-aw/2, ax1=x+aw/2;
-  var hl=fontSize*0.24, hw=fontSize*0.17;
-  ctx.strokeStyle=col; ctx.fillStyle=col; ctx.lineWidth=Math.max(1.2,fontSize*0.09); ctx.lineCap='round';
-  ctx.beginPath(); ctx.moveTo(ax0,ay); ctx.lineTo(ax1-hl*0.5,ay); ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(ax1,ay);
-  ctx.lineTo(ax1-hl,ay-hw);
-  ctx.lineTo(ax1-hl,ay+hw);
-  ctx.closePath(); ctx.fill();
-  ctx.restore();
+/* ── MathML-to-image rendering for canvas labels (cached; no external deps, works offline) ── */
+function mathmlToImage(innerHtml,color,fontPx,boxW,boxH,cb){
+  var svgNS='http://www.w3.org/2000/svg', xhtmlNS='http://www.w3.org/1999/xhtml';
+  var svg=document.createElementNS(svgNS,'svg');
+  svg.setAttribute('width',boxW); svg.setAttribute('height',boxH);
+  var fo=document.createElementNS(svgNS,'foreignObject');
+  fo.setAttribute('width',boxW); fo.setAttribute('height',boxH);
+  var div=document.createElementNS(xhtmlNS,'div');
+  div.setAttribute('xmlns',xhtmlNS);
+  div.style.cssText='width:'+boxW+'px;height:'+boxH+'px;display:flex;align-items:center;justify-content:center;'+
+    'color:'+color+';font-size:'+fontPx+'px;font-weight:bold;font-family:"Segoe UI",Arial,sans-serif;white-space:nowrap;';
+  div.innerHTML=innerHtml;
+  fo.appendChild(div); svg.appendChild(fo);
+  var svgStr=new XMLSerializer().serializeToString(svg);
+  var img=new Image();
+  img.onload=function(){ cb(img); };
+  img.onerror=function(){ cb(null); };
+  img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svgStr);
 }
-function drawVectorNameLabel(tailX,tailY,dx,dy,col,letter){
+var VEC_LABEL_BOX_W=64, VEC_LABEL_BOX_H=40, VEC_LABEL_FONT=22;
+var vecLabelImg={};
+function preloadVecLabelImages(){
+  ['a','b','s'].forEach(function(k){
+    var mm='<math><mover><mi>'+VLETTER[k]+'</mi><mo>\u2192</mo></mover></math>';
+    mathmlToImage(mm,COL[k],VEC_LABEL_FONT,VEC_LABEL_BOX_W,VEC_LABEL_BOX_H,function(img){
+      vecLabelImg[k]=img;
+      if(typeof draw==='function') draw();
+    });
+  });
+}
+function drawVectorNameLabel(tailX,tailY,dx,dy,col,key){
   var p0=WXY(tailX,tailY), p1=WXY(tailX+dx,tailY+dy);
   var mag=Math.hypot(dx,dy);
   if(mag<0.05) return;
@@ -799,7 +824,26 @@ function drawVectorNameLabel(tailX,tailY,dx,dy,col,letter){
   var ux=(p1.x-p0.x), uy=(p1.y-p0.y); var len=Math.hypot(ux,uy)||1; ux/=len; uy/=len;
   var px=-uy, py=ux; if(py>0){ px=-px; py=-py; } /* keep label on the upper side */
   var offset=15;
-  drawVecGlyph(mx+px*offset, my+py*offset, letter, col, 14);
+  var lx=mx+px*offset, ly=my+py*offset;
+  var img=vecLabelImg[key];
+  if(!img) return;
+  var dispH=21, dispW=dispH*(VEC_LABEL_BOX_W/VEC_LABEL_BOX_H);
+  ctx.drawImage(img,lx-dispW/2,ly-dispH/2,dispW,dispH);
+}
+var RES_LABEL_BOX_W=280, RES_LABEL_BOX_H=40, RES_LABEL_FONT=20;
+var resLabelImg={};
+function preloadResLabelImages(){
+  var jobs={
+    mag: SimI18n.t('ui.resMagWord').toUpperCase()+'&nbsp;<math><mo stretchy="false">|</mo><mover><mi mathvariant="bold">S</mi><mo>\u2192</mo></mover><mo stretchy="false">|</mo></math>',
+    angle: SimI18n.t('ui.resAngle').toUpperCase(),
+    comp: SimI18n.t('ui.resCompWord').toUpperCase()+' (<math><msub><mi mathvariant="bold">S</mi><mi>x</mi></msub><mo>,</mo><msub><mi mathvariant="bold">S</mi><mi>y</mi></msub></math>)'
+  };
+  Object.keys(jobs).forEach(function(k){
+    mathmlToImage(jobs[k],'#8a96a8',RES_LABEL_FONT,RES_LABEL_BOX_W,RES_LABEL_BOX_H,function(img){
+      resLabelImg[k]=img;
+      if(typeof draw==='function') draw();
+    });
+  });
 }
 function drawResultBar(){
   var bY=H-RES_H;
@@ -817,16 +861,17 @@ function drawResultBar(){
   var ang=Math.atan2(sdy,sdx)*180/Math.PI; if(ang<0) ang+=360;
   var titleSz=CW<360?9.5:11; var valSz=CW<360?14:(CW<480?18:22);
   var cols=[
-    {lbl:SimI18n.t('ui.resMag'), val:mag.toFixed(2)},
-    {lbl:SimI18n.t('ui.resAngle'), val:ang.toFixed(1)+'°'},
-    {lbl:SimI18n.t('ui.resComp'), val:'('+fmtInt(sdx)+', '+fmtInt(sdy)+')'}
+    {key:'mag', val:mag.toFixed(2)},
+    {key:'angle', val:ang.toFixed(1)+'°'},
+    {key:'comp', val:'('+fmtInt(sdx)+', '+fmtInt(sdy)+')'}
   ];
   var cW=W/3, midY=bY+RES_H/2+4;
+  var labelDispH=titleSz*1.9, labelDispW=labelDispH*(RES_LABEL_BOX_W/RES_LABEL_BOX_H);
   cols.forEach(function(col,i){
     var cx=cW*i+cW/2;
-    ctx.fillStyle='#8a96a8'; ctx.font='bold '+titleSz+'px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='alphabetic';
-    ctx.fillText(col.lbl.toUpperCase(),cx,midY-12);
-    ctx.fillStyle=COL.s; ctx.font='bold '+valSz+'px sans-serif';
+    var img=resLabelImg[col.key];
+    if(img) ctx.drawImage(img,cx-labelDispW/2,midY-16-labelDispH/2,labelDispW,labelDispH);
+    ctx.fillStyle=COL.s; ctx.font='bold '+valSz+'px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='alphabetic';
     ctx.fillText(col.val,cx,midY+13);
     if(i<2){ ctx.strokeStyle='#dde2ea'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(cW*(i+1),bY+8); ctx.lineTo(cW*(i+1),bY+RES_H-8); ctx.stroke(); }
   });
@@ -870,9 +915,9 @@ function draw(){
   bTipPx=drawTipHandle(bTip.x,bTip.y,COL.b);
 
   if(chkValues.checked){
-    drawVectorNameLabel(A.x0,A.y0,A.dx,A.dy,COL.a,VLETTER.a);
-    drawVectorNameLabel(B.x0,B.y0,B.dx,B.dy,COL.b,VLETTER.b);
-    if(showSum) drawVectorNameLabel(P.x,P.y,A.dx+B.dx,A.dy+B.dy,COL.s,VLETTER.s);
+    drawVectorNameLabel(A.x0,A.y0,A.dx,A.dy,COL.a,'a');
+    drawVectorNameLabel(B.x0,B.y0,B.dx,B.dy,COL.b,'b');
+    if(showSum) drawVectorNameLabel(P.x,P.y,A.dx+B.dx,A.dy+B.dy,COL.s,'s');
   }
 
   drawResultBar();
@@ -880,6 +925,8 @@ function draw(){
 
 updateLabels();
 updateReadout();
+preloadVecLabelImages();
+preloadResLabelImages();
 draw();
 </script>
 </body>
