@@ -438,9 +438,14 @@ header p{margin:0;color:#C7D4E8;font-size:13.5px;}
       btn.addEventListener('click', function(){
         var qidx = Number(btn.dataset.qidx);
         var origCi = Number(btn.dataset.origCi);
-        answers[qidx] = origCi;
         var group = document.getElementById('q-' + qidx).querySelectorAll('.quiz-choice-btn');
-        group.forEach(function(b){ b.classList.toggle('selected', Number(b.dataset.origCi) === origCi); });
+        if (answers[qidx] === origCi) {
+          delete answers[qidx];
+          group.forEach(function(b){ b.classList.remove('selected'); });
+        } else {
+          answers[qidx] = origCi;
+          group.forEach(function(b){ b.classList.toggle('selected', Number(b.dataset.origCi) === origCi); });
+        }
         updateProgress();
       });
     });
